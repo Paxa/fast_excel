@@ -1,0 +1,26 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    axlsx (2.0.1)
+      htmlentities (~> 4.3.1)
+      nokogiri (>= 1.4.1)
+      rubyzip (~> 1.0.0)
+    ffi (1.9.17)
+    ffi_gen (1.2.0)
+      ffi (~> 1.0)
+    htmlentities (4.3.4)
+    mini_portile2 (2.1.0)
+    nokogiri (1.7.0.1)
+      mini_portile2 (~> 2.1.0)
+    rubyzip (1.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  axlsx
+  ffi
+  ffi_gen
+
+BUNDLED WITH
+   1.14.4

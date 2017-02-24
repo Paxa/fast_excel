@@ -1,0 +1,12 @@
+FROM centos:latest
+
+MAINTAINER Pavel Evstigneev <pavel.evst@gmail.com>
+
+RUN yum -y install make gcc zlib-devel && yum clean all
+
+RUN mkdir -p /srv/libxlsxwriter
+WORKDIR /srv/libxlsxwriter
+
+COPY ./libxlsxwriter /srv/libxlsxwriter
+
+RUN make

@@ -1,0 +1,9 @@
+libxlsxwriter
+.ruby-version
+try.c
+try.rb
+gen.rb
+gen_ffi.rb
+*.xlsx
+a.out
+.DS_Store
