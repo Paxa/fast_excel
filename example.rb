@@ -1,6 +1,5 @@
-# Ultra Fast Excel Writter for Ruby
+require_relative './lib/fast_excel'
 
-```ruby
 workbook = FastExcel.open("hello_world_ffi.xlsx", constant_memory: true)
 worksheet = workbook.add_worksheet("Garuda Payments")
 
@@ -32,6 +31,3 @@ for i in 1..1000
 end
 
 workbook.close
-```
-
-This repositiry and gem contain precompiled `libxlsxwriter` for macOs, Linux  with glibc and Alpine Linux

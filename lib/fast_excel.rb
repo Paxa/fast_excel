@@ -3,9 +3,18 @@ require_relative './fast_excel/binding'
 module FastExcel
   #include Libxlsxwriter
 
-  def self.open(filename)
+  DEF_COL_WIDTH = 8.43
+
+  def self.open(filename, constant_memory: false)
     filename = filename.to_s if defined?(Pathname) && filename.is_a?(Pathname)
-    workbook = Libxlsxwriter.workbook_new(filename)
+
+    workbook = if constant_memory
+      opt = Libxlsxwriter::WorkbookOptions.new
+      opt[:constant_memory] = 1
+      Libxlsxwriter.workbook_new_opt(filename, opt)
+    else
+      Libxlsxwriter.workbook_new(filename)
+    end
     Libxlsxwriter::Workbook.new(workbook)
   end
 
