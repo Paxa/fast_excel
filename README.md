@@ -34,4 +34,5 @@ end
 workbook.close
 ```
 
-This repositiry and gem contain precompiled `libxlsxwriter` for macOs, Linux  with glibc and Alpine Linux
+This repositiry and gem contain precompiled [libxlsxwriter](https://github.com/jmcnamara/libxlsxwriter) for MacOs, Linux with glibc and Alpine Linux
+

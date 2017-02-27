@@ -11,7 +11,7 @@
     #install_name_tool -change /usr/lib/libxlsxwriter.dylib @rpath/libxlsxwriter-darwin.dylib ./binaries/libxlsxwriter-darwin.dylib
 
 
-## On Linux
+## For Linux
 
     docker build . -f build_alpine_linux.docker -t fast_excel_alpine
     docker run -t fast_excel_alpine ls lib/libxlsxwriter.so

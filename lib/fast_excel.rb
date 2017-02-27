@@ -18,7 +18,8 @@ module FastExcel
     Libxlsxwriter::Workbook.new(workbook)
   end
 
-  def self.datetime(time)
+  # Creates internal Libxlsxwriter::Datetime from Datetime object
+  def self.lxw_datetime(time)
     date = Libxlsxwriter::Datetime.new
     date[:year] = time.year
     date[:month] = time.month
@@ -29,7 +30,8 @@ module FastExcel
     date
   end
 
-  def self.time(time)
+  # Creates internal Libxlsxwriter::Datetime from Time object
+  def self.lxw_time(time)
     date = Libxlsxwriter::Datetime.new
     date[:year] = time.year
     date[:month] = time.month
@@ -40,11 +42,30 @@ module FastExcel
     date
   end
 
-  module WorkbookExt
+  # seconds in 1 day
+  XLSX_DATE_DAY = 86400.0
 
-    #def add_worksheet(title = nil)
-    #  Libxlsxwriter::Worksheet.new(super(title))
-    #end
+  # days between 1970-jan-01 and 1900-jan-01
+  XLSX_DATE_EPOCH_DIFF = 25567
+
+  # Convert time to number of days, and change beginning point from 1st jan 1970 to 1st jan 1900
+  # Offset argument should be number of seconds, if not specified then it will use Time.zone.utc_offset || 0
+  #
+  # https://support.microsoft.com/en-us/help/214330/differences-between-the-1900-and-the-1904-date-system-in-excel
+  def self.date_num(time, offset = nil)
+    unless offset
+      # Try use Rails' app timezone
+      if Time.respond_to?(:zone)
+        offset = Time.zone.utc_offset
+      else
+        offset = 0 # rollback to UTC
+      end
+    end
+
+    time.to_f / XLSX_DATE_DAY + XLSX_DATE_EPOCH_DIFF + offset / XLSX_DATE_DAY
+  end
+
+  module WorkbookExt
 
     def bold_cell_format
       bold = add_format
@@ -74,9 +95,9 @@ module FastExcel
         elsif defined?(BigDecimal) && value.is_a?(BigDecimal)
           write_number(row_number, index, value.to_f, format)
         elsif defined?(DateTime) && value.is_a?(DateTime)
-          write_datetime(row_number, index, FastExcel.datetime(value), format)
+          write_datetime(row_number, index, FastExcel.lxw_datetime(value), format)
         elsif value.is_a?(Time)
-          write_datetime(row_number, index, FastExcel.time(value), format)
+          write_datetime(row_number, index, FastExcel.lxw_time(value), format)
         else
           write_string(row_number, index, value.to_s, format)
         end
