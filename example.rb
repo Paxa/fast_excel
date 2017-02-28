@@ -1,7 +1,10 @@
 require_relative './lib/fast_excel'
 
-workbook = FastExcel.open("hello_world_ffi.xlsx", constant_memory: true)
-worksheet = workbook.add_worksheet("Garuda Payments")
+workbook = FastExcel.open("ffi_example.xlsx", constant_memory: true)
+
+workbook.default_format[:font_size] = -1 # user's default
+
+worksheet = workbook.add_worksheet("Payments Report")
 
 bold = workbook.bold_cell_format
 worksheet.set_column(0, 0, FastExcel::DEF_COL_WIDTH, bold)

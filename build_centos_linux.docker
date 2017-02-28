@@ -9,4 +9,5 @@ WORKDIR /srv/libxlsxwriter
 
 COPY ./libxlsxwriter /srv/libxlsxwriter
 
+RUN make clean
 RUN make

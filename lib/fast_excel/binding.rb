@@ -1477,18 +1477,18 @@ module Libxlsxwriter
   class Format < FFI::Struct
     include FormatWrappers
     layout :file, :pointer,
-           :xf_format_indices, HashTable,
+           :xf_format_indices, HashTable.ptr,
            :num_xf_formats, :pointer,
-           :xf_index, :int,
-           :dxf_index, :int,
+           :xf_index, :int32_t,
+           :dxf_index, :int32_t,
            :num_format, [:char, 128],
            :font_name, [:char, 128],
            :font_scheme, [:char, 128],
-           :num_format_index, :ushort,
-           :font_index, :ushort,
+           :num_format_index, :uint16,
+           :font_index, :uint16,
            :has_font, :uchar,
            :has_dxf_font, :uchar,
-           :font_size, :ushort,
+           :font_size, :uint16,
            :bold, :uchar,
            :italic, :uchar,
            :font_color, :int,
@@ -7745,7 +7745,11 @@ module Libxlsxwriter
     def add_format()
       Format.new Libxlsxwriter.workbook_add_format(self)
     end
-    
+
+    def default_format()
+      Format.new Libxlsxwriter.workbook_default_format(self)
+    end
+
     # @param [Integer] chart_type 
     # @return [Chart] 
     def add_chart(chart_type)
@@ -7862,7 +7866,9 @@ module Libxlsxwriter
            :has_bmp, :uchar,
            :used_xf_formats, HashTable
   end
-  
+
+  attach_function :workbook_default_format, :workbook_default_format, [Workbook], Format
+
   # (Not documented)
   # 
   # @method workbook_new(filename)

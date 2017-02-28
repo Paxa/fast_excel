@@ -80,6 +80,10 @@ module FastExcel
       format.set_num_format(pattern)
       format
     end
+
+    def add_worksheet(sheetname = nil)
+      super
+    end
   end
 
   module WorksheetExt
