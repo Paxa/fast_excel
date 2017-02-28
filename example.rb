@@ -1,8 +1,14 @@
 require_relative './lib/fast_excel'
+require 'pp'
 
 workbook = FastExcel.open("ffi_example.xlsx", constant_memory: true)
 
-workbook.default_format[:font_size] = -1 # user's default
+workbook.default_format.set(
+  font_size: 0, # user's default
+  #font_family: "Arial"
+)
+
+# pp workbook.default_format
 
 worksheet = workbook.add_worksheet("Payments Report")
 

@@ -65,7 +65,28 @@ module FastExcel
     time.to_f / XLSX_DATE_DAY + XLSX_DATE_EPOCH_DIFF + offset / XLSX_DATE_DAY
   end
 
+  module AttributeHelper
+    def set(value)
+      value.each do |key, value|
+        if respond_to?("#{key}=")
+          send("#{key}=", value)
+        else
+          self[key] = value
+        end
+      end
+    end
+
+    def pretty_print(pp)
+      res = {}
+      members.each do |key|
+        res[key] = respond_to?(key) ? send(key) : self[key]
+      end
+      pp res
+    end
+  end
+
   module WorkbookExt
+    include AttributeHelper
 
     def bold_cell_format
       bold = add_format
@@ -87,6 +108,7 @@ module FastExcel
   end
 
   module WorksheetExt
+    include AttributeHelper
 
     def write_row(row_number, values, formats = nil)
       values.each_with_index do |value, index|
@@ -109,10 +131,61 @@ module FastExcel
     end
 
   end
+
+  module FormatExt
+    include AttributeHelper
+
+    [:font_size, :font_name, :underline, :font_script, :num_format, :align, :rotation, :indent, :pattern, :border].each do |prop|
+      define_method(prop) do
+        self[prop]
+      end
+      define_method("#{prop}=") do |value|
+        send("set_#{prop}", value)
+      end
+    end
+
+    [:bold, :italic, :font_outline, :font_shadow, :hidden, :text_wrap, :font_strikeout, :shrink, :text_justlast].each do |prop|
+      define_method(prop) do
+        self[prop]
+      end
+      define_method("#{prop}=") do |value|
+        value ? send("set_#{prop}") : self[prop] = false
+      end
+    end
+
+    [:num_format, :font_name].each do |prop|
+      define_method(prop) do
+        self[prop].to_ptr.read_string
+      end
+
+      define_method("#{prop}=") do |value|
+        send("set_#{prop}", value)
+      end
+    end
+
+    def set_font_size(value)
+      if value < 0
+        raise ArgumentError, "font size should be >= 0 (use 0 for user default font size)"
+      end
+      super(value)
+    end
+
+    def font_family
+      font_name
+    end
+
+    def font_family=(value)
+      self.font_name = value
+    end
+  end
 end
 
 Libxlsxwriter::Workbook.instance_eval do
   include FastExcel::WorkbookExt
+end
+
+Libxlsxwriter::Format.instance_eval do
+  include FastExcel::FormatExt
 end
 
 Libxlsxwriter::Worksheet.instance_eval do
