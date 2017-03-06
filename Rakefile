@@ -25,3 +25,13 @@ namespace :build do
     system("docker rm #{last_container_id}")
   end
 end
+
+task :sync do
+  require 'fileutils'
+  FileUtils.rm_rf("./libxlsxwriter")
+  system("git clone --depth 10 git@github.com:Paxa/libxlsxwriter.git")
+  Dir.chdir("./libxlsxwriter") do
+    system("git show --pretty='format:%cd %h' --date=iso --quiet > version.txt")
+    FileUtils.rm_rf("./.git")
+  end
+end

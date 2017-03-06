@@ -1,0 +1,25 @@
+language: c
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  -                                      CFLAGS='-Werror'
+  - NO_VALGRIND=1 USE_STANDARD_TMPFILE=1 CFLAGS='-Werror'
+  - NO_VALGRIND=1                        CFLAGS='-Werror -m32'
+
+install:
+  - sudo pip install pytest
+  - sudo apt-get update
+  - sudo apt-get install -y gcc-multilib
+  - sudo apt-get install -y zlib1g-dev
+  - sudo apt-get install -y zlib1g-dev:i386
+  - sudo apt-get install -y gcc
+  - sudo apt-get install -y valgrind
+
+script:
+  - make V=1
+  - make test_functional V=1
+  - make test_unit V=1
+  - make test_valgrind V=1

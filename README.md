@@ -2,7 +2,12 @@
 
 ```ruby
 workbook = FastExcel.open("hello_world_ffi.xlsx", constant_memory: true)
-worksheet = workbook.add_worksheet("Garuda Payments")
+workbook.default_format.set(
+  font_size: 0, # user's default
+  font_family: "Arial"
+)
+
+worksheet = workbook.add_worksheet("Example Report")
 
 bold = workbook.bold_cell_format
 worksheet.set_column(0, 0, FastExcel::DEF_COL_WIDTH, bold)
@@ -34,5 +39,5 @@ end
 workbook.close
 ```
 
-This repositiry and gem contain precompiled [libxlsxwriter](https://github.com/jmcnamara/libxlsxwriter) for MacOs, Linux with glibc and Alpine Linux
+This repositiry and gem contain sources of [libxlsxwriter](https://github.com/jmcnamara/libxlsxwriter)
 

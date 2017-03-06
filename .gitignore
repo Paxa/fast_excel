@@ -1,4 +1,3 @@
-libxlsxwriter
 .ruby-version
 try.c
 try.rb
@@ -8,3 +7,7 @@ gen_ffi.rb
 a.out
 .DS_Store
 *.gem
+libxlsxwriter/dev
+libxlsxwriter/docs
+libxlsxwriter/examples
+libxlsxwriter/test

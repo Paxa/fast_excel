@@ -1,0 +1,557 @@
+/**
+@page changes Changes
+
+
+## 0.6.9 January 30 2017
+
+- Added chart trendlines. See @ref chart_trendlines and
+  @ref chart_data_tools.c.
+
+
+## 0.6.8 January 28 2017
+
+- Added chart error bars. See @ref chart_error_bars and
+  @ref chart_data_tools.c.
+
+## 0.6.7 January 24 2017
+
+- Added chart data labels. See @ref chart_labels.
+
+
+## 0.6.6 January 22 2017
+
+- Added functions to set chart Up-Down bars: see `chart_set_up_down_bars()`
+  and `chart_set_up_down_bars_format()` and @ref chart_data_tools.c.
+
+- Added functions to handle blank and hidden data in charts: see
+  `chart_show_blanks_as()` and `chart_show_hidden_data()`.
+
+
+## 0.6.5 January 21 2017
+
+- Added functions to set the overlap and gap between series: see
+  `chart_set_series_overlap()` and `chart_set_series_gap()`.
+
+
+## 0.6.4 January 20 2017
+
+- Added chart data table option, see `chart_set_table()` and
+  `chart_set_table_grid()`.
+
+- Added Clustered Chart example, see @ref chart_clustered.c.
+
+
+## 0.6.3 January 19 2017
+
+- Added `chart_set_drop_lines()` and `chart_set_high_low_lines()` functions to
+  add chart Drop and High-Low lines to indicate category values.
+  See @ref chart_data_tools.c.
+
+
+## 0.6.2 January 17 2017
+
+- Added `chart_series_set_smooth()` function to set the line smoothing
+  property of a line or scatter chart series.
+
+
+## 0.6.1 January 16 2017
+
+- Added option to set formatting for points in a chart. This allow the colors
+  of Pie chart segments to be defined. See @ref chart_points.
+
+
+## 0.6.0 January 15 2017
+
+- Added option to set the number format for a chart axis, see
+  `chart_axis_set_num_format()`.
+
+- Added "invert if negative" option for series fills, see
+  `chart_series_set_invert_if_negative()`.
+
+
+## 0.5.9 January 14 2017
+
+- Added support for chart axis crossing. See `chart_axis_set_crossing()` and
+  `chart_axis_set_crossing_max()`.
+
+
+## 0.5.8 January 13 2017
+
+- Added `chart_axis_set_major_tick_mark()` and
+  `chart_axis_set_minor_tick_mark()` functions to chart axis tick marks.
+
+
+## 0.5.7 January 12 2017
+
+- Added `chart_axis_set_display_units()` function to set chart axis display
+  units.
+
+
+## 0.5.6 January 11 2017
+
+- Added `chart_axis_set_interval_unit()` and `chart_axis_set_interval_tick()`
+  functions to adjust category axis intervals.
+
+
+## 0.5.5 January 10 2017
+
+- Added `chart_axis_set_major_unit()` and `chart_axis_set_minor_unit()` to set
+  the major and minor units of a category axis.
+
+
+## 0.5.4 January 9 2017
+
+- Added `chart_axis_set_label_position()` option to position the axis labels
+  (numbers).
+
+- Improved documentation for @ref ww_charts_axes.
+
+
+## 0.5.3 January 8 2017
+
+- Added `chart_axis_set_position()` option to position a category axis
+  horizontally on, or between, the axis tick marks.
+
+
+## 0.5.2 January 7 2017
+
+- Added option to turn off chart axis: `chart_axis_off()`.
+
+
+## 0.5.1 January 6 2017
+
+- Added chart major and minor gridlines handling, see:
+
+  - `chart_axis_major_gridlines_set_visible()`
+  - `chart_axis_minor_gridlines_set_visible()`
+  - `chart_axis_major_gridlines_set_line()`
+  - `chart_axis_minor_gridlines_set_line()`
+
+
+## 0.5.0 January 5 2017
+
+- Added chart and plot area formatting. See `chart_chartarea_set_line()` and
+  `chart_plotarea_set_line()`.
+
+
+## 0.4.9 January 4 2017
+
+- Added support for chart patterns. See @ref chart_patterns.
+
+
+## 0.4.8 January 3 2017
+
+- Added support for chart markers. See @ref chart_markers.
+
+
+## 0.4.7 January 2 2017
+
+- Added `chart_axis_set_reverse()` function to reverse the order of a chart
+  axis.
+
+- Added `chart_axis_set_min()`and `chart_axis_set_max()` functions to set the
+  minimum and maximum value for a chart axis.
+
+- Added `chart_axis_set_log_base()` function to set the log base of a chart
+  axis.
+  Feature request [#70][gh_70].
+
+  [gh_70]: https://github.com/jmcnamara/libxlsxwriter/issues/70
+
+
+## 0.4.6 January 1 2017
+
+- Added functions to set chart line and fill properties, see:
+
+  - `chart_series_set_line()`. Feature request [#83][gh_83].
+  - `chart_series_set_fill()`.
+  - `chart_axis_set_line()`.
+  - `chart_axis_set_fill()`.
+  - @ref chart_lines.
+  - @ref chart_fills.
+
+  [gh_83]: https://github.com/jmcnamara/libxlsxwriter/issues/83
+
+
+## 0.4.5 December 31 2016
+
+- Added functions to set chart legend properties: see  `chart_legend_set_position()`,
+  `chart_legend_set_font()` and `chart_legend_delete_series()`.
+
+
+## 0.4.4 December 30 2016
+- Added chart fonts. See `chart_axis_set_name_font()`, `chart_axis_set_num_font()`,
+  `chart_title_set_name_font()` and @ref chart_fonts.
+
+
+## 0.4.3 December 26 2016
+
+- Added `workbook_get_worksheet_by_name()` function to get a worksheet
+  object from its name.
+
+- Added `workbook_validate_worksheet_name()` function to validate a worksheet
+  name.
+
+- Fix for parameter length check when strings are UTF-8.
+  Issue [#84][gh_84].
+
+  [gh_84]: https://github.com/jmcnamara/libxlsxwriter/issues/84
+
+
+## 0.4.2 July 14 2016
+
+- Added support for OpenBSD and better support for FreeBSD. See @ref gsg_bsd.
+
+
+## 0.4.1 July 11 2016
+
+- Switched to using
+  [tmpfileplus](http://www.di-mgt.com.au/c_function_to_create_temp_file.html)
+  for temporary file handles to work around issue when the temp directory on
+  Windows isn't writeable. The temp file directory is now also configurable at
+  runtime, see @ref gsg_tmpdir.
+
+  Issue [#63][gh_63].
+
+  [gh_63]: https://github.com/jmcnamara/libxlsxwriter/issues/63
+
+
+## 0.4.0 July 5 2016
+
+- Added fixes for MSVC 2010.
+
+- Refactored public APIs to return #lxw_error instead of int.
+
+
+## 0.3.9 July 2 2016
+
+- Added support for MinGW, MinGW-w64, Cygwin, MSYS and MSYS2.
+  See @ref gsg_ming.
+
+
+## 0.3.8 June 11 2016
+
+- Added workbook functions to set custom document properties. See
+  `workbook_set_custom_property_string()` and @ref doc_custom_properties.c.
+
+
+## 0.3.7 June 2 2016
+
+- Added updated Cocoapods file for Cocoapods 1.0.0. This also add support for
+  the "use_frameworks" directive. Thanks to Ludovico Rossi. See @ref
+  getting_started for instructions on how to use the cocoapod.
+
+  Pull request [#50][gh_50].
+
+  [gh_50]: https://github.com/jmcnamara/libxlsxwriter/issues/50
+
+
+## 0.3.6 June 1 2016
+
+- Fix for `worksheet_insert_image()` issue when handling images with zero dpi.
+
+
+## 0.3.5 May 31 2016
+
+- Refactored the error handling and reporting for when the file creation
+  subsystem fails due to file permissions or other issues. The new error codes
+  are in `#lxw_error` and the codes can be converted to strings, for reporting,
+  using the new `lxw_strerror()` function.
+
+  Issue [#49][gh_49].
+
+  [gh_49]: https://github.com/jmcnamara/libxlsxwriter/issues/49
+
+
+## 0.3.4 May 28 2016
+
+- Updated the @ref getting_started docs with instructions on how to build
+  libxlsxwriter for Windows using Microsoft Visual Studio and added links to
+  the example MSVC project:
+  [MSVCLibXlsxWriter](https://github.com/jmcnamara/MSVCLibXlsxWriter).
+
+
+## 0.3.3 May 23 2016
+
+- Added support for charts via the @ref chart.h "The Chart object". See the
+  examples of the supported chart types:
+
+  - @ref chart_area.c       "Area chart"
+  - @ref chart_bar.c        "Bar chart"
+  - @ref chart_column.c     "Column chart"
+  - @ref chart_line.c       "Line chart"
+  - @ref chart_scatter.c    "Scatter chart"
+  - @ref chart_radar.c      "Radar chart"
+  - @ref chart_pie.c        "Pie chart"
+  - @ref chart_doughnut.c   "Doughnut chart"
+  - @ref chart_styles.c     "Built-in charts styles"
+
+  Feature request [#36][gh_36].
+
+  [gh_36]: https://github.com/jmcnamara/libxlsxwriter/issues/36
+
+
+## 0.3.2 April 8 2016
+
+- Added the `worksheet_write_boolean()` function to write Excel boolean
+  values.
+  Feature request [#47][gh_47].
+
+  [gh_47]: https://github.com/jmcnamara/libxlsxwriter/issues/47
+
+
+## 0.3.1 January 9 2016
+
+- Improved performance 20-30% for large data files.
+
+
+## 0.3.0 January 4 2016
+
+- Renamed `worksheet_set_row()` function to `worksheet_set_row_opt()` for
+  consistency with current and future APIs. The `worksheet_set_row()` function
+  is now used without the options parameter.
+
+  Note: This is a backward incompatible change.
+
+
+- Renamed `worksheet_set_column()` function to `worksheet_set_column_opt()`
+  for consistency with current and future APIs. The `worksheet_set_column()`
+  function is now used without the options parameter.
+
+  Note: This is a backward incompatible change.
+
+
+## 0.2.9 January 3 2016
+
+- Added the `worksheet_insert_image()` function to add PNG and JPG images to
+  worksheets. See @ref demo.c and @ref images.c.
+
+
+## 0.2.8 December 22 2015
+
+- Added `worksheet_set_default_row()` function to allow setting of default row
+  height and hiding unused rows. See the @ref hide_row_col.c example.
+
+
+## 0.2.7 December 21 2015
+
+- Added support for escaping control characters in strings. This prevents
+  unreadable files if string data contains control characters.
+  Issue [#42][gh_42].
+
+  [gh_42]: https://github.com/jmcnamara/libxlsxwriter/issues/42
+
+
+## 0.2.6 December 19 2015
+
+- Added `worksheet_protect()` function to protect Excel worksheet elements
+  from modification. See the @ref worksheet_protection.c example.
+
+
+## 0.2.5 December 14 2015
+
+- Added `workbook_set_properties()` function to set Excel document properties
+  such as Author and Title. See the @ref doc_properties.c example.
+
+
+## 0.2.4 December 13 2015
+
+- Added `worksheet_hide()` function to hide a worksheet. See the @ref
+  hide_sheet.c example.
+
+- Added `worksheet_set_first_sheet()` function to set the first visible
+  worksheet in a workbook with a large number of worksheets.
+
+
+## 0.2.3 December 12 2015
+
+- Added `worksheet_set_tab_color()` function to set the worksheet tab
+  color. See the @ref tab_colors.c example.
+
+
+## 0.2.2 December 11 2015
+
+- Replaced shared strings hash table with a Red/Black tree implementation for
+  better performance.
+  Thanks to Martin Renters. Pull Request [#41][gh_41].
+
+  [gh_41]: https://github.com/jmcnamara/libxlsxwriter/issues/41
+
+
+## 0.2.1 December 11 2015
+
+- Added `worksheet_right_to_left()` function. This can be used to change the
+  default direction of the worksheet from left-to-right when creating Arabic,
+  Hebrew or other near or far eastern worksheets that use right-to-left as the
+  default direction.
+
+- Added `worksheet_hide_zero()` function to hide zero cell values.
+
+- Added `worksheet_set_zoom()` method to set the worksheet zoom factor.
+
+
+## 0.2.0 December 9 2015
+
+- Added `worksheet_set_selection()` function to set the cell selected range on
+  a worksheet.
+
+
+## 0.1.9 December 7 2015
+
+- Replaced main worksheet data structure with a Red/Black tree implementation
+  for better performance when data isn't added in linear row-column order.
+  Thanks to Martin Renters. Pull Request [#14][gh_14] and [#16][gh_16].
+
+  [gh_14]: https://github.com/jmcnamara/libxlsxwriter/issues/14
+  [gh_16]: https://github.com/jmcnamara/libxlsxwriter/issues/16
+
+
+## 0.1.8 December 7 2015
+
+- Added `worksheet_freeze_panes()` and `worksheet_split_panes()` to allow
+  setting worksheet panes. See @ref panes.c example.
+
+- Added link to [Xcode project][libxlsxwriterCocoaExamples] for iOS and OS X
+  with Objective-C and Swift, provided by Ludovico Rossi.
+
+- Added improved support for Windows.
+
+  [libxlsxwriterCocoaExamples]: https://github.com/lrossi/libxlsxwriterCocoaExamples
+
+## 0.1.7 September 27 2015
+
+- Fixed Cocoapod spec file for iOS and OS X.
+
+
+## 0.1.6 September 27 2015
+
+- Added Cocoapod spec file to allow the library to be installed using
+  [CocoaPods](https://cocoapods.org).
+  Pull Request [#7](https://github.com/jmcnamara/libxlsxwriter/issues/7).
+
+
+## 0.1.5 May 3 2015
+
+- Added `worksheet_write_url()` function to write urls/hyperlinks to
+  worksheets. See also @ref hyperlinks.c.
+
+
+## 0.1.4 March 18 2015
+
+- Added `worksheet_autofilter()` function to add autofilters to worksheets.
+  See also @ref autofilter.c.
+
+
+## 0.1.3 March 15 2015
+
+- Added `worksheet_write_array_formula()` function to allow writing of
+  array formulas in worksheets.
+
+
+## 0.1.2 March 14 2015
+
+- Added `worksheet_set_h_pagebreaks()` and `worksheet_set_v_pagebreaks()`
+  functions to define worksheet page breaks.
+
+- Added LXW_FOREACH_WORKSHEET() macro to allow iteration over all the
+  worksheets in a workbook.
+
+- Added `worksheet_set_print_scale()` function to set the scale factor for
+  the printed page.
+
+- Added `worksheet_set_start_page()` function to set the start page number
+  when printing.
+
+
+## 0.1.1 March 13 2015
+
+- Added `worksheet_print_area()` function to control the print area of a
+  worksheet.
+
+- Added `worksheet_fit_to_pages()` function to fit the printed area to a
+  specific number of pages both vertically and horizontally.
+
+
+## 0.1.0 March 12 2015
+
+- Added `worksheet_repeat_rows()` and `worksheet_repeat_columns()` functions
+  to control the repeated rows/columns on printed worksheets.
+
+
+## 0.0.9 March 9 2015
+
+- Added `worksheet_gridlines()` function to show/hide screen and print
+  gridlines.
+
+- Added `worksheet_center_horizontally()` and `worksheet_center_vertically()`
+  functions to center worksheet on the printed page.
+
+- Added `worksheet_print_row_col_headers()` function to enable printing of row
+  and column headers.
+
+
+## 0.0.8 March 8 2015
+
+- Added support for worksheet headers and footers via the
+  `worksheet_set_header()` and `worksheet_set_footer()` functions. See also
+  @ref headers_footers.c.
+
+
+## 0.0.7 March 7 2015
+
+- Added the `worksheet_merge_range()` method to merge worksheet cells. See
+  also @ref merge_range.c.
+
+
+## 0.0.6 March 5 2015
+
+- Added the `workbook_define_name()` method to create defined names and ranges
+  in a workbook or worksheet.
+
+
+## 0.0.5 March 6 2015
+
+- Added `worksheet_select()` function to set worksheets as selected.
+
+- Added `worksheet_activate()` to set the active worksheet.
+
+- Several portability fixes to fix warnings with different compilers.
+
+
+## 0.0.4 March 1 2015
+
+- Added `worksheet_set_margins()` function to set top, bottom, left and right
+  margins in a worksheet.
+
+- Fix for issue where format objects were written to the file in the order of
+  creation rather than the order of use. This issue caused incorrect formats
+  in cells.
+  Issue [#3](https://github.com/jmcnamara/libxlsxwriter/issues/3).
+
+- Fix for issue where tmp files in `constant_memory` mode weren't closed
+  until application exited.
+  Issue [#1](https://github.com/jmcnamara/libxlsxwriter/issues/1).
+
+
+## 0.0.3 January 7 2015
+
+-   Added worksheet page setup methods.
+
+    -   `worksheet_set_landscape()`
+    -   `worksheet_set_portrait()`
+    -   `worksheet_set_page_view()`
+    -   `worksheet_set_paper()`
+    -   `worksheet_print_across()`
+
+
+## 0.0.2 June 26 2014
+
+- First public release.
+
+
+## 0.0.1 June 8 2014
+
+- First GitHub release.
+
+
+*/

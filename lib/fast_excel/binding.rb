@@ -6,16 +6,12 @@ module Libxlsxwriter
   extend FFI::Library
 
   LIB_FILENAME = if RUBY_PLATFORM =~ /darwin/
-    "libxlsxwriter-darwin.dylib"
+    "libxlsxwriter.dylib"
   else
-    if File.exist?('/etc/alpine-release')
-      "libxlsxwriter-alpine.so"
-    else
-      "libxlsxwriter-glibc.so"
-    end
+    "libxlsxwriter.so"
   end
 
-  ffi_lib File.expand_path("./../../../binaries/#{LIB_FILENAME}", __FILE__)
+  ffi_lib File.expand_path("./../../../libxlsxwriter/lib/#{LIB_FILENAME}", __FILE__)
 
   def self.attach_function(name, *_)
     begin; super; rescue FFI::NotFoundError => e
