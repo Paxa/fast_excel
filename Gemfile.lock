@@ -1,18 +1,34 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    ansi (1.5.0)
     axlsx (2.0.1)
       htmlentities (~> 4.3.1)
       nokogiri (>= 1.4.1)
       rubyzip (~> 1.0.0)
+    builder (3.2.3)
     ffi (1.9.17)
     ffi_gen (1.2.0)
       ffi (~> 1.0)
     htmlentities (4.3.4)
     mini_portile2 (2.1.0)
+    minitest (5.10.1)
+    minitest-reporters (1.1.14)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
     nokogiri (1.7.0.1)
       mini_portile2 (~> 2.1.0)
+    roo (1.13.2)
+      nokogiri
+      rubyzip
+      spreadsheet (> 0.6.4)
+    ruby-ole (1.2.12.1)
+    ruby-progressbar (1.8.1)
     rubyzip (1.0.0)
+    spreadsheet (1.1.4)
+      ruby-ole (>= 1.0)
 
 PLATFORMS
   ruby
@@ -21,6 +37,9 @@ DEPENDENCIES
   axlsx
   ffi
   ffi_gen
+  minitest
+  minitest-reporters
+  roo
 
 BUNDLED WITH
-   1.14.4
+   1.14.5

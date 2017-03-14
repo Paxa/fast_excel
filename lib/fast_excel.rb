@@ -46,7 +46,7 @@ module FastExcel
   XLSX_DATE_DAY = 86400.0
 
   # days between 1970-jan-01 and 1900-jan-01
-  XLSX_DATE_EPOCH_DIFF = 25567
+  XLSX_DATE_EPOCH_DIFF = 25569
 
   # Convert time to number of days, and change beginning point from 1st jan 1970 to 1st jan 1900
   # Offset argument should be number of seconds, if not specified then it will use Time.zone.utc_offset || 0
