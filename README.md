@@ -35,7 +35,7 @@ This repositiry and gem contain sources of [libxlsxwriter](https://github.com/jm
 ```
 Comparison:
            FastExcel:       31.7 i/s
-               Axslx:        8.0 i/s - 3.98x  slower
+               Axlsx:        8.0 i/s - 3.98x  slower
           write_xlsx:        6.9 i/s - 4.62x  slower
 ```
 
@@ -43,15 +43,15 @@ Comparison:
 ```
 Comparison:
            FastExcel:        1.4 i/s
-               Axslx:        0.4 i/s - 3.46x  slower
+               Axlsx:        0.4 i/s - 3.46x  slower
           write_xlsx:        0.1 i/s - 17.04x  slower
 ```
 
 Max memory usage, generating 100k rows:
 ```
 FastExcel   - 20 MB
-Axslx       - 60 MB
-write_axslx - 100 MB
+Axlsx       - 60 MB
+write_xlsx - 100 MB
 ```
 
 ## Install
