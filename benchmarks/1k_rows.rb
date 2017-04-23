@@ -1,13 +1,4 @@
-require 'bundler/setup'
-require 'fileutils'
-require 'tmpdir'
-require_relative '../lib/fast_excel'
-
-# gem install axlsx benchmark-ips write_xlsx
-
-require "benchmark/ips"
-require 'axlsx'
-require 'write_xlsx'
+require_relative 'init'
 
 HEADERS = ["id", "name", "age", "date"]
 
@@ -40,7 +31,6 @@ Benchmark.ips do |x|
           sheet.add_row(row)
         end
       end
-      #package.to_stream.read
       package.serialize(filename)
       File.open(filename, 'rb', &:read)
       File.delete(filename)

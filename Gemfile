@@ -12,4 +12,4 @@ gem 'minitest-reporters'
 gem 'axlsx', git: 'https://github.com/randym/axlsx.git'
 gem 'write_xlsx'
 gem 'benchmark-ips'
-
+gem 'process_memory', git: 'https://github.com/paxa/process_memory'

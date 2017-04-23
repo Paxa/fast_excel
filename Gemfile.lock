@@ -1,4 +1,10 @@
 GIT
+  remote: https://github.com/paxa/process_memory
+  revision: 1aa4df28c9a98903301317236104abe591e086fd
+  specs:
+    process_memory (0.1)
+
+GIT
   remote: https://github.com/randym/axlsx.git
   revision: c8ac844572b25fda358cc01d2104720c4c42f450
   specs:
@@ -54,6 +60,7 @@ DEPENDENCIES
   ffi_gen
   minitest
   minitest-reporters
+  process_memory!
   roo (= 2.7.1)!
   write_xlsx
 
