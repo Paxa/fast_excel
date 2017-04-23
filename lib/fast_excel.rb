@@ -1,11 +1,20 @@
 require_relative './fast_excel/binding'
 
 module FastExcel
-  #include Libxlsxwriter
-
   DEF_COL_WIDTH = 8.43
 
-  def self.open(filename, constant_memory: false)
+  def self.open(filename = nil, constant_memory: false, default_format: nil)
+    tmp_file = false
+    unless filename
+      require 'tmpdir'
+      filename = "#{Dir.mktmpdir}/fast_excel.xslx"
+      tmp_file = true
+    end
+
+    unless filename
+      raise ArgumentError, "filename is required"
+    end
+
     filename = filename.to_s if defined?(Pathname) && filename.is_a?(Pathname)
 
     workbook = if constant_memory
@@ -15,7 +24,16 @@ module FastExcel
     else
       Libxlsxwriter.workbook_new(filename)
     end
-    Libxlsxwriter::Workbook.new(workbook)
+    result = Libxlsxwriter::Workbook.new(workbook)
+
+    if default_format
+      raise "default_format argument must be a hash" unless default_format.is_a?(Hash)
+      result.default_format.set(default_format)
+    end
+
+    result.tmp_file = tmp_file
+    result.filename = filename
+    result
   end
 
   # Creates internal Libxlsxwriter::Datetime from Datetime object
@@ -65,9 +83,25 @@ module FastExcel
     time.to_f / XLSX_DATE_DAY + XLSX_DATE_EPOCH_DIFF + offset / XLSX_DATE_DAY
   end
 
+  def self.print_ffi_obj(value)
+    puts "#{value.class}"
+    value.members.each do |key|
+      field_val = if value[key].is_a?(FFI::Pointer) && value[key].null?
+        "nil"
+      elsif value[key].is_a?(FFI::StructLayout::CharArray)
+        value[key].to_str.inspect
+      elsif value[key].is_a?(String)
+        value[key].inspect
+      else
+        value[key]
+      end
+      puts "* #{key}: #{field_val}"
+    end
+  end
+
   module AttributeHelper
-    def set(value)
-      value.each do |key, value|
+    def set(values)
+      values.each do |key, value|
         if respond_to?("#{key}=")
           send("#{key}=", value)
         else
@@ -87,6 +121,12 @@ module FastExcel
 
   module WorkbookExt
     include AttributeHelper
+    attr_accessor :tmp_file, :is_open, :filename
+
+    def initialize(struct)
+      @is_open = true
+      super(struct)
+    end
 
     def bold_cell_format
       bold = add_format
@@ -104,6 +144,22 @@ module FastExcel
 
     def add_worksheet(sheetname = nil)
       super
+    end
+
+    def close
+      @is_open = false
+      super
+    end
+
+    def read_string
+      close if @is_open
+      File.open(filename, 'rb', &:read)
+    ensure
+      remove_tmp_file
+    end
+
+    def remove_tmp_file
+      File.delete(filename) if tmp_file
     end
   end
 
@@ -135,7 +191,7 @@ module FastExcel
   module FormatExt
     include AttributeHelper
 
-    [:font_size, :font_name, :underline, :font_script, :num_format, :align, :rotation, :indent, :pattern, :border].each do |prop|
+    [:font_size, :underline, :font_script, :align, :rotation, :indent, :pattern, :border].each do |prop|
       define_method(prop) do
         self[prop]
       end

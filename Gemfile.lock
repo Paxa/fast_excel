@@ -1,16 +1,32 @@
+GIT
+  remote: https://github.com/randym/axlsx.git
+  revision: c8ac844572b25fda358cc01d2104720c4c42f450
+  specs:
+    axlsx (2.1.0.pre)
+      htmlentities (~> 4.3.4)
+      mimemagic (~> 0.3)
+      nokogiri (>= 1.6.6)
+      rubyzip (>= 1.2.1)
+
+GIT
+  remote: https://github.com/roo-rb/roo.git
+  revision: 6bde8588dfd97d7a18981ee3ac7b444fec165a2c
+  specs:
+    roo (2.7.1)
+      nokogiri (~> 1)
+      rubyzip (>= 1.2.1, < 2.0.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
     ansi (1.5.0)
-    axlsx (2.0.1)
-      htmlentities (~> 4.3.1)
-      nokogiri (>= 1.4.1)
-      rubyzip (~> 1.0.0)
+    benchmark-ips (2.7.2)
     builder (3.2.3)
-    ffi (1.9.17)
+    ffi (1.9.18)
     ffi_gen (1.2.0)
       ffi (~> 1.0)
     htmlentities (4.3.4)
+    mimemagic (0.3.2)
     mini_portile2 (2.1.0)
     minitest (5.10.1)
     minitest-reporters (1.1.14)
@@ -18,28 +34,28 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    nokogiri (1.7.0.1)
+    nokogiri (1.7.1)
       mini_portile2 (~> 2.1.0)
-    roo (1.13.2)
-      nokogiri
-      rubyzip
-      spreadsheet (> 0.6.4)
-    ruby-ole (1.2.12.1)
     ruby-progressbar (1.8.1)
-    rubyzip (1.0.0)
-    spreadsheet (1.1.4)
-      ruby-ole (>= 1.0)
+    rubyzip (1.2.1)
+    write_xlsx (0.83.0)
+      rubyzip (>= 1.0.0)
+      zip-zip
+    zip-zip (0.3)
+      rubyzip (>= 1.0.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  axlsx
+  axlsx!
+  benchmark-ips
   ffi
   ffi_gen
   minitest
   minitest-reporters
-  roo
+  roo (= 2.7.1)!
+  write_xlsx
 
 BUNDLED WITH
    1.14.5

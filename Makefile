@@ -8,7 +8,7 @@ all :
 	$(Q)$(MAKE) -C libxlsxwriter
 
 clean :
-	#$(Q)$(MAKE) clean -C libxlsxwriter
+	$(Q)$(MAKE) clean -C libxlsxwriter
 
 install :
 	@echo "Nothing to install"
