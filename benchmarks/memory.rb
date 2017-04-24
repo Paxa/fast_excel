@@ -9,11 +9,11 @@ end
 
 puts "warm up..."
 write_fast_excel_20k
-write_axslx_20k
+write_axlsx_20k
 write_xlsx_20k
 
 DATA.clear
-100_000.times do |n|
+50_000.times do |n|
   DATA << [n, "String string #{n}" * 5, (n * rand * 10).round, Time.at(n * 1000 + 1492922688), n * 100]
 end
 
@@ -37,13 +37,13 @@ end
 GC.start
 sleep 5
 
-measure_memory("Axslx") do
-  write_axslx_20k
+measure_memory("Axlsx") do
+  write_axlsx_20k
 end
 
 GC.start
 sleep 5
 
-measure_memory("write_axslx") do
-  write_axslx_20k
+measure_memory("write_xlsx") do
+  write_xlsx_20k
 end

@@ -21,8 +21,8 @@ Benchmark.ips do |x|
     workbook.read_string
   end
 
-  x.report("Axslx") do
-    filename = "#{Dir.mktmpdir}/axslx.xslx"
+  x.report("Axlsx") do
+    filename = "#{Dir.mktmpdir}/axlsx.xlsx"
     Axlsx::Package.new do |package|
       package.use_autowidth = false
       package.workbook.add_worksheet do |sheet|
@@ -38,7 +38,7 @@ Benchmark.ips do |x|
   end
 
   x.report("write_xlsx") do
-    filename = "#{Dir.mktmpdir}/write_xlsx.xslx"
+    filename = "#{Dir.mktmpdir}/write_xlsx.xlsx"
     workbook = WriteXLSX.new(filename)
     worksheet = workbook.add_worksheet
     HEADERS.each_with_index do |value, i|

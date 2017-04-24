@@ -7,7 +7,7 @@ module FastExcel
     tmp_file = false
     unless filename
       require 'tmpdir'
-      filename = "#{Dir.mktmpdir}/fast_excel.xslx"
+      filename = "#{Dir.mktmpdir}/fast_excel.xlsx"
       tmp_file = true
     end
 

@@ -6,7 +6,7 @@ describe "FastExcel" do
     workbook = FastExcel.open(constant_memory: true)
 
     assert(workbook.tmp_file)
-    assert_match(/fast_excel.xslx$/, workbook.filename)
+    assert_match(/fast_excel.xlsx$/, workbook.filename)
 
     result = workbook.read_string
     assert(result.size > 1000)

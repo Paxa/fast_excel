@@ -14,8 +14,8 @@ Benchmark.ips do |x|
     write_fast_excel_20k
   end
 
-  x.report("Axslx") do
-    write_axslx_20k
+  x.report("Axlsx") do
+    write_axlsx_20k
   end
 
   x.report("write_xlsx") do

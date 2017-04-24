@@ -24,7 +24,7 @@ def write_fast_excel_20k
 end
 
 def write_xlsx_20k
-  filename = "#{Dir.mktmpdir}/write_xlsx.xslx"
+  filename = "#{Dir.mktmpdir}/write_xlsx.xlsx"
   workbook = WriteXLSX.new(filename)
   worksheet = workbook.add_worksheet
   HEADERS.each_with_index do |value, i|
@@ -42,8 +42,8 @@ def write_xlsx_20k
   File.delete(filename)
 end
 
-def write_axslx_20k
-  filename = "#{Dir.mktmpdir}/axslx.xslx"
+def write_axlsx_20k
+  filename = "#{Dir.mktmpdir}/axlsx.xlsx"
   Axlsx::Package.new do |package|
     package.use_autowidth = false
     package.workbook.add_worksheet do |sheet|
