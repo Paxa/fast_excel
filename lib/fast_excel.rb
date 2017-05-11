@@ -1,6 +1,13 @@
 require_relative './fast_excel/binding'
 
 module FastExcel
+  class Formula
+    attr_accessor :fml
+    def initialize fml
+      @fml = fml
+    end
+  end
+
   DEF_COL_WIDTH = 8.43
 
   def self.open(filename = nil, constant_memory: false, default_format: nil)
@@ -180,6 +187,8 @@ module FastExcel
           write_datetime(row_number, index, FastExcel.lxw_datetime(value), format)
         elsif value.is_a?(Time)
           write_datetime(row_number, index, FastExcel.lxw_time(value), format)
+        elsif value.is_a?(Formula)
+          write_formula(row_number, index, value.fml, format)
         else
           write_string(row_number, index, value.to_s, format)
         end
