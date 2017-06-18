@@ -1066,45 +1066,6 @@ module Libxlsxwriter
     :show_all, 3
   ]
   
-  # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:cell_types).</em>
-  # 
-  # === Options:
-  # :number_cell ::
-  #   
-  # :string_cell ::
-  #   
-  # :inline_string_cell ::
-  #   
-  # :formula_cell ::
-  #   
-  # :array_formula_cell ::
-  #   
-  # :blank_cell ::
-  #   
-  # :boolean_cell ::
-  #   
-  # :hyperlink_url ::
-  #   
-  # :hyperlink_internal ::
-  #   
-  # :hyperlink_external ::
-  #   
-  # 
-  # @method _enum_cell_types_
-  # @return [Symbol]
-  # @scope class
-  enum :cell_types, [
-    :number_cell, 1,
-    :string_cell, 2,
-    :inline_string_cell, 3,
-    :formula_cell, 4,
-    :array_formula_cell, 5,
-    :blank_cell, 6,
-    :boolean_cell, 7,
-    :hyperlink_url, 8,
-    :hyperlink_internal, 9,
-    :hyperlink_external, 10
-  ]
   
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:pane_types).</em>
   # 

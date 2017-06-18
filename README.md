@@ -1,6 +1,8 @@
 # Ultra Fast Excel Writter for Ruby
 
 ```ruby
+require 'fast_excel'
+
 workbook = FastExcel.open("hello_world_ffi.xlsx", constant_memory: true)
 workbook.default_format.set(
   font_size: 0, # user's default
@@ -23,6 +25,8 @@ worksheet.write_row(0, ["message", "price", "date"], bold)
 for i in 1..1000
   worksheet.write_row(i, ["Hello", (rand * 10_000_000).round(2), Time.now])
 end
+
+worksheet.write_row(1001, ["Sum", FastExcel::Formula.new("SUM(B2:B1001)")], bold)
 
 workbook.close
 ```

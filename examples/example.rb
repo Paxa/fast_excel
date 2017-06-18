@@ -1,7 +1,7 @@
-require_relative './lib/fast_excel'
+require_relative '../lib/fast_excel'
 require 'pp'
 
-workbook = FastExcel.open("ffi_example.xlsx", constant_memory: true)
+workbook = FastExcel.open("example.xlsx", constant_memory: true)
 
 workbook.default_format.set(
   font_size: 0, # user's default
@@ -40,3 +40,4 @@ for i in 1..1000
 end
 
 workbook.close
+puts "Saved to file example.xlsx"

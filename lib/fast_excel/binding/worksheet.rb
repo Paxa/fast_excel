@@ -656,7 +656,7 @@ module Libxlsxwriter
     # @param [Integer] row_num 
     # @return [Row] 
     def find_row(row_num)
-      Row.new Libxlsxwriter.worksheet_find_row(self, row_num)
+      Row.new(Libxlsxwriter.worksheet_find_row(self, row_num))
     end
   end
 
@@ -847,7 +847,7 @@ module Libxlsxwriter
   # :tree_pointers ::
   #   (RowTreePointers) 
   class Row < FFI::Struct
-    layout :row_num, :uint,
+    layout :row_num, :uint32,
            :height, :double,
            :format, Format,
            :hidden, :uchar,
@@ -860,6 +860,46 @@ module Libxlsxwriter
            :tree_pointers, RowTreePointers.by_value
   end
 
+  # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:cell_types).</em>
+  # 
+  # === Options:
+  # :number_cell ::
+  #   
+  # :string_cell ::
+  #   
+  # :inline_string_cell ::
+  #   
+  # :formula_cell ::
+  #   
+  # :array_formula_cell ::
+  #   
+  # :blank_cell ::
+  #   
+  # :boolean_cell ::
+  #   
+  # :hyperlink_url ::
+  #   
+  # :hyperlink_internal ::
+  #   
+  # :hyperlink_external ::
+  #   
+  # 
+  # @method _enum_cell_types_
+  # @return [Symbol]
+  # @scope class
+  enum :cell_types, [
+    :number_cell, 1,
+    :string_cell, 2,
+    :inline_string_cell, 3,
+    :formula_cell, 4,
+    :array_formula_cell, 5,
+    :blank_cell, 6,
+    :boolean_cell, 7,
+    :hyperlink_url, 8,
+    :hyperlink_internal, 9,
+    :hyperlink_external, 10
+  ]
+
   # = Fields:
   # :number ::
   #   (Float) 
@@ -870,7 +910,7 @@ module Libxlsxwriter
   class CellU < FFI::Union
     layout :number, :double,
            :string_id, :int,
-           :string, :string
+           :string, :pointer
   end
 
   # = Fields:
@@ -911,15 +951,15 @@ module Libxlsxwriter
   # :tree_pointers ::
   #   (CellTreePointers) 
   class Cell < FFI::Struct
-    layout :row_num, :uint,
-           :col_num, :ushort,
+    layout :row_num, :uint32,
+           :col_num, :uint16,
            :type, :cell_types,
-           :format, Format,
+           :format, :pointer,
            :u, CellU.by_value,
            :formula_result, :double,
-           :user_data1, :string,
-           :user_data2, :string,
-           :sst_string, :string,
+           :user_data1, :pointer,
+           :user_data2, :pointer,
+           :sst_string, :pointer,
            :tree_pointers, CellTreePointers.by_value
   end
 
@@ -931,7 +971,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_number, :worksheet_write_number, [Worksheet, :uint, :ushort, :double, Format], :error
+  attach_function :worksheet_write_number, :worksheet_write_number, [Worksheet, :uint32, :ushort, :double, Format], :error
 
   # @method worksheet_write_string(worksheet, row, col, string, format)
   # @param [Worksheet] worksheet 
@@ -941,7 +981,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_string, :worksheet_write_string, [Worksheet, :uint, :ushort, :string, Format], :error
+  attach_function :worksheet_write_string, :worksheet_write_string, [Worksheet, :uint32, :ushort, :string, Format], :error
 
   # @method worksheet_write_formula(worksheet, row, col, formula, format)
   # @param [Worksheet] worksheet 
@@ -951,7 +991,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_formula, :worksheet_write_formula, [Worksheet, :uint, :ushort, :string, Format], :error
+  attach_function :worksheet_write_formula, :worksheet_write_formula, [Worksheet, :uint32, :ushort, :string, Format], :error
 
   # @method worksheet_write_array_formula(worksheet, first_row, first_col, last_row, last_col, formula, format)
   # @param [Worksheet] worksheet 
@@ -963,7 +1003,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_array_formula, :worksheet_write_array_formula, [Worksheet, :uint, :ushort, :uint, :ushort, :string, Format], :error
+  attach_function :worksheet_write_array_formula, :worksheet_write_array_formula, [Worksheet, :uint32, :ushort, :uint, :ushort, :string, Format], :error
 
   # @method worksheet_write_array_formula_num(worksheet, first_row, first_col, last_row, last_col, formula, format, result)
   # @param [Worksheet] worksheet 
@@ -976,7 +1016,7 @@ module Libxlsxwriter
   # @param [Float] result 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_array_formula_num, :worksheet_write_array_formula_num, [Worksheet, :uint, :ushort, :uint, :ushort, :string, Format, :double], :error
+  attach_function :worksheet_write_array_formula_num, :worksheet_write_array_formula_num, [Worksheet, :uint32, :ushort, :uint, :ushort, :string, Format, :double], :error
 
   # @method worksheet_write_datetime(worksheet, row, col, datetime, format)
   # @param [Worksheet] worksheet 
@@ -986,7 +1026,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_datetime, :worksheet_write_datetime, [Worksheet, :uint, :ushort, Datetime, Format], :error
+  attach_function :worksheet_write_datetime, :worksheet_write_datetime, [Worksheet, :uint32, :ushort, Datetime, Format], :error
 
   # @method worksheet_write_url_opt(worksheet, row_num, col_num, url, format, string, tooltip)
   # @param [Worksheet] worksheet 
@@ -998,7 +1038,7 @@ module Libxlsxwriter
   # @param [String] tooltip 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_url_opt, :worksheet_write_url_opt, [Worksheet, :uint, :ushort, :string, Format, :string, :string], :error
+  attach_function :worksheet_write_url_opt, :worksheet_write_url_opt, [Worksheet, :uint32, :ushort, :string, Format, :string, :string], :error
 
   # @method worksheet_write_url(worksheet, row, col, url, format)
   # @param [Worksheet] worksheet 
@@ -1008,7 +1048,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_url, :worksheet_write_url, [Worksheet, :uint, :ushort, :string, Format], :error
+  attach_function :worksheet_write_url, :worksheet_write_url, [Worksheet, :uint32, :ushort, :string, Format], :error
 
   # @method worksheet_write_boolean(worksheet, row, col, value, format)
   # @param [Worksheet] worksheet 
@@ -1018,7 +1058,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_boolean, :worksheet_write_boolean, [Worksheet, :uint, :ushort, :int, Format], :error
+  attach_function :worksheet_write_boolean, :worksheet_write_boolean, [Worksheet, :uint32, :ushort, :int, Format], :error
 
   # @method worksheet_write_blank(worksheet, row, col, format)
   # @param [Worksheet] worksheet 
@@ -1027,7 +1067,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_blank, :worksheet_write_blank, [Worksheet, :uint, :ushort, Format], :error
+  attach_function :worksheet_write_blank, :worksheet_write_blank, [Worksheet, :uint32, :ushort, Format], :error
 
   # @method worksheet_write_formula_num(worksheet, row, col, formula, format, result)
   # @param [Worksheet] worksheet 
@@ -1038,7 +1078,7 @@ module Libxlsxwriter
   # @param [Float] result 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_write_formula_num, :worksheet_write_formula_num, [Worksheet, :uint, :ushort, :string, Format, :double], :error
+  attach_function :worksheet_write_formula_num, :worksheet_write_formula_num, [Worksheet, :uint32, :ushort, :string, Format, :double], :error
 
   # @method worksheet_set_row(worksheet, row, height, format)
   # @param [Worksheet] worksheet 
@@ -1047,7 +1087,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_set_row, :worksheet_set_row, [Worksheet, :uint, :double, Format], :error
+  attach_function :worksheet_set_row, :worksheet_set_row, [Worksheet, :uint32, :double, Format], :error
 
   # @method worksheet_set_row_opt(worksheet, row, height, format, options)
   # @param [Worksheet] worksheet 
@@ -1057,7 +1097,7 @@ module Libxlsxwriter
   # @param [RowColOptions] options 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_set_row_opt, :worksheet_set_row_opt, [Worksheet, :uint, :double, Format, RowColOptions], :error
+  attach_function :worksheet_set_row_opt, :worksheet_set_row_opt, [Worksheet, :uint32, :double, Format, RowColOptions], :error
 
   # @method worksheet_set_column(worksheet, first_col, last_col, width, format)
   # @param [Worksheet] worksheet 
@@ -1087,7 +1127,7 @@ module Libxlsxwriter
   # @param [String] filename 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_insert_image, :worksheet_insert_image, [Worksheet, :uint, :ushort, :string], :error
+  attach_function :worksheet_insert_image, :worksheet_insert_image, [Worksheet, :uint32, :ushort, :string], :error
 
   # @method worksheet_insert_image_opt(worksheet, row, col, filename, options)
   # @param [Worksheet] worksheet 
@@ -1097,7 +1137,7 @@ module Libxlsxwriter
   # @param [ImageOptions] options 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_insert_image_opt, :worksheet_insert_image_opt, [Worksheet, :uint, :ushort, :string, ImageOptions], :error
+  attach_function :worksheet_insert_image_opt, :worksheet_insert_image_opt, [Worksheet, :uint32, :ushort, :string, ImageOptions], :error
 
   # @method worksheet_insert_chart(worksheet, row, col, chart)
   # @param [Worksheet] worksheet 
@@ -1106,7 +1146,7 @@ module Libxlsxwriter
   # @param [Chart] chart 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_insert_chart, :worksheet_insert_chart, [Worksheet, :uint, :ushort, Chart], :error
+  attach_function :worksheet_insert_chart, :worksheet_insert_chart, [Worksheet, :uint32, :ushort, Chart], :error
 
   # @method worksheet_insert_chart_opt(worksheet, row, col, chart, user_options)
   # @param [Worksheet] worksheet 
@@ -1116,7 +1156,7 @@ module Libxlsxwriter
   # @param [ImageOptions] user_options 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_insert_chart_opt, :worksheet_insert_chart_opt, [Worksheet, :uint, :ushort, Chart, ImageOptions], :error
+  attach_function :worksheet_insert_chart_opt, :worksheet_insert_chart_opt, [Worksheet, :uint32, :ushort, Chart, ImageOptions], :error
 
   # @method worksheet_merge_range(worksheet, first_row, first_col, last_row, last_col, string, format)
   # @param [Worksheet] worksheet 
@@ -1128,7 +1168,7 @@ module Libxlsxwriter
   # @param [Format] format 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :worksheet_merge_range, :worksheet_merge_range, [Worksheet, :uint, :ushort, :uint, :ushort, :string, Format], :error
+  attach_function :worksheet_merge_range, :worksheet_merge_range, [Worksheet, :uint32, :ushort, :uint32, :ushort, :string, Format], :error
 
   # @method worksheet_autofilter(worksheet, first_row, first_col, last_row, last_col)
   # @param [Worksheet] worksheet 
@@ -1458,7 +1498,7 @@ module Libxlsxwriter
   # @param [Integer] row_num 
   # @return [Row] 
   # @scope class
-  attach_function :worksheet_find_row, :lxw_worksheet_find_row, [Worksheet, :uint], Row
+  attach_function :worksheet_find_row, :lxw_worksheet_find_row, [Worksheet, :uint32], Row
 
   # @method worksheet_find_cell(row, col_num)
   # @param [Row] row 

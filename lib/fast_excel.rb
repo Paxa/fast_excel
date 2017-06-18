@@ -1,9 +1,10 @@
 require_relative './fast_excel/binding'
 
 module FastExcel
+
   class Formula
     attr_accessor :fml
-    def initialize fml
+    def initialize(fml)
       @fml = fml
     end
   end
@@ -93,17 +94,20 @@ module FastExcel
   def self.print_ffi_obj(value)
     puts "#{value.class}"
     value.members.each do |key|
-      field_val = if value[key].is_a?(FFI::Pointer) && value[key].null?
+      field_val = if value[key].is_a?(FFI::Pointer) && value[key].null? || value[key].nil?
         "nil"
       elsif value[key].is_a?(FFI::StructLayout::CharArray)
         value[key].to_str.inspect
       elsif value[key].is_a?(String)
+        value[key].inspect
+      elsif value[key].is_a?(Symbol)
         value[key].inspect
       else
         value[key]
       end
       puts "* #{key}: #{field_val}"
     end
+    nil
   end
 
   module AttributeHelper
@@ -117,12 +121,17 @@ module FastExcel
       end
     end
 
-    def pretty_print(pp)
+    def fields_hash
       res = {}
       members.each do |key|
+        #p [key, self[key]]
         res[key] = respond_to?(key) ? send(key) : self[key]
       end
-      pp res
+      res
+    end
+
+    def pretty_print(pp)
+      pp fields_hash
     end
   end
 
