@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: https://github.com/roo-rb/roo.git
-  revision: 6bde8588dfd97d7a18981ee3ac7b444fec165a2c
+  revision: 85c2736b0ea1c984391688c5aeb4acf85f225405
   specs:
     roo (2.7.1)
       nokogiri (~> 1)
@@ -33,18 +33,18 @@ GEM
       ffi (~> 1.0)
     htmlentities (4.3.4)
     mimemagic (0.3.2)
-    mini_portile2 (2.1.0)
-    minitest (5.10.1)
+    mini_portile2 (2.2.0)
+    minitest (5.10.2)
     minitest-reporters (1.1.14)
       ansi
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    nokogiri (1.7.1)
-      mini_portile2 (~> 2.1.0)
+    nokogiri (1.8.0)
+      mini_portile2 (~> 2.2.0)
     ruby-progressbar (1.8.1)
     rubyzip (1.2.1)
-    write_xlsx (0.83.0)
+    write_xlsx (0.85.1)
       rubyzip (>= 1.0.0)
       zip-zip
     zip-zip (0.3)
@@ -65,4 +65,4 @@ DEPENDENCIES
   write_xlsx
 
 BUNDLED WITH
-   1.14.5
+   1.15.1
