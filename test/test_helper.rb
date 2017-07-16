@@ -20,9 +20,13 @@ ensure
   File.delete(file_path)
 end
 
+def get_arrays(workbook)
+  workbook.close
+  parse_xlsx_as_matrix(workbook.filename)
+end
+
 def parse_xlsx_as_array(file_path)
-  excel = parse_xlsx(file_path)
-  data = excel.to_matrix.to_a
+  data = parse_xlsx_as_matrix(file_path)
   headers = data.shift
 
   data.map do |row|
@@ -32,5 +36,17 @@ end
 
 def parse_xlsx_as_matrix(file_path)
   excel = parse_xlsx(file_path)
-  excel.to_matrix.to_a
+
+  sheet = excel.sheet(0)
+
+  rows = []
+  1.upto(sheet.last_row) do |row_number|
+    row = 1.upto(sheet.last_column).map do |col|
+      sheet.cell(row_number, col)
+    end
+
+    rows << row
+  end
+
+  return rows
 end

@@ -341,7 +341,9 @@ module FastExcel
     end
 
     def add_worksheet(sheetname = nil)
-      super
+      sheet = super
+      sheet.workbook = self
+      sheet
     end
 
     def close
@@ -359,9 +361,16 @@ module FastExcel
     def remove_tmp_file
       File.delete(filename) if tmp_file
     end
+
+    def constant_memory?
+      #FastExcel.print_ffi_obj(self[:options])
+      return self[:options][:constant_memory] != 0
+    end
   end
 
   module WorksheetExt
+    attr_accessor :workbook
+
     include AttributeHelper
 
     def write_row(row_number, values, formats = nil)
@@ -375,6 +384,11 @@ module FastExcel
     end
 
     def write_value(row_number, cell_number, value, format = nil)
+
+      if workbook.constant_memory? && row_number < last_row_number
+        raise ArgumentError, "Can not write to saved row in constant_memory mode (attempted row: #{row_number}, last saved row: #{last_row_number})"
+      end
+
       if value.is_a?(Integer) || value.is_a?(Numeric) || value.is_a?(Float)
         write_number(row_number, cell_number, value, format)
       elsif defined?(BigDecimal) && value.is_a?(BigDecimal)
@@ -388,6 +402,21 @@ module FastExcel
       else
         write_string(row_number, cell_number, value.to_s, format)
       end
+
+      @last_row_number = [row_number, last_row_number].max
+    end
+
+    def append_row(values, formats = nil)
+      increment_last_row_number!
+      write_row(last_row_number, values, formats)
+    end
+
+    def last_row_number
+      defined?(@last_row_number) ? @last_row_number : -1
+    end
+
+    def increment_last_row_number!
+      @last_row_number = last_row_number + 1
     end
 
     def set_column(start_col, end_col, width, format = nil)
