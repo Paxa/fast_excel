@@ -110,15 +110,197 @@ module FastExcel
     nil
   end
 
+
+  COLOR_ENUM = Libxlsxwriter.enum_type(:defined_colors)
+  EXTRA_COLORS = {
+    alice_blue: 0xF0F8FF,
+    antique_white: 0xFAEBD7,
+    aqua: 0x00FFFF,
+    aquamarine: 0x7FFFD4,
+    azure: 0xF0FFFF,
+    beige: 0xF5F5DC,
+    bisque: 0xFFE4C4,
+    black: 0x000000,
+    blanched_almond: 0xFFEBCD,
+    blue: 0x0000FF,
+    blue_violet: 0x8A2BE2,
+    brown: 0xA52A2A,
+    burly_wood: 0xDEB887,
+    cadet_blue: 0x5F9EA0,
+    chartreuse: 0x7FFF00,
+    chocolate: 0xD2691E,
+    coral: 0xFF7F50,
+    cornflower_blue: 0x6495ED,
+    cornsilk: 0xFFF8DC,
+    crimson: 0xDC143C,
+    cyan: 0x00FFFF,
+    dark_blue: 0x00008B,
+    dark_cyan: 0x008B8B,
+    dark_golden_rod: 0xB8860B,
+    dark_gray: 0xA9A9A9,
+    dark_grey: 0xA9A9A9,
+    dark_green: 0x006400,
+    dark_khaki: 0xBDB76B,
+    dark_magenta: 0x8B008B,
+    dark_olive_green: 0x556B2F,
+    dark_orange: 0xFF8C00,
+    dark_orchid: 0x9932CC,
+    dark_red: 0x8B0000,
+    dark_salmon: 0xE9967A,
+    dark_sea_green: 0x8FBC8F,
+    dark_slate_blue: 0x483D8B,
+    dark_slate_gray: 0x2F4F4F,
+    dark_slate_grey: 0x2F4F4F,
+    dark_turquoise: 0x00CED1,
+    dark_violet: 0x9400D3,
+    deep_pink: 0xFF1493,
+    deep_sky_blue: 0x00BFFF,
+    dim_gray: 0x696969,
+    dim_grey: 0x696969,
+    dodger_blue: 0x1E90FF,
+    fire_brick: 0xB22222,
+    floral_white: 0xFFFAF0,
+    forest_green: 0x228B22,
+    fuchsia: 0xFF00FF,
+    gainsboro: 0xDCDCDC,
+    ghost_white: 0xF8F8FF,
+    gold: 0xFFD700,
+    golden_rod: 0xDAA520,
+    gray: 0x808080,
+    grey: 0x808080,
+    green: 0x008000,
+    green_yellow: 0xADFF2F,
+    honey_dew: 0xF0FFF0,
+    hot_pink: 0xFF69B4,
+    indian_red: 0xCD5C5C,
+    indigo: 0x4B0082,
+    ivory: 0xFFFFF0,
+    khaki: 0xF0E68C,
+    lavender: 0xE6E6FA,
+    lavender_blush: 0xFFF0F5,
+    lawn_green: 0x7CFC00,
+    lemon_chiffon: 0xFFFACD,
+    light_blue: 0xADD8E6,
+    light_coral: 0xF08080,
+    light_cyan: 0xE0FFFF,
+    light_golden_rod_yellow: 0xFAFAD2,
+    light_gray: 0xD3D3D3,
+    light_grey: 0xD3D3D3,
+    light_green: 0x90EE90,
+    light_pink: 0xFFB6C1,
+    light_salmon: 0xFFA07A,
+    light_sea_green: 0x20B2AA,
+    light_sky_blue: 0x87CEFA,
+    light_slate_gray: 0x778899,
+    light_slate_grey: 0x778899,
+    light_steel_blue: 0xB0C4DE,
+    light_yellow: 0xFFFFE0,
+    lime: 0x00FF00,
+    lime_green: 0x32CD32,
+    linen: 0xFAF0E6,
+    magenta: 0xFF00FF,
+    maroon: 0x800000,
+    medium_aqua_marine: 0x66CDAA,
+    medium_blue: 0x0000CD,
+    medium_orchid: 0xBA55D3,
+    medium_purple: 0x9370DB,
+    medium_sea_green: 0x3CB371,
+    medium_slate_blue: 0x7B68EE,
+    medium_spring_green: 0x00FA9A,
+    medium_turquoise: 0x48D1CC,
+    medium_violet_red: 0xC71585,
+    midnight_blue: 0x191970,
+    mint_cream: 0xF5FFFA,
+    misty_rose: 0xFFE4E1,
+    moccasin: 0xFFE4B5,
+    navajo_white: 0xFFDEAD,
+    navy: 0x000080,
+    old_lace: 0xFDF5E6,
+    olive: 0x808000,
+    olive_drab: 0x6B8E23,
+    orange: 0xFFA500,
+    orange_red: 0xFF4500,
+    orchid: 0xDA70D6,
+    pale_golden_rod: 0xEEE8AA,
+    pale_green: 0x98FB98,
+    pale_turquoise: 0xAFEEEE,
+    pale_violet_red: 0xDB7093,
+    papaya_whip: 0xFFEFD5,
+    peach_puff: 0xFFDAB9,
+    peru: 0xCD853F,
+    pink: 0xFFC0CB,
+    plum: 0xDDA0DD,
+    powder_blue: 0xB0E0E6,
+    purple: 0x800080,
+    rebecca_purple: 0x663399,
+    red: 0xFF0000,
+    rosy_brown: 0xBC8F8F,
+    royal_blue: 0x4169E1,
+    saddle_brown: 0x8B4513,
+    salmon: 0xFA8072,
+    sandy_brown: 0xF4A460,
+    sea_green: 0x2E8B57,
+    sea_shell: 0xFFF5EE,
+    sienna: 0xA0522D,
+    silver: 0xC0C0C0,
+    sky_blue: 0x87CEEB,
+    slate_blue: 0x6A5ACD,
+    slate_gray: 0x708090,
+    slate_grey: 0x708090,
+    snow: 0xFFFAFA,
+    spring_green: 0x00FF7F,
+    steel_blue: 0x4682B4,
+    tan: 0xD2B48C,
+    teal: 0x008080,
+    thistle: 0xD8BFD8,
+    tomato: 0xFF6347,
+    turquoise: 0x40E0D0,
+    violet: 0xEE82EE,
+    wheat: 0xF5DEB3,
+    white: 0xFFFFFF,
+    white_smoke: 0xF5F5F5,
+    yellow: 0xFFFF00,
+    yellow_green: 0x9ACD32
+  }.freeze
+
+  # Convert hex string, color name or hex number to color hex number
+  def self.color_to_hex(value)
+    orig_value = value
+    value = value.to_s if value.is_a?(Symbol)
+
+    if value.is_a?(String)
+      if EXTRA_COLORS[value.to_sym]
+        return EXTRA_COLORS[value.to_sym]
+      elsif COLOR_ENUM.find(value.to_sym)
+        return COLOR_ENUM.find(value.to_sym)
+      elsif COLOR_ENUM.find("color_#{value.to_sym}")
+        return COLOR_ENUM.find("color_#{value.to_sym}")
+      elsif value =~ /^#?(0x)?([\da-f]){6}$/i
+        value = value.sub('#', '') if value.start_with?('#')
+        return value.start_with?('0x') ? value.to_i(16) : "0x#{value}".to_i(16)
+      else
+        raise ArgumentError, "Unknown color value #{orig_value.inspect}, expected hex string or color name"
+      end
+    end
+
+    return value if value.is_a?(Numeric)
+
+    raise ArgumentError, "Can not use #{value.class} (#{value.inspect}) for color value, expected String or Hex Number"
+  end
+
   module AttributeHelper
     def set(values)
       values.each do |key, value|
         if respond_to?("#{key}=")
           send("#{key}=", value)
+        elsif respond_to?("set_#{key}=")
+            send("set_#{key}=", value)
         else
           self[key] = value
         end
       end
+
+      self
     end
 
     def fields_hash
@@ -188,19 +370,23 @@ module FastExcel
           formats.is_a?(Array) ? formats[index] : formats
         end
 
-        if value.is_a?(Integer) || value.is_a?(Numeric) || value.is_a?(Float)
-          write_number(row_number, index, value, format)
-        elsif defined?(BigDecimal) && value.is_a?(BigDecimal)
-          write_number(row_number, index, value.to_f, format)
-        elsif defined?(DateTime) && value.is_a?(DateTime)
-          write_datetime(row_number, index, FastExcel.lxw_datetime(value), format)
-        elsif value.is_a?(Time)
-          write_datetime(row_number, index, FastExcel.lxw_time(value), format)
-        elsif value.is_a?(Formula)
-          write_formula(row_number, index, value.fml, format)
-        else
-          write_string(row_number, index, value.to_s, format)
-        end
+        write_value(row_number, index, value, format)
+      end
+    end
+
+    def write_value(row_number, cell_number, value, format = nil)
+      if value.is_a?(Integer) || value.is_a?(Numeric) || value.is_a?(Float)
+        write_number(row_number, cell_number, value, format)
+      elsif defined?(BigDecimal) && value.is_a?(BigDecimal)
+        write_number(row_number, cell_number, value.to_f, format)
+      elsif defined?(DateTime) && value.is_a?(DateTime)
+        write_datetime(row_number, cell_number, FastExcel.lxw_datetime(value), format)
+      elsif value.is_a?(Time)
+        write_datetime(row_number, cell_number, FastExcel.lxw_time(value), format)
+      elsif value.is_a?(Formula)
+        write_formula(row_number, cell_number, value.fml, format)
+      else
+        write_string(row_number, cell_number, value.to_s, format)
       end
     end
 
@@ -304,6 +490,51 @@ module FastExcel
         horizontal: ALIGN_ENUM.find(self[:text_h_align]),
         vertical:   ALIGN_ENUM.find(self[:text_v_align])
       }
+    end
+
+    [:font_color, :bg_color, :fg_color, :bottom_color, :diag_color, :left_color, :right_color, :top_color].each do |prop|
+      define_method("#{prop}=") do |value|
+        send("set_#{prop}", FastExcel.color_to_hex(value))
+      end
+      define_method(prop) do
+        self[prop]
+      end
+    end
+
+    [:bottom_color, :left_color, :right_color, :top_color].each do |prop|
+      alias_method :"border_#{prop}=", :"#{prop}="
+      alias_method :"border_#{prop}", :"#{prop}"
+    end
+
+    BORDER_ENUM = Libxlsxwriter.enum_type(:format_borders)
+
+    [:bottom, :diag_border, :left, :right, :top].each do |prop|
+      define_method("#{prop}=") do |value|
+
+        send("set_#{prop}", border_value(value))
+      end
+      define_method(prop) do
+        BORDER_ENUM.find(self[prop])
+      end
+
+      unless prop == :diag_border
+        alias_method :"border_#{prop}=", :"#{prop}="
+        alias_method :"border_#{prop}", :"#{prop}"
+      end
+    end
+
+    def border_value(value)
+      # if a number
+      return value if value.is_a?(Numeric) && BORDER_ENUM.find(value)
+
+      orig_value = value
+      value = value.to_sym if value.is_a?(String)
+
+      return BORDER_ENUM.find(value) if BORDER_ENUM.find(value)
+      return BORDER_ENUM.find(:"border_#{value}") if BORDER_ENUM.find(:"border_#{value}")
+
+      short_symbols = BORDER_ENUM.symbols.map {|s| s.to_s.sub(/^border_/, '').to_sym }
+      raise ArgumentError, "Unknown value #{orig_value.inspect} for border. Possible values: #{short_symbols}"
     end
 
     def set_font_size(value)

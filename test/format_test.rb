@@ -1,6 +1,6 @@
 require_relative 'test_helper'
 
-describe "FastExcel::FormatExt" do
+describe "FastExcel::FormatExt align" do
 
   before do
     workbook = FastExcel.open(constant_memory: true)
@@ -49,19 +49,116 @@ describe "FastExcel::FormatExt" do
     assert_equal(error.message, "Not allowed keys for align: [:aaa], possible keys: [:horizontal, :h, :vertical, :v]")
   end
 
-  def my_assert_raises(*excs)
-    error = nil
-    assert_raises(*excs) do
-      begin
-        yield
-      rescue => e
-        p e
-        error = e
-        raise e
-      end
+end
+
+
+describe "FastExcel::FormatExt colors" do
+
+  before do
+    workbook = FastExcel.open(constant_memory: true)
+    @format = workbook.add_format
+  end
+
+  it "should set font color as hex num" do
+    @format.font_color = 0xFF0000
+    assert_equal(0xFF0000, @format.font_color)
+  end
+
+  it "should set font color as hex string" do
+    @format.font_color = '0xFF0000'
+    assert_equal(0xFF0000, @format.font_color)
+  end
+
+  it "should set font color as css hex string" do
+    @format.font_color = '#FF0000'
+    assert_equal(0xFF0000, @format.font_color)
+  end
+
+  it "should set font color as short hex string" do
+    @format.font_color = 'FF0000'
+    assert_equal(0xFF0000, @format.font_color)
+  end
+
+  it "should set font color as name" do
+    @format.font_color = 'red'
+    assert_equal(0xFF0000, @format.font_color)
+  end
+
+  it "should set font css color" do
+    @format.font_color = 'alice_blue'
+    assert_equal(0xF0F8FF, @format.font_color)
+  end
+
+  it "should allow to use symbol" do
+    @format.font_color = :alice_blue
+    assert_equal(0xF0F8FF, @format.font_color)
+  end
+
+  it "should have long method for border colors" do
+    @format.border_bottom_color = :alice_blue
+    assert_equal(0xF0F8FF, @format.border_bottom_color)
+    assert_equal(0xF0F8FF, @format.bottom_color)
+  end
+
+  it "should raise for unexpected type" do
+    error = assert_raises(ArgumentError) do
+      @format.font_color = {aaa: 1}
     end
 
-    return error
+    assert_equal(error.message, "Can not use Hash ({:aaa=>1}) for color value, expected String or Hex Number")
+  end
+
+  it "should raise for unexpected color" do
+    error = assert_raises(ArgumentError) do
+      @format.font_color = :aaa
+    end
+
+    assert_equal(error.message, "Unknown color value :aaa, expected hex string or color name")
+  end
+
+end
+
+
+describe "FastExcel::FormatExt border" do
+
+  before do
+    workbook = FastExcel.open(constant_memory: true)
+    @format = workbook.add_format
+  end
+
+  it "should set border as symbol" do
+    @format.bottom = :border_thin
+    assert_equal(:border_thin, @format.bottom)
+  end
+
+  it "should set border as short symbol" do
+    @format.bottom = :thin
+    assert_equal(:border_thin, @format.bottom)
+  end
+
+  it "should set border as string" do
+    @format.bottom = "thin"
+    assert_equal(:border_thin, @format.bottom)
+  end
+
+  it "should set border as number" do
+    @format.bottom = 1
+    assert_equal(:border_thin, @format.bottom)
+  end
+
+  it "should set border with long prop name" do
+    error = assert_raises(ArgumentError) do
+      @format.border_bottom = :aaa
+    end
+
+    assert_equal(error.message, "Unknown value :aaa for border. Possible values: "\
+      "[:none, :thin, :medium, :dashed, :dotted, :thick, :double, :hair, :medium_dashed, "\
+      ":dash_dot, :medium_dash_dot, :dash_dot_dot, :medium_dash_dot_dot, :slant_dash_dot]")
+  end
+
+  it "should get value with long name" do
+    @format.bottom = "thin"
+    assert_equal(:border_thin, @format.border_bottom)
   end
 
 end
