@@ -17,4 +17,5 @@ Gem::Specification.new do |s|
   s.extensions = ["extconf.rb"]
 
   s.add_runtime_dependency "ffi", ["> 1.9", "< 2"]
+  s.add_development_dependency 'rake'
 end
