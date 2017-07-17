@@ -8,9 +8,9 @@ matrix:
   - os: osx
     rvm: 2.1
   - os: linux
-    rvm: 2.2.5
+    rvm: 2.2.6
   - os: osx
-    rvm: 2.2.5
+    rvm: 2.2.6
   - os: linux
     rvm: 2.3.1
   - os: osx
