@@ -72,17 +72,4 @@ describe "FastExcel::WorksheetExt append_row" do
 
     assert_equal("Can not write to saved row in constant_memory mode (attempted row: 0, last saved row: 1)", error.message)
   end
-
-  it 'should generate more than 30 lines multiple times' do
-    5.times do |try|
-      @workbook = FastExcel.open(constant_memory: true)
-      @worksheet = @workbook.add_worksheet
-
-      50.times do |it|
-        @worksheet.write_row(it, [ "a" , "b", "c" ])
-      end
-    end
-
-    assert_equal(true, true)
-  end
 end
