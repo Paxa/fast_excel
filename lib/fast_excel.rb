@@ -364,7 +364,7 @@ module FastExcel
 
     def constant_memory?
       #FastExcel.print_ffi_obj(self[:options])
-      return self[:options][:constant_memory] != 0
+      @constant_memory ||= self[:options][:constant_memory] != 0
     end
   end
 
@@ -403,7 +403,7 @@ module FastExcel
         write_string(row_number, cell_number, value.to_s, format)
       end
 
-      @last_row_number = [row_number, last_row_number].max
+      @last_row_number = row_number > last_row_number ? row_number : last_row_number
     end
 
     def append_row(values, formats = nil)
