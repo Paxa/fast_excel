@@ -72,5 +72,4 @@ describe "FastExcel::WorksheetExt append_row" do
 
     assert_equal("Can not write to saved row in constant_memory mode (attempted row: 0, last saved row: 1)", error.message)
   end
-
 end
