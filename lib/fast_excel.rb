@@ -389,7 +389,7 @@ module FastExcel
         raise ArgumentError, "Can not write to saved row in constant_memory mode (attempted row: #{row_number}, last saved row: #{last_row_number})"
       end
 
-      if value.is_a?(Integer) || value.is_a?(Numeric) || value.is_a?(Float)
+      if value.is_a?(Numeric)
         write_number(row_number, cell_number, value, format)
       elsif defined?(BigDecimal) && value.is_a?(BigDecimal)
         write_number(row_number, cell_number, value.to_f, format)
