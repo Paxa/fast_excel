@@ -391,8 +391,6 @@ module FastExcel
 
       if value.is_a?(Numeric)
         write_number(row_number, cell_number, value, format)
-      elsif defined?(BigDecimal) && value.is_a?(BigDecimal)
-        write_number(row_number, cell_number, value.to_f, format)
       elsif defined?(DateTime) && value.is_a?(DateTime)
         write_datetime(row_number, cell_number, FastExcel.lxw_datetime(value), format)
       elsif value.is_a?(Time)
