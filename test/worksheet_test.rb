@@ -72,4 +72,15 @@ describe "FastExcel::WorksheetExt append_row" do
 
     assert_equal("Can not write to saved row in constant_memory mode (attempted row: 0, last saved row: 1)", error.message)
   end
+
+  it "should write bigdecimal as a number" do
+    require 'bigdecimal'
+
+    @workbook = FastExcel.open(constant_memory: true)
+    @worksheet = @workbook.add_worksheet
+
+    @worksheet.append_row([BigDecimal.new("0.1234")])
+
+    assert_equal([[0.1234]], get_arrays(@workbook))
+  end
 end
