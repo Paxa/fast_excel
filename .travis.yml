@@ -16,9 +16,9 @@ matrix:
   - os: osx
     rvm: 2.3.4
   - os: linux
-    rvm: 2.4.1
+    rvm: 2.4.0
   - os: osx
-    rvm: 2.4.1
+    rvm: 2.4.0
   fast_finish: true
 
 script:
