@@ -10,8 +10,6 @@ require 'axlsx'
 require 'write_xlsx'
 require 'process_memory'
 
-require_relative 'init'
-
 def write_fast_excel_20k
   workbook = FastExcel.open(constant_memory: true)
   worksheet = workbook.add_worksheet("benchmark")

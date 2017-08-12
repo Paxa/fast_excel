@@ -684,6 +684,13 @@ module Libxlsxwriter
     def set_theme(value)
       Libxlsxwriter.format_set_theme(self, value)
     end
+
+    [:font_size, :underline, :font_script, :rotation, :indent, :pattern, :border, :num_format, :font_name].each do |prop|
+      alias :"#{prop}=" :"set_#{prop}"
+      define_method(prop) do
+        self[prop]
+      end
+    end
   end
 
   class Format < FFI::Struct

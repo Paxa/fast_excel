@@ -386,6 +386,7 @@ module FastExcel
     def initialize(struct)
       @is_open = true
       @col_formats = {}
+      @last_row_number = -1
       super(struct)
     end
 
@@ -410,16 +411,16 @@ module FastExcel
 
     def write_value(row_number, cell_number, value, format = nil)
 
-      if workbook.constant_memory? && row_number < last_row_number
+      if workbook.constant_memory? && row_number < @last_row_number
         raise ArgumentError, "Can not write to saved row in constant_memory mode (attempted row: #{row_number}, last saved row: #{last_row_number})"
       end
 
       if value.is_a?(Numeric)
         write_number(row_number, cell_number, value, format)
-      elsif defined?(DateTime) && value.is_a?(DateTime)
-        write_datetime(row_number, cell_number, FastExcel.lxw_datetime(value), format)
       elsif value.is_a?(Time)
-        write_datetime(row_number, cell_number, FastExcel.lxw_time(value), format)
+        write_number(row_number, cell_number, FastExcel.date_num(value), format)
+      elsif defined?(DateTime) && value.is_a?(DateTime)
+        write_number(row_number, cell_number, FastExcel.date_num(value), format)
       elsif value.is_a?(Formula)
         write_formula(row_number, cell_number, value.fml, format)
       else
@@ -428,7 +429,7 @@ module FastExcel
         add_text_width(value, format, cell_number) if auto_width?
       end
 
-      @last_row_number = row_number > last_row_number ? row_number : last_row_number
+      @last_row_number = row_number > @last_row_number ? row_number : @last_row_number
     end
 
     def add_text_width(value, format, cell_number)
@@ -444,14 +445,14 @@ module FastExcel
       end
 
       if font_size == 0
-        workbook.default_format.font_size
+        font_size = workbook.default_format.font_size
       end
 
       font_size = 13 if font_size == nil || font_size == 0
 
       font_family = ''
       if format
-        font_size = format.font_family
+        font_family = format.font_family
       end
 
       if font_family == ''
@@ -482,11 +483,11 @@ module FastExcel
     end
 
     def last_row_number
-      defined?(@last_row_number) ? @last_row_number : -1
+      @last_row_number
     end
 
     def increment_last_row_number!
-      @last_row_number = last_row_number + 1
+      @last_row_number += 1
     end
 
     def set_column(start_col, end_col, width, format = nil)
@@ -531,15 +532,6 @@ module FastExcel
   module FormatExt
     include AttributeHelper
 
-    [:font_size, :underline, :font_script, :rotation, :indent, :pattern, :border].each do |prop|
-      define_method(prop) do
-        self[prop]
-      end
-      define_method("#{prop}=") do |value|
-        send("set_#{prop}", value)
-      end
-    end
-
     [:bold, :italic, :font_outline, :font_shadow, :hidden, :text_wrap, :font_strikeout, :shrink, :text_justlast].each do |prop|
       define_method(prop) do
         self[prop]
@@ -552,10 +544,6 @@ module FastExcel
     [:num_format, :font_name].each do |prop|
       define_method(prop) do
         self[prop].to_ptr.read_string
-      end
-
-      define_method("#{prop}=") do |value|
-        send("set_#{prop}", value)
       end
     end
 

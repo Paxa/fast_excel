@@ -161,4 +161,12 @@ describe "FastExcel::FormatExt border" do
     assert_equal(:border_thin, @format.border_bottom)
   end
 
+  it "should define aliases" do
+    @format.font_size = 20
+    assert_equal(@format.font_size, 20)
+
+    @format.font_name = "XXX"
+    assert_equal(@format.font_name, "XXX")
+  end
+
 end
