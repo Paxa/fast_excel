@@ -408,8 +408,9 @@ rb_some_text_width(VALUE text, float default_width, float char_widths[127], floa
   double total = 0;
   char ch = 0;
   char nch = 0;
+  int i = 0;
 
-  for (int i = 0; i < strlen(text_value); i++) {
+  for (i = 0; i < strlen(text_value); i++) {
     ch = text_value[i];
     nch = text_value[i + 1];
 
