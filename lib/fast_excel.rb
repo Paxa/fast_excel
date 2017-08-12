@@ -1,4 +1,5 @@
 require_relative './fast_excel/binding'
+require_relative '../ext/fast_excel/text_width_ext'
 
 module FastExcel
 
@@ -323,7 +324,14 @@ module FastExcel
 
     def initialize(struct)
       @is_open = true
+      @sheets = []
       super(struct)
+    end
+
+    def add_format(options = nil)
+      new_format = super()
+      new_format.set(options) if options
+      new_format
     end
 
     def bold_cell_format
@@ -343,11 +351,13 @@ module FastExcel
     def add_worksheet(sheetname = nil)
       sheet = super
       sheet.workbook = self
+      @sheets << sheet
       sheet
     end
 
     def close
       @is_open = false
+      @sheets.each(&:close)
       super
     end
 
@@ -373,6 +383,12 @@ module FastExcel
 
     include AttributeHelper
 
+    def initialize(struct)
+      @is_open = true
+      @col_formats = {}
+      super(struct)
+    end
+
     def write_row(row_number, values, formats = nil)
       values.each_with_index do |value, index|
         format = if formats
@@ -381,6 +397,15 @@ module FastExcel
 
         write_value(row_number, index, value, format)
       end
+    end
+
+    def auto_width?
+      defined?(@auto_width) && @auto_width
+    end
+
+    def auto_width=(v)
+      @auto_width = v
+      @column_widths = {}
     end
 
     def write_value(row_number, cell_number, value, format = nil)
@@ -398,10 +423,57 @@ module FastExcel
       elsif value.is_a?(Formula)
         write_formula(row_number, cell_number, value.fml, format)
       else
-        write_string(row_number, cell_number, value.to_s, format)
+        value = value.to_s
+        write_string(row_number, cell_number, value, format)
+        add_text_width(value, format, cell_number) if auto_width?
       end
 
       @last_row_number = row_number > last_row_number ? row_number : last_row_number
+    end
+
+    def add_text_width(value, format, cell_number)
+      font_size = 0
+      if format
+        font_size = format.font_size
+      end
+
+      if font_size == 0
+        if @col_formats[cell_number] && @col_formats[cell_number].font_size
+          font_size = @col_formats[cell_number].font_size
+        end
+      end
+
+      if font_size == 0
+        workbook.default_format.font_size
+      end
+
+      font_size = 13 if font_size == nil || font_size == 0
+
+      font_family = ''
+      if format
+        font_size = format.font_family
+      end
+
+      if font_family == ''
+        if @col_formats[cell_number] && @col_formats[cell_number].font_family
+          font_family = @col_formats[cell_number].font_family
+        end
+      end
+
+      if font_family == ''
+        font_family = workbook.default_format.font_family || 'Arial'
+      end
+
+      #p [value, font_family, font_size]
+
+      base_width = case font_family
+        when "Calibri" then FastExcel.calibri_text_width(value)
+        when "Times New Roman" then FastExcel.times_new_roman_text_width(value)
+        else FastExcel.arial_text_width(value)
+      end
+      new_width = (base_width / 100 * font_size / 8) #.round
+      #p [:text_width, font_family, value, base_width]
+      @column_widths[cell_number] = new_width > (@column_widths[cell_number] || 0) ? new_width : @column_widths[cell_number]
     end
 
     def append_row(values, formats = nil)
@@ -419,14 +491,39 @@ module FastExcel
 
     def set_column(start_col, end_col, width, format = nil)
       super(start_col, end_col, width, format)
+
+      start_col.upto(end_col) do |i|
+        @col_formats[i] = format
+      end if format
     end
 
     def set_column_width(col, width)
-      set_column(col, col, width, nil)
+      set_column(col, col, width, @col_formats[col])
     end
 
     def set_columns_width(start_col, end_col, width)
-      set_column(start_col, end_col, width, nil)
+      #set_column(start_col, end_col, width, nil)
+      start_col.upto(end_col) do |i|
+        set_column_width(i, width)
+      end
+    end
+
+#    def get_col_format(cell_number)
+#      if self[:col_formats_max] >= cell_number
+#        format_pointer = self[:col_formats] + cell_number * Libxlsxwriter::Format.size
+#        format_pointer.null? ? nil : Libxlsxwriter::Format.new()
+#      else
+#        nil
+#      end
+#    end
+
+    def close
+      if auto_width?
+        @column_widths.each do |num, width|
+          #p [:set_column_width, num, width]
+          set_column_width(num, width + 0.2)
+        end
+      end
     end
 
   end

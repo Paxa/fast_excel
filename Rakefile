@@ -16,3 +16,10 @@ Rake::TestTask.new do |test|
 end
 
 #task :default => :test
+task :compile do
+  %x{
+    cd ext/fast_excel
+    ruby ./extconf.rb
+    make
+  }
+end

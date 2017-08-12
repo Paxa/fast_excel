@@ -689,7 +689,7 @@ module Libxlsxwriter
   class Format < FFI::Struct
     include FormatWrappers
     layout :file, :pointer,
-           :xf_format_indices, HashTable.ptr,
+           :xf_format_indices, :pointer, #HashTable.ptr,
            :num_xf_formats, :pointer,
            :xf_index, :int32_t,
            :dxf_index, :int32_t,

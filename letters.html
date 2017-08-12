@@ -1,0 +1,114 @@
+<style>
+  html, body {
+    font-family: Arial;
+  }
+  #result {
+    font-size: 14px;
+    font-family: Arial;
+    white-space: pre;
+  }
+</style>
+
+<select onchange="generateFor(this.value)">
+  <option></option>
+  <option>Arial</option>
+  <option>Calibri</option>
+  <option>Times New Roman</option>
+</select>
+
+<pre id="result">
+  
+</pre>
+
+<script>
+  function ready(fn){var d=document;(d.readyState=='loading')?d.addEventListener('DOMContentLoaded',fn):fn();}
+
+  let average = (array) => array.reduce((a, b) => a + b) / array.length;
+
+  window.widths = {};
+  window.combos = {};
+  window.characters = [];
+
+  for (var n = 32; n <= 126; n++) {
+    characters.push(String.fromCharCode(n));
+  }
+
+  function generateFor(fontFamily) {
+    window.widths = {};
+    window.combos = {};
+
+    var startTime = (new Date()).getTime();
+
+    var canvas = document.createElement('canvas').getContext('2d');
+    canvas.font = `normal 100px ${fontFamily}`;
+    canvas.textAlign = 'start';
+    canvas.textBaseline = 'alphabetic';
+
+    var textWidth = function getWidth(value) {
+      return canvas.measureText(value).width;
+    }
+
+    characters.forEach((char) => {
+      widths[char] = textWidth(char);
+    });
+
+    characters.forEach((char1) => {
+      characters.forEach((char2) => {
+        var combined = textWidth(char1 + char2);
+        var expected = widths[char1] + widths[char2];
+
+        if (Math.abs(combined - expected) > 0.001) {
+          combos[ char1 + char2 ] = [combined, expected];
+          //console.log('delta', char1, char2, Math.abs(el.clientWidth - expected));
+        }
+      });
+    });
+
+    printOutput(startTime, fontFamily);
+  }
+
+  function printOutput(startTime, fontFamily) {
+    //document.querySelector('#result').innerText = JSON.stringify(widths, null, 4) + "\n" + JSON.stringify(combos, null, 4);
+    var fontPrefix = fontFamily.replace(/\s+/g, '_').toUpperCase();
+    var output = "";
+
+    var averageSize = average(Object.values(widths));
+
+    output += `static float ${fontPrefix}_DEFAULT = ${averageSize};\n`;
+    output += `static float ${fontPrefix}_CHAR_WIDTH[127] = {0`;
+    for (var n = 1; n <= 126; n++) {
+      output += `, ${widths[String.fromCharCode(n)] || '0' }`;
+    }
+    output += "};\n";
+
+    output += `static float ${fontPrefix}_KERNING[127][127] = {\n`;
+    for (var n1 = 0; n1 <= 126; n1++) {
+      var char1 = String.fromCharCode(n1);
+      var charDisplay = characters.includes(char1) ? char1 : '';
+
+      var prefix = `/* ${n1} : ${charDisplay} */`;
+      if (Object.keys(combos).some((pair) => { return pair[0] == char1 })) {
+        output += `  ${prefix} { 0`;
+        for (var n2 = 1; n2 <= 126; n2++) {
+          var char2 = String.fromCharCode(n2);
+          output += `, ${combos[char1 + char2] ? combos[char1 + char2][0] : '0' }`;
+        }
+        output += ` }${n1 == 126 ? '' : ','}\n`;
+      } else {
+        output += `  ${prefix} { 0 },\n`;
+      }
+    }
+    output += "};\n";
+
+    output += "\nKerning:\n";
+    Object.keys(combos).forEach((pair) => {
+      output += `${pair} = ${combos[pair][0]} (not ${combos[pair][1]})\n`
+    });
+
+    document.querySelector('#result').innerText = output;
+
+    var endTime = (new Date()).getTime();
+    //alert(`done ${endTime - startTime} ms`);
+    console.log(`done ${endTime - startTime} ms, ${Object.keys(combos).length} combos`);
+  }
+</script>
