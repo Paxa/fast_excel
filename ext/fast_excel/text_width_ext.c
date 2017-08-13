@@ -405,6 +405,7 @@ static VALUE
 rb_some_text_width(VALUE text, float default_width, float char_widths[127], float kernings[127][127]) {
   char *text_value = StringValueCStr(text);
 
+  double max = 0;
   double total = 0;
   char ch = 0;
   char nch = 0;
@@ -413,6 +414,11 @@ rb_some_text_width(VALUE text, float default_width, float char_widths[127], floa
   for (i = 0; i < strlen(text_value); i++) {
     ch = text_value[i];
     nch = text_value[i + 1];
+
+    if (ch == 10) {
+      if (total > max) max = total;
+      total = 0;
+    }
 
     if (ch < 32) continue;
 
@@ -425,8 +431,9 @@ rb_some_text_width(VALUE text, float default_width, float char_widths[127], floa
       total += char_widths[ch];
     }
   }
+  if (total > max) max = total;
 
-  return DBL2NUM(total);
+  return DBL2NUM(max);
 }
 
 static VALUE

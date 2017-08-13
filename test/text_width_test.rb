@@ -18,6 +18,10 @@ describe "FastExcel Arial text_width" do
   it "should skip system characters" do
     assert_in_delta(FastExcel.arial_text_width(10.chr), 0.0)
   end
+
+  it "should handle multiline text" do
+    assert_in_delta(FastExcel.arial_text_width("More\nThen\nOne Line"), 405.85, 0.1)
+  end
 end
 
 describe "FastExcel Calibri text_width" do

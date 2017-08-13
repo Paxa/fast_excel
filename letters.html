@@ -44,7 +44,7 @@
     canvas.textAlign = 'start';
     canvas.textBaseline = 'alphabetic';
 
-    var textWidth = function getWidth(value) {
+    window.textWidth = function getWidth(value) {
       return canvas.measureText(value).width;
     }
 
