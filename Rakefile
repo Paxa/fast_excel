@@ -16,3 +16,9 @@ Rake::TestTask.new do |test|
 end
 
 #task :default => :test
+
+task :examples do
+  Dir.glob('examples/**/*.rb').each do |file|
+    require './' + file.sub(/\.rb$/, '')
+  end
+end

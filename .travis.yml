@@ -25,3 +25,4 @@ script:
   - bundle install
   - make
   - bundle exec rake test
+  - bundle exec rake examples

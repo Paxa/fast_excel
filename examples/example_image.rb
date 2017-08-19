@@ -7,7 +7,7 @@ img_options = Libxlsxwriter::ImageOptions.new
 img_options[:x_offset] = 0
 img_options[:y_offset] = 0
 
-worksheet.insert_image_opt(3, 3, "libxlsxwriter/examples/logo.png", img_options)
+worksheet.insert_image_opt(3, 3, "examples/logo.png", img_options)
 
 workbook.close
 puts "Saved to file example_image.xlsx"

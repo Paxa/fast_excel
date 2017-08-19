@@ -326,6 +326,12 @@ module FastExcel
       super(struct)
     end
 
+    def add_format(options = nil)
+      new_format = super()
+      new_format.set(options) if options
+      new_format
+    end
+
     def bold_cell_format
       bold = add_format
       bold.set_bold
