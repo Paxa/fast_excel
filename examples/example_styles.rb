@@ -1,5 +1,4 @@
 require_relative '../lib/fast_excel'
-require 'pp'
 
 workbook = FastExcel.open("example_styles.xlsx", constant_memory: true)
 

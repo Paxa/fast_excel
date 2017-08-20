@@ -1,6 +1,4 @@
 require_relative '../lib/fast_excel'
-require 'pp'
-require 'looksee'
 
 workbook = FastExcel.open("example_formula.xlsx", constant_memory: false)
 
