@@ -5,18 +5,14 @@ cache:
 install:
   - SET PATH=C:\Ruby%ruby_version%\bin;%PATH%
   - SET RAKEOPT=-rdevkit
+  - C:\msys64\usr\bin\bash --login -c "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain autoconf automake libtool make patch mingw-w64-x86_64-libtool mingw-w64-zlib"
 
-  - if not exist "%MINGW_ARCHIVE%" appveyor DownloadFile "%MINGW_URL%" -FileName "%MINGW_ARCHIVE%"
-  - 7z x -y "%MINGW_ARCHIVE%" > nul
-  - set PATH=%CD%\%MINGW_DIR%\bin;%Path%
-  - dir %CD%\%MINGW_DIR%\bin
-  - mingw-get install mingw32-libz
-
+  - gcc --version
   - make --version
   - gem --version
   - bundle install
+
   - make
-  - mingw-get remove mingw32-libz
 
 build: off
 
@@ -27,15 +23,7 @@ test_script:
 environment:
   matrix:
     - ruby_version: "24"
-      PLATFORM: Win32
-      MINGW_DIR: mingw32
-      MINGW_URL: https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.9.2/threads-win32/dwarf/i686-4.9.2-release-win32-dwarf-rt_v4-rev4.7z/download
-      MINGW_ARCHIVE: i686-4.9.2-release-win32-dwarf-rt_v4-rev4.7z
     - ruby_version: "24-x64"
-      PLATFORM: x64
-      MINGW_DIR: mingw64
-      MINGW_URL: https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.2/threads-win32/seh/x86_64-4.9.2-release-win32-seh-rt_v4-rev4.7z/download
-      MINGW_ARCHIVE: x86_64-4.9.2-release-win32-seh-rt_v4-rev4.7z
 #    - ruby_version: "23"
 #    - ruby_version: "23-x64"
 #    - ruby_version: "22"
