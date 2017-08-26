@@ -5,6 +5,7 @@ install:
   - copy c:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe
   - copy win_deps\zlib.h C:\MinGW\include\zlib.h
   - copy win_deps\zconf.h C:\MinGW\include\zconf.h
+  - copy win_deps\x64\zlibwapi.dll z.dll
   - ruby --version
   - gem --version
   - bundle install
