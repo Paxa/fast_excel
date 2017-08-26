@@ -2,11 +2,10 @@ install:
   - SET PATH=C:\Ruby%ruby_version%\bin;%PATH%
   - SET PATH=C:\MinGW\bin;%PATH%
   - SET RAKEOPT=-rdevkit
-  - copy c:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe
-  - mingw-get install mingw32-libz
-#  - copy win_deps\zlib.h C:\MinGW\include\zlib.h
-#  - copy win_deps\zconf.h C:\MinGW\include\zconf.h
-#  - copy win_deps\x64\zlibwapi.dll libxlsxwriter\z.dll
+  - If Defined ProgramFiles(x86) (copy C:\MinGW\bin\mingw64-make.exe c:\MinGW\bin\make.exe) else (copy C:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe)
+  - If Defined ProgramFiles(x86) (mingw-get install mingw64-libz) else (mingw-get install mingw32-libz)
+#  - copy C:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe
+#  - mingw-get install mingw32-libz
   - ruby --version
   - gem --version
   - bundle install
