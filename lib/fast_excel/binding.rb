@@ -7,6 +7,8 @@ module Libxlsxwriter
 
   LIB_FILENAME = if RUBY_PLATFORM =~ /darwin/
     "libxlsxwriter.dylib"
+  elsif Gem.win_platform?
+    "libxlsxwriter.dll"
   else
     "libxlsxwriter.so"
   end
