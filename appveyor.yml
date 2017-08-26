@@ -1,16 +1,21 @@
+cache:
+- x86_64-4.9.2-release-win32-seh-rt_v4-rev4.7z
+- i686-4.9.2-release-win32-dwarf-rt_v4-rev4.7z
+
 install:
   - SET PATH=C:\Ruby%ruby_version%\bin;%PATH%
-  - SET PATH=C:\MinGW\bin;%PATH%
   - SET RAKEOPT=-rdevkit
-  - If Defined ProgramFiles(x86) (copy C:\MinGW\bin\mingw64-make.exe c:\MinGW\bin\make.exe) else (copy C:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe)
-  - If Defined ProgramFiles(x86) (mingw-get install mingw64-libz) else (mingw-get install mingw32-libz)
-#  - copy C:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe
-#  - mingw-get install mingw32-libz
-  - ruby --version
+
+  - if (defined MINGW_URL) ( if not exist "%MINGW_ARCHIVE%" appveyor DownloadFile "%MINGW_URL%" -FileName "%MINGW_ARCHIVE%" )
+  - if (defined MINGW_URL) ( 7z x -y "%MINGW_ARCHIVE%" > nul )
+  - if (defined MINGW_URL) ( set Path=%CD%\%MINGW_DIR%\bin;%Path% ) else ( SET PATH=C:\MinGW\bin;%PATH% )
+  - mingw-get install mingw32-libz
+
+  - make --version
   - gem --version
   - bundle install
   - make
-  - If Defined ProgramFiles(x86) (mingw-get remove mingw64-libz) else (mingw-get remove mingw32-libz)
+  - mingw-get remove mingw32-libz
 
 build: off
 
@@ -21,7 +26,13 @@ test_script:
 environment:
   matrix:
     - ruby_version: "24"
+      PLATFORM: Win32
+      MINGW_DIR: MinGW
     - ruby_version: "24-x64"
+      PLATFORM: x64
+      MINGW_DIR: mingw64
+      MINGW_URL: https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.2/threads-win32/seh/x86_64-4.9.2-release-win32-seh-rt_v4-rev4.7z/download
+      MINGW_ARCHIVE: x86_64-4.9.2-release-win32-seh-rt_v4-rev4.7z
 #    - ruby_version: "23"
 #    - ruby_version: "23-x64"
 #    - ruby_version: "22"
