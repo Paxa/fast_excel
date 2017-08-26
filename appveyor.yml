@@ -8,7 +8,8 @@ install:
 
   - if not exist "%MINGW_ARCHIVE%" appveyor DownloadFile "%MINGW_URL%" -FileName "%MINGW_ARCHIVE%"
   - 7z x -y "%MINGW_ARCHIVE%" > nul
-  - set Path=%CD%\%MINGW_DIR%\bin;%Path%
+  - set PATH=%CD%\%MINGW_DIR%\bin;%Path%
+  - dir %CD%\%MINGW_DIR%\bin
   - mingw-get install mingw32-libz
 
   - make --version
