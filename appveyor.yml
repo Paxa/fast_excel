@@ -5,6 +5,7 @@ cache:
 install:
   - SET PATH=C:\Ruby%ruby_version%\bin;%PATH%
   - SET RAKEOPT=-rdevkit
+  - C:\msys64\usr\bin\bash --login -c "pacman -S --needed --noconfirm pacman-mirrors"
   - C:\msys64\usr\bin\bash --login -c "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain autoconf automake libtool make patch mingw-w64-x86_64-libtool"
   - C:\msys64\usr\bin\bash --login -c "pacman -S --needed --noconfirm mingw-w64-zlib"
 
