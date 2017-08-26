@@ -3,7 +3,7 @@ install:
   - SET PATH=C:\MinGW\bin;%PATH%
   - SET RAKEOPT=-rdevkit
   - copy c:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe
-  - C:\cygwin64\setup-x86_64 -q -P zlin
+  - mingw-get install zlib
 #  - copy win_deps\zlib.h C:\MinGW\include\zlib.h
 #  - copy win_deps\zconf.h C:\MinGW\include\zconf.h
 #  - copy win_deps\x64\zlibwapi.dll libxlsxwriter\z.dll
