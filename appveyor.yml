@@ -10,11 +10,13 @@ install:
   - gem --version
   - bundle install
   - make
+  - If Defined ProgramFiles(x86) (mingw-get remove mingw64-libz) else (mingw-get remove mingw32-libz)
 
 build: off
 
 test_script:
   - bundle exec rake test
+  - gem build fast_excel.gemspec
 
 environment:
   matrix:
