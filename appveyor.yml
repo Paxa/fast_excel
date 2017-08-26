@@ -2,6 +2,7 @@ install:
   - SET PATH=C:\Ruby%ruby_version%\bin;%PATH%
   - SET PATH=C:\MinGW\bin;%PATH%
   - SET RAKEOPT=-rdevkit
+  - copy c:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe
   - ruby --version
   - gem --version
   - bundle install
@@ -14,6 +15,8 @@ test_script:
 
 environment:
   matrix:
+    - ruby_version: "24"
+    - ruby_version: "24-x64"
     - ruby_version: "23"
     - ruby_version: "23-x64"
     - ruby_version: "22"
