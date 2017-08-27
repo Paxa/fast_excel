@@ -28,9 +28,11 @@ task :windows_gem do
 
   puts Dir.glob("**/libgcc_*.dll")
 
-  gcc_dll = Dir.glob("**/libgcc_s_dw2-1.dll")[0]
-  raise "Can not find libgcc_s_dw2-1.dll" unless gcc_dll
-  FileUtils.cp(gcc_dll, "libxlsxwriter/lib/libgcc_s_dw2-1.dll")
+  gcc_dll = Dir.glob("**/libgcc_*.dll")[0]
+  raise "Can not find libgcc_*.dll" unless gcc_dll
+
+  puts "Copy #{gcc_dll} -> libxlsxwriter/lib/#{File.basename(gcc_dll)}"
+  FileUtils.cp(gcc_dll, "libxlsxwriter/lib/#{File.basename(gcc_dll)}")
 
   system("gem build fast_excel.gemspec")
 
