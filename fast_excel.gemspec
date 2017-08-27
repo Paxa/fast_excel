@@ -16,7 +16,9 @@ Gem::Specification.new do |s|
   s.test_files  = []
 
   s.require_paths = ["lib"]
-  s.extensions = ["extconf.rb"]
+  unless Gem.win_platform?
+    s.extensions = ["extconf.rb"]
+  end
 
   s.add_runtime_dependency "ffi", ["> 1.9", "< 2"]
 end
