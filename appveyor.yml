@@ -11,6 +11,7 @@ install:
   - set PATH=%CD%\%MINGW_DIR%\bin;%Path%
   - copy %CD%\%MINGW_DIR%\bin\mingw32-make.exe %CD%\%MINGW_DIR%\bin\make.exe
 
+  - ruby -e "p RUBY_PLATFORM"
   - make --version
   - gcc --version
   - gem --version
