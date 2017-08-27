@@ -24,6 +24,11 @@ test_script:
   - bundle exec rake test
   - gem build fast_excel.gemspec
 
+artifacts:
+  - path: fast_excel-*.gem
+    name: fast_excel gem
+    type: File
+
 environment:
   matrix:
     - ruby_version: "24"
