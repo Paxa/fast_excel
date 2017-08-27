@@ -16,7 +16,6 @@ install:
   - gem --version
   - bundle install
   - make
-  - dir libxlsxwriter\lib\
 
 build: off
 
