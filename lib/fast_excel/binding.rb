@@ -13,7 +13,11 @@ module Libxlsxwriter
     "libxlsxwriter.so"
   end
 
-  ffi_lib File.expand_path("./../../../libxlsxwriter/lib/#{LIB_FILENAME}", __FILE__)
+  if Gem.win_platform?
+    ffi_lib File.expand_path("./../../../libxlsxwriter/lib/#{LIB_FILENAME}", __FILE__).gsub('/', '\\')
+  else
+    ffi_lib File.expand_path("./../../../libxlsxwriter/lib/#{LIB_FILENAME}", __FILE__)
+  end
 
   def self.attach_function(name, *_)
     begin; super; rescue FFI::NotFoundError => e
