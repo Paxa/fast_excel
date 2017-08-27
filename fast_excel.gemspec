@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.has_rdoc    = false
   s.required_ruby_version = '~> 2.0'
 
-  files = `git ls-files`.split("\n") + Dir.glob("**/*.dll")
+  files = `git ls-files`.split("\n") + Dir.glob("libxlsxwriter/**/*.dll")
 
   s.files       = files
   s.test_files  = []

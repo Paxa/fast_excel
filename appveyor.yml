@@ -14,6 +14,7 @@ install:
   - make --version
   - gcc --version
   - gem --version
+  - ruby --version
   - bundle install
   - make
 
@@ -21,7 +22,8 @@ build: off
 
 test_script:
   - bundle exec rake test
-  - gem build fast_excel.gemspec
+  - bundle exec rake examples
+  - rake windows_gem
 
 artifacts:
   - path: fast_excel-*.gem

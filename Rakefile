@@ -22,3 +22,18 @@ task :examples do
     require './' + file.sub(/\.rb$/, '')
   end
 end
+
+task :windows_gem do
+  require 'fileutils'
+
+  gcc_dll = Dir.glob("**/libgcc_s_dw2-1.dll")[0]
+  raise "Can not find libgcc_s_dw2-1.dll" unless gcc_dll
+  FileUtils.cp(gcc_dll, "libxlsxwriter/lib/libgcc_s_dw2-1.dll")
+
+  system("gem build fast_excel.gemspec")
+
+  gem_file = Dir.glob("*.gem")[0]
+  new_file = gem_file.sub('fast_excel', 'fast_excel-' + RUBY_PLATFORM)
+  File.rename(gem_file, new_file)
+  puts "Generated: #{new_file}"
+end
