@@ -17,7 +17,6 @@ install:
   - bundle install
   - make
   - dir libxlsxwriter\lib\
-  - /oc:libxlsxwriter\lib\libxlsxwriter.dll
 
 build: off
 
