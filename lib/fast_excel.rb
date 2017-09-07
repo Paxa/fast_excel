@@ -497,16 +497,16 @@ module FastExcel
         end
       elsif value.is_a?(Hash)
         if value[:horizontal]
-          self.align = "align_#{value[:horizontal]}".to_sym
+          self.align = "align_#{value[:horizontal].to_s.sub(/^align_/, '')}".to_sym
         end
         if value[:h]
-          self.align = "align_#{value[:h]}".to_sym
+          self.align = "align_#{value[:h].to_s.sub(/^align_/, '')}".to_sym
         end
         if value[:vertical]
-          self.align = "align_vertical_#{value[:vertical]}".to_sym
+          self.align = "align_vertical_#{value[:vertical].to_s.sub(/^align_vertical_/, '')}".to_sym
         end
         if value[:v]
-          self.align = "align_vertical_#{value[:v]}".to_sym
+          self.align = "align_vertical_#{value[:v].to_s.sub(/^align_vertical_/, '')}".to_sym
         end
         possible = [:horizontal, :h, :vertical, :v]
         extras = value.keys - possible

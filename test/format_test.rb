@@ -3,8 +3,8 @@ require_relative 'test_helper'
 describe "FastExcel::FormatExt align" do
 
   before do
-    workbook = FastExcel.open(constant_memory: true)
-    @format = workbook.add_format
+    @workbook = FastExcel.open(constant_memory: true)
+    @format = @workbook.add_format
   end
 
   it "should give default aligns" do
@@ -47,6 +47,13 @@ describe "FastExcel::FormatExt align" do
     end
 
     assert_equal(error.message, "Not allowed keys for align: [:aaa], possible keys: [:horizontal, :h, :vertical, :v]")
+  end
+
+  it "should get and set" do
+    @format.align = {h: :center, v: :center}
+    format2 = @workbook.add_format(align: @format.align)
+
+    assert_equal({horizontal: :align_center, vertical: :align_vertical_center}, format2.align)
   end
 
 end
