@@ -397,8 +397,8 @@ module FastExcel
 
       if value.is_a?(Numeric)
         write_number(row_number, cell_number, value, format)
-      elsif defined?(DateTime) && value.is_a?(DateTime)
-        write_datetime(row_number, cell_number, FastExcel.lxw_datetime(value), format)
+      elsif defined?(Date) && value.is_a?(Date)
+        write_datetime(row_number, cell_number, FastExcel.lxw_datetime(value.to_datetime), format)
       elsif value.is_a?(Time)
         write_datetime(row_number, cell_number, FastExcel.lxw_time(value), format)
       elsif value.is_a?(Formula)
