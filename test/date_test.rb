@@ -20,3 +20,37 @@ describe "FastExcel.date_num" do
   end
 
 end
+
+describe "FastExcel.write_value" do
+
+  it "should save correct datetime" do
+    workbook = FastExcel.open(constant_memory: true)
+    worksheet = workbook.add_worksheet
+
+    format = workbook.number_format("yyyy-mm-dd hh:mm:ss")
+    value = DateTime.parse('2017-03-01 15:15:15 +0000')
+
+    worksheet.write_value(0, 0, value, format)
+    workbook.close
+
+    data = parse_xlsx_as_matrix(workbook.filename)
+
+    assert_equal(data[0][0], value)
+  end
+
+  it "should save correct date" do
+    workbook = FastExcel.open(constant_memory: true)
+    worksheet = workbook.add_worksheet
+
+    format = workbook.number_format("yyyy-mm-dd")
+    value = Date.parse('2017-03-01')
+
+    worksheet.write_value(0, 0, value, format)
+    workbook.close
+
+    data = parse_xlsx_as_matrix(workbook.filename)
+
+    assert_equal(data[0][0], value)
+  end
+
+end

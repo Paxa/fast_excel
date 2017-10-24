@@ -31,7 +31,7 @@ worksheet.write_row(1001, ["Sum", FastExcel::Formula.new("SUM(B2:B1001)")], bold
 workbook.close
 ```
 
-This repositiry and gem contain sources of [libxlsxwriter](https://github.com/jmcnamara/libxlsxwriter)
+This repository and gem contain sources of [libxlsxwriter](https://github.com/jmcnamara/libxlsxwriter)
 
 ## Benchmarks
 
@@ -83,7 +83,7 @@ Full libxlsxwriter documentation: [http://libxlsxwriter.github.io/](http://libxl
 
 Helper Methods:
 
-* `FastExcel.open(filename = nil, constant_memory: false, default_format: {})` - open new workbook, if `filename` is nil - it will craete tmp file, `default_format` will be called with `workbook.default_format.set(...)`
+* `FastExcel.open(filename = nil, constant_memory: false, default_format: {})` - open new workbook, if `filename` is nil - it will create tmp file, `default_format` will be called with `workbook.default_format.set(...)`
 * `FastExcel.date_num(time, offset = nil)` - generate Excel's internal date value, number of days since 1900-Jan-01, works faster then creating `Libxlsxwriter::Datetime` struct. `offset` argument is number hours from UTC, e.g. `3.5`
 * `FastExcel.print_ffi_obj(object)` - print FFI object fields, just for debugging
 * `workbook.bold_cell_format` - shortcut for creating bold format
