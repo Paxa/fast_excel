@@ -1,3 +1,7 @@
+#### Version 0.2.3 - 27 oct 2017
+
+* Allow Date along with DateTime in write_value (thanks to @noxern)
+
 #### Version 0.2.2 - 20 sep 2017
 
 * Nice setters and getters for format.align
