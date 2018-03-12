@@ -700,7 +700,7 @@ module Libxlsxwriter
            :font_index, :uint16,
            :has_font, :uchar,
            :has_dxf_font, :uchar,
-           :font_size, :uint16,
+           :font_size, :double,
            :bold, :uchar,
            :italic, :uchar,
            :font_color, :int,
@@ -786,7 +786,7 @@ module Libxlsxwriter
   #   (Integer) 
   class Font < FFI::Struct
     layout :font_name, [:char, 128],
-           :font_size, :ushort,
+           :font_size, :double,
            :bold, :uchar,
            :italic, :uchar,
            :underline, :uchar,
@@ -904,7 +904,7 @@ module Libxlsxwriter
   # @param [Integer] size 
   # @return [nil] 
   # @scope class
-  attach_function :format_set_font_size, :format_set_font_size, [Format, :ushort], :void
+  attach_function :format_set_font_size, :format_set_font_size, [Format, :double], :void
   
   # @method format_set_font_color(format, color)
   # @param [Format] format 

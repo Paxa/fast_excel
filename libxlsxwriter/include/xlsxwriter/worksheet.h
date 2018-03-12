@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2017, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  */
 
 /**
@@ -76,12 +76,129 @@
 enum lxw_gridlines {
     /** Hide screen and print gridlines. */
     LXW_HIDE_ALL_GRIDLINES = 0,
+
     /** Show screen gridlines. */
     LXW_SHOW_SCREEN_GRIDLINES,
+
     /** Show print gridlines. */
     LXW_SHOW_PRINT_GRIDLINES,
+
     /** Show screen and print gridlines. */
     LXW_SHOW_ALL_GRIDLINES
+};
+
+/** Data validation property values. */
+enum lxw_validation_boolean {
+    LXW_VALIDATION_DEFAULT,
+
+    /** Turn a data validation property off. */
+    LXW_VALIDATION_OFF,
+
+    /** Turn a data validation property on. Data validation properties are
+     * generally on by default. */
+    LXW_VALIDATION_ON
+};
+
+/** Data validation types. */
+enum lxw_validation_types {
+    LXW_VALIDATION_TYPE_NONE,
+
+    /** Restrict cell input to whole/integer numbers only. */
+    LXW_VALIDATION_TYPE_INTEGER,
+
+    /** Restrict cell input to whole/integer numbers only, using a cell
+     *  reference. */
+    LXW_VALIDATION_TYPE_INTEGER_FORMULA,
+
+    /** Restrict cell input to decimal numbers only. */
+    LXW_VALIDATION_TYPE_DECIMAL,
+
+    /** Restrict cell input to decimal numbers only, using a cell
+     * reference. */
+    LXW_VALIDATION_TYPE_DECIMAL_FORMULA,
+
+    /** Restrict cell input to a list of strings in a dropdown. */
+    LXW_VALIDATION_TYPE_LIST,
+
+    /** Restrict cell input to a list of strings in a dropdown, using a
+     * cell range. */
+    LXW_VALIDATION_TYPE_LIST_FORMULA,
+
+    /** Restrict cell input to date values only, using a lxw_datetime type. */
+    LXW_VALIDATION_TYPE_DATE,
+
+    /** Restrict cell input to date values only, using a cell reference. */
+    LXW_VALIDATION_TYPE_DATE_FORMULA,
+
+    /* Restrict cell input to date values only, as a serial number.
+     * Undocumented. */
+    LXW_VALIDATION_TYPE_DATE_NUMBER,
+
+    /** Restrict cell input to time values only, using a lxw_datetime type. */
+    LXW_VALIDATION_TYPE_TIME,
+
+    /** Restrict cell input to time values only, using a cell reference. */
+    LXW_VALIDATION_TYPE_TIME_FORMULA,
+
+    /* Restrict cell input to time values only, as a serial number.
+     * Undocumented. */
+    LXW_VALIDATION_TYPE_TIME_NUMBER,
+
+    /** Restrict cell input to strings of defined length, using a cell
+     * reference. */
+    LXW_VALIDATION_TYPE_LENGTH,
+
+    /** Restrict cell input to strings of defined length, using a cell
+     * reference. */
+    LXW_VALIDATION_TYPE_LENGTH_FORMULA,
+
+    /** Restrict cell to input controlled by a custom formula that returns
+     * `TRUE/FALSE`. */
+    LXW_VALIDATION_TYPE_CUSTOM_FORMULA,
+
+    /** Allow any type of input. Mainly only useful for pop-up messages. */
+    LXW_VALIDATION_TYPE_ANY
+};
+
+/** Data validation criteria uses to control the selection of data. */
+enum lxw_validation_criteria {
+    LXW_VALIDATION_CRITERIA_NONE,
+
+    /** Select data between two values. */
+    LXW_VALIDATION_CRITERIA_BETWEEN,
+
+    /** Select data that is not between two values. */
+    LXW_VALIDATION_CRITERIA_NOT_BETWEEN,
+
+    /** Select data equal to a value. */
+    LXW_VALIDATION_CRITERIA_EQUAL_TO,
+
+    /** Select data not equal to a value. */
+    LXW_VALIDATION_CRITERIA_NOT_EQUAL_TO,
+
+    /** Select data greater than a value. */
+    LXW_VALIDATION_CRITERIA_GREATER_THAN,
+
+    /** Select data less than a value. */
+    LXW_VALIDATION_CRITERIA_LESS_THAN,
+
+    /** Select data greater than or equal to a value. */
+    LXW_VALIDATION_CRITERIA_GREATER_THAN_OR_EQUAL_TO,
+
+    /** Select data less than or equal to a value. */
+    LXW_VALIDATION_CRITERIA_LESS_THAN_OR_EQUAL_TO
+};
+
+/** Data validation error types for pop-up messages. */
+enum lxw_validation_error_types {
+    /** Show a "Stop" data validation pop-up message. This is the default. */
+    LXW_VALIDATION_ERROR_TYPE_STOP,
+
+    /** Show an "Error" data validation pop-up message. */
+    LXW_VALIDATION_ERROR_TYPE_WARNING,
+
+    /** Show an "Information" data validation pop-up message. */
+    LXW_VALIDATION_ERROR_TYPE_INFORMATION
 };
 
 enum cell_types {
@@ -140,6 +257,7 @@ struct lxw_table_rows {
 
 STAILQ_HEAD(lxw_merged_ranges, lxw_merged_range);
 STAILQ_HEAD(lxw_selections, lxw_selection);
+STAILQ_HEAD(lxw_data_validations, lxw_data_validation);
 STAILQ_HEAD(lxw_image_data, lxw_image_options);
 STAILQ_HEAD(lxw_chart_data, lxw_image_options);
 
@@ -149,12 +267,14 @@ STAILQ_HEAD(lxw_chart_data, lxw_image_options);
  * Options struct for the worksheet_set_column() and worksheet_set_row()
  * functions.
  *
- * It has the following members but currently only the `hidden` property is
- * supported:
+ * It has the following members:
  *
  * * `hidden`
  * * `level`
  * * `collapsed`
+ *
+ * The members of this struct are explained in @ref ww_outlines_grouping.
+ *
  */
 typedef struct lxw_row_col_options {
     /** Hide the row/column */
@@ -228,6 +348,180 @@ typedef struct lxw_selection {
     STAILQ_ENTRY (lxw_selection) list_pointers;
 
 } lxw_selection;
+
+/**
+ * @brief Worksheet data validation options.
+ */
+typedef struct lxw_data_validation {
+
+    /**
+     * Set the validation type. Should be a #lxw_validation_types value.
+     */
+    uint8_t validate;
+
+    /**
+     * Set the validation criteria type to select the data. Should be a
+     * #lxw_validation_criteria value.
+     */
+    uint8_t criteria;
+
+    /** Controls whether a data validation is not applied to blank data in the
+     * cell. Should be a #lxw_validation_boolean value. It is on by
+     * default.
+     */
+    uint8_t ignore_blank;
+
+    /**
+     * This parameter is used to toggle on and off the 'Show input message
+     * when cell is selected' option in the Excel data validation dialog. When
+     * the option is off an input message is not displayed even if it has been
+     * set using input_message. Should be a #lxw_validation_boolean value. It
+     * is on by default.
+     */
+    uint8_t show_input;
+
+    /**
+     * This parameter is used to toggle on and off the 'Show error alert
+     * after invalid data is entered' option in the Excel data validation
+     * dialog. When the option is off an error message is not displayed even
+     * if it has been set using error_message. Should be a
+     * #lxw_validation_boolean value. It is on by default.
+     */
+    uint8_t show_error;
+
+    /**
+     * This parameter is used to specify the type of error dialog that is
+     * displayed. Should be a #lxw_validation_error_types value.
+     */
+    uint8_t error_type;
+
+    /**
+     * This parameter is used to toggle on and off the 'In-cell dropdown'
+     * option in the Excel data validation dialog. When the option is on a
+     * dropdown list will be shown for list validations. Should be a
+     * #lxw_validation_boolean value. It is on by default.
+     */
+    uint8_t dropdown;
+
+    uint8_t is_between;
+
+    /**
+     * This parameter is used to set the limiting value to which the criteria
+     * is applied using a whole or decimal number.
+     */
+    double value_number;
+
+    /**
+     * This parameter is used to set the limiting value to which the criteria
+     * is applied using a cell reference. It is valid for any of the
+     * `_FORMULA` validation types.
+     */
+    char *value_formula;
+
+    /**
+     * This parameter is used to set a list of strings for a drop down list.
+     * The list should be a `NULL` terminated array of char* strings:
+     *
+     * @code
+     *    char *list[] = {"open", "high", "close", NULL};
+     *
+     *    data_validation->validate   = LXW_VALIDATION_TYPE_LIST;
+     *    data_validation->value_list = list;
+     * @endcode
+     *
+     * The `value_formula` parameter can also be used to specify a list from
+     * an Excel cell range.
+     *
+     * Note, the string list is restricted by Excel to 255 characters,
+     * including comma separators.
+     */
+    char **value_list;
+
+    /**
+     * This parameter is used to set the limiting value to which the date or
+     * time criteria is applied using a #lxw_datetime struct.
+     */
+    lxw_datetime value_datetime;
+
+    /**
+     * This parameter is the same as `value_number` but for the minimum value
+     * when a `BETWEEN` criteria is used.
+     */
+    double minimum_number;
+
+    /**
+     * This parameter is the same as `value_formula` but for the minimum value
+     * when a `BETWEEN` criteria is used.
+     */
+    char *minimum_formula;
+
+    /**
+     * This parameter is the same as `value_datetime` but for the minimum value
+     * when a `BETWEEN` criteria is used.
+     */
+    lxw_datetime minimum_datetime;
+
+    /**
+     * This parameter is the same as `value_number` but for the maximum value
+     * when a `BETWEEN` criteria is used.
+     */
+    double maximum_number;
+
+    /**
+     * This parameter is the same as `value_formula` but for the maximum value
+     * when a `BETWEEN` criteria is used.
+     */
+    char *maximum_formula;
+
+    /**
+     * This parameter is the same as `value_datetime` but for the maximum value
+     * when a `BETWEEN` criteria is used.
+     */
+    lxw_datetime maximum_datetime;
+
+    /**
+     * The input_title parameter is used to set the title of the input message
+     * that is displayed when a cell is entered. It has no default value and
+     * is only displayed if the input message is displayed. See the
+     * `input_message` parameter below.
+     *
+     * The maximum title length is 32 characters.
+     */
+    char *input_title;
+
+    /**
+     * The input_message parameter is used to set the input message that is
+     * displayed when a cell is entered. It has no default value.
+     *
+     * The message can be split over several lines using newlines. The maximum
+     * message length is 255 characters.
+     */
+    char *input_message;
+
+    /**
+     * The error_title parameter is used to set the title of the error message
+     * that is displayed when the data validation criteria is not met. The
+     * default error title is 'Microsoft Excel'. The maximum title length is
+     * 32 characters.
+     */
+    char *error_title;
+
+    /**
+     * The error_message parameter is used to set the error message that is
+     * displayed when a cell is entered. The default error message is "The
+     * value you entered is not valid. A user has restricted values that can
+     * be entered into the cell".
+     *
+     * The message can be split over several lines using newlines. The maximum
+     * message length is 255 characters.
+     */
+    char *error_message;
+
+    char sqref[LXW_MAX_CELL_RANGE_LENGTH];
+
+    STAILQ_ENTRY (lxw_data_validation) list_pointers;
+
+} lxw_data_validation;
 
 /**
  * @brief Options for inserted images
@@ -354,6 +648,7 @@ typedef struct lxw_worksheet {
     struct lxw_cell **array;
     struct lxw_merged_ranges *merged_ranges;
     struct lxw_selections *selections;
+    struct lxw_data_validations *data_validations;
     struct lxw_image_data *image_data;
     struct lxw_chart_data *chart_data;
 
@@ -403,6 +698,9 @@ typedef struct lxw_worksheet {
     uint8_t orientation;
     uint8_t outline_changed;
     uint8_t outline_on;
+    uint8_t outline_style;
+    uint8_t outline_below;
+    uint8_t outline_right;
     uint8_t page_order;
     uint8_t page_setup_changed;
     uint8_t page_view;
@@ -416,6 +714,7 @@ typedef struct lxw_worksheet {
     uint8_t vba_codename;
     uint8_t vcenter;
     uint8_t zoom_scale_normal;
+    uint8_t num_validations;
 
     lxw_color_t tab_color;
 
@@ -431,6 +730,8 @@ typedef struct lxw_worksheet {
     uint32_t default_col_pixels;
     uint8_t default_row_zeroed;
     uint8_t default_row_set;
+    uint8_t outline_row_level;
+    uint8_t outline_col_level;
 
     uint8_t header_footer_changed;
     char header[LXW_HEADER_FOOTER_MAX];
@@ -561,6 +862,10 @@ extern "C" {
  *
  * @image html write_number02.png
  *
+ * @note Excel doesn't support `NaN`, `Inf` or `-Inf` as a number value. If
+ * you are writing data that contains these values then your application
+ * should convert them to a string or handle them in some other way.
+ *
  */
 lxw_error worksheet_write_number(lxw_worksheet *worksheet,
                                  lxw_row_t row,
@@ -669,7 +974,7 @@ lxw_error worksheet_write_formula(lxw_worksheet *worksheet,
 /**
  * @brief Write an array formula to a worksheet cell.
  *
- * @param worksheet
+ * @param worksheet pointer to a lxw_worksheet instance to be updated.
  * @param first_row   The first row of the range. (All zero indexed.)
  * @param first_col   The first column of the range.
  * @param last_row    The last row of the range.
@@ -874,7 +1179,7 @@ lxw_error worksheet_write_url_opt(lxw_worksheet *worksheet,
  * @endcode
  *
  *
- * Alternatively, you can use Windows style forward slashes. These are
+ * Alternatively, you can use Unix style forward slashes. These are
  * translated internally to backslashes:
  *
  * @code
@@ -1066,7 +1371,7 @@ lxw_error worksheet_set_row(lxw_worksheet *worksheet,
  *  `worksheet_set_row()` with an additional `options` parameter.
  *
  * The `options` parameter is a #lxw_row_col_options struct. It has the
- * following members but currently only the `hidden` property is supported:
+ * following members:
  *
  * - `hidden`
  * - `level`
@@ -1076,11 +1381,40 @@ lxw_error worksheet_set_row(lxw_worksheet *worksheet,
  * example, to hide intermediary steps in a complicated calculation:
  *
  * @code
- *     lxw_row_col_options options = {.hidden = 1, .level = 0, .collapsed = 0};
+ *     lxw_row_col_options options1 = {.hidden = 1, .level = 0, .collapsed = 0};
  *
- *     // Hide the fourth row.
- *     worksheet_set_row(worksheet, 3, 20, NULL, &options);
+ *     // Hide the fourth and fifth (zero indexed) rows.
+ *     worksheet_set_row_opt(worksheet, 3,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 4,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *
  * @endcode
+ *
+ * @image html hide_row_col2.png
+ *
+ * The `"hidden"`, `"level"`,  and `"collapsed"`, options can also be used to
+ * create Outlines and Grouping. See @ref working_with_outlines.
+ *
+ * @code
+ *     // The option structs with the outline level set.
+ *     lxw_row_col_options options1 = {.hidden = 0, .level = 2, .collapsed = 0};
+ *     lxw_row_col_options options2 = {.hidden = 0, .level = 1, .collapsed = 0};
+ *
+ *
+ *     // Set the row options with the outline level.
+ *     worksheet_set_row_opt(worksheet, 1,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 2,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 3,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 4,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 5,  LXW_DEF_ROW_HEIGHT, NULL, &options2);
+ *
+ *     worksheet_set_row_opt(worksheet, 6,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 7,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 8,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 9,  LXW_DEF_ROW_HEIGHT, NULL, &options1);
+ *     worksheet_set_row_opt(worksheet, 10, LXW_DEF_ROW_HEIGHT, NULL, &options2);
+ * @endcode
+ *
+ * @image html outline1.png
  *
  */
 lxw_error worksheet_set_row_opt(lxw_worksheet *worksheet,
@@ -1189,36 +1523,48 @@ lxw_error worksheet_set_column(lxw_worksheet *worksheet,
                                lxw_col_t last_col,
                                double width, lxw_format *format);
 
- /**
-  * @brief Set the properties for one or more columns of cells with options.
-  *
-  * @param worksheet Pointer to a lxw_worksheet instance to be updated.
-  * @param first_col The zero indexed first column.
-  * @param last_col  The zero indexed last column.
-  * @param width     The width of the column(s).
-  * @param format    A pointer to a Format instance or NULL.
-  * @param options   Optional row parameters: hidden, level, collapsed.
-  *
-  * The `%worksheet_set_column_opt()` function  is the same as
-  * `worksheet_set_column()` with an additional `options` parameter.
-  *
-  * The `options` parameter is a #lxw_row_col_options struct. It has the
-  * following members but currently only the `hidden` property is supported:
-  *
-  * - `hidden`
-  * - `level`
-  * - `collapsed`
-  *
-  * The `"hidden"` option is used to hide a column. This can be used, for
-  * example, to hide intermediary steps in a complicated calculation:
-  *
-  * @code
-  *     lxw_row_col_options options = {.hidden = 1, .level = 0, .collapsed = 0};
-  *
-  *     worksheet_set_column_opt(worksheet, COLS("A:A"), 8.43, NULL, &options);
-  * @endcode
-  *
-  */
+/**
+ * @brief Set the properties for one or more columns of cells with options.
+ *
+ * @param worksheet Pointer to a lxw_worksheet instance to be updated.
+ * @param first_col The zero indexed first column.
+ * @param last_col  The zero indexed last column.
+ * @param width     The width of the column(s).
+ * @param format    A pointer to a Format instance or NULL.
+ * @param options   Optional row parameters: hidden, level, collapsed.
+ *
+ * The `%worksheet_set_column_opt()` function  is the same as
+ * `worksheet_set_column()` with an additional `options` parameter.
+ *
+ * The `options` parameter is a #lxw_row_col_options struct. It has the
+ * following members:
+ *
+ * - `hidden`
+ * - `level`
+ * - `collapsed`
+ *
+ * The `"hidden"` option is used to hide a column. This can be used, for
+ * example, to hide intermediary steps in a complicated calculation:
+ *
+ * @code
+ *     lxw_row_col_options options1 = {.hidden = 1, .level = 0, .collapsed = 0};
+ *
+ *     worksheet_set_column_opt(worksheet, COLS("D:E"),  LXW_DEF_COL_WIDTH, NULL, &options1);
+ * @endcode
+ *
+ * @image html hide_row_col3.png
+ *
+ * The `"hidden"`, `"level"`,  and `"collapsed"`, options can also be used to
+ * create Outlines and Grouping. See @ref working_with_outlines.
+ *
+ * @code
+ *     lxw_row_col_options options1 = {.hidden = 0, .level = 1, .collapsed = 0};
+ *
+ *     worksheet_set_column_opt(worksheet, COLS("B:G"),  5, NULL, &options1);
+ * @endcode
+ *
+ * @image html outline8.png
+ */
 lxw_error worksheet_set_column_opt(lxw_worksheet *worksheet,
                                    lxw_col_t first_col,
                                    lxw_col_t last_col,
@@ -1469,6 +1815,87 @@ lxw_error worksheet_merge_range(lxw_worksheet *worksheet, lxw_row_t first_row,
 lxw_error worksheet_autofilter(lxw_worksheet *worksheet, lxw_row_t first_row,
                                lxw_col_t first_col, lxw_row_t last_row,
                                lxw_col_t last_col);
+
+/**
+ * @brief Add a data validation to a cell.
+ *
+ * @param worksheet  Pointer to a lxw_worksheet instance to be updated.
+ * @param row        The zero indexed row number.
+ * @param col        The zero indexed column number.
+ * @param validation A #lxw_data_validation object to control the validation.
+ *
+ * @return A #lxw_error code.
+ *
+ * The `%worksheet_data_validation_cell()` function is used to construct an
+ * Excel data validation or to limit the user input to a dropdown list of
+ * values:
+ *
+ * @code
+ *
+ *    lxw_data_validation *data_validation = calloc(1, sizeof(lxw_data_validation));
+ *
+ *    data_validation->validate       = LXW_VALIDATION_TYPE_INTEGER;
+ *    data_validation->criteria       = LXW_VALIDATION_CRITERIA_BETWEEN;
+ *    data_validation->minimum_number = 1;
+ *    data_validation->maximum_number = 10;
+ *
+ *    worksheet_data_validation_cell(worksheet, 2, 1, data_validation);
+ *
+ *    // Same as above with the CELL() macro.
+ *    worksheet_data_validation_cell(worksheet, CELL("B3"), data_validation);
+ *
+ * @endcode
+ *
+ * @image html data_validate4.png
+ *
+ * Data validation and the various options of #lxw_data_validation are
+ * described in more detail in @ref working_with_data_validation.
+ */
+lxw_error worksheet_data_validation_cell(lxw_worksheet *worksheet,
+                                         lxw_row_t row, lxw_col_t col,
+                                         lxw_data_validation *validation);
+
+/**
+ * @brief Add a data validation to a range cell.
+ *
+ * @param worksheet  Pointer to a lxw_worksheet instance to be updated.
+ * @param first_row  The first row of the range. (All zero indexed.)
+ * @param first_col  The first column of the range.
+ * @param last_row   The last row of the range.
+ * @param last_col   The last col of the range.
+ * @param validation A #lxw_data_validation object to control the validation.
+ *
+ * @return A #lxw_error code.
+ *
+ * The `%worksheet_data_validation_range()` function is the same as the
+ * `%worksheet_data_validation_cell()`, see above,  except the data validation
+ * is applied to a range of cells:
+ *
+ * @code
+ *
+ *    lxw_data_validation *data_validation = calloc(1, sizeof(lxw_data_validation));
+ *
+ *    data_validation->validate       = LXW_VALIDATION_TYPE_INTEGER;
+ *    data_validation->criteria       = LXW_VALIDATION_CRITERIA_BETWEEN;
+ *    data_validation->minimum_number = 1;
+ *    data_validation->maximum_number = 10;
+ *
+ *    worksheet_data_validation_range(worksheet, 2, 1, 4, 1, data_validation);
+ *
+ *    // Same as above with the RANGE() macro.
+ *    worksheet_data_validation_range(worksheet, RANGE("B3:B5"), data_validation);
+ *
+ * @endcode
+ *
+ * Data validation and the various options of #lxw_data_validation are
+ * described in more detail in @ref working_with_data_validation.
+ */
+lxw_error worksheet_data_validation_range(lxw_worksheet *worksheet,
+                                          lxw_row_t first_row,
+                                          lxw_col_t first_col,
+                                          lxw_row_t last_row,
+                                          lxw_col_t last_col,
+                                          lxw_data_validation *validation);
 
  /**
   * @brief Make a worksheet the active, i.e., visible worksheet.
@@ -2554,6 +2981,54 @@ void worksheet_protect(lxw_worksheet *worksheet, const char *password,
                        lxw_protection *options);
 
 /**
+ * @brief Set the Outline and Grouping display properties.
+ *
+ * @param worksheet      Pointer to a lxw_worksheet instance to be updated.
+ * @param visible        Outlines are visible. Optional, defaults to True.
+ * @param symbols_below  Show row outline symbols below the outline bar.
+ * @param symbols_right  Show column outline symbols to the right of outline.
+ * @param auto_style     Use Automatic outline style.
+ *
+ * The `%worksheet_outline_settings()` method is used to control the
+ * appearance of outlines in Excel. Outlines are described the section on 
+ * @ref working_with_outlines.
+ * 
+ * The `visible` parameter is used to control whether or not outlines are
+ * visible. Setting this parameter to False will cause all outlines on the
+ * worksheet to be hidden. They can be un-hidden in Excel by means of the
+ * "Show Outline Symbols" command button. The default Excel setting is True
+ * for visible outlines.
+ *
+ * The `symbols_below` parameter is used to control whether the row outline
+ * symbol will appear above or below the outline level bar. The default Excel
+ * setting is True for symbols to appear below the outline level bar.
+ *
+ * The `symbols_right` parameter is used to control whether the column outline
+ * symbol will appear to the left or the right of the outline level bar. The
+ * default Excel setting is True for symbols to appear to the right of the
+ * outline level bar.
+ *
+ * The `auto_style` parameter is used to control whether the automatic outline
+ * generator in Excel uses automatic styles when creating an outline. This has
+ * no effect on a file generated by XlsxWriter but it does have an effect on
+ * how the worksheet behaves after it is created. The default Excel setting is
+ * False for "Automatic Styles" to be turned off.
+ *
+ * The default settings for all of these parameters in libxlsxwriter
+ * correspond to Excel's default parameters and are shown below:
+ * 
+ * @code
+ *     worksheet_outline_settings(worksheet1, LXW_TRUE, LXW_TRUE, LXW_TRUE, LXW_FALSE);
+ * @endcode
+ *
+ * The worksheet parameters controlled by `worksheet_outline_settings()` are
+ * rarely used.
+ */
+void worksheet_outline_settings(lxw_worksheet *worksheet, uint8_t visible,
+                                uint8_t symbols_below, uint8_t symbols_right,
+                                uint8_t auto_style);
+
+/**
  * @brief Set the default row properties.
  *
  * @param worksheet        Pointer to a lxw_worksheet instance to be updated.
@@ -2630,6 +3105,7 @@ STATIC void _worksheet_write_print_options(lxw_worksheet *worksheet);
 STATIC void _worksheet_write_sheet_pr(lxw_worksheet *worksheet);
 STATIC void _worksheet_write_tab_color(lxw_worksheet *worksheet);
 STATIC void _worksheet_write_sheet_protection(lxw_worksheet *worksheet);
+STATIC void _worksheet_write_data_validations(lxw_worksheet *self);
 #endif /* TESTING */
 
 /* *INDENT-OFF* */

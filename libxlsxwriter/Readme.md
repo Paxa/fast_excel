@@ -20,6 +20,7 @@ It supports features such as:
 - Defined names.
 - Autofilters.
 - Charts.
+- Data validation and drop down lists.
 - Worksheet PNG/JPEG images.
 - Memory optimization mode for writing large files.
 - Source code available on [GitHub](https://github.com/jmcnamara/libxlsxwriter).
@@ -28,6 +29,7 @@ It supports features such as:
 - Works with GCC, Clang, Xcode, MSVC 2015, ICC, TCC, MinGW, MingGW-w64/32.
 - Works on Linux, FreeBSD, OpenBSD, OS X, iOS and Windows. Also works on MSYS/MSYS2 and Cygwin.
 - Compiles for 32 and 64 bit.
+- Compiles and works on big and little endian systems.
 - The only dependency is on `zlib`.
 
 Here is an example that was used to create the spreadsheet shown above:

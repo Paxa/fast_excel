@@ -2,7 +2,7 @@
 #
 # Makefile for libxlsxwriter library.
 #
-# Copyright 2014-2017, John McNamara, jmcnamara@cpan.org
+# Copyright 2014-2018, John McNamara, jmcnamara@cpan.org
 #
 
 # Keep the output quiet by default.
@@ -15,8 +15,17 @@ endif
 OBJS_DIR    = .
 INC_DIR     = ../include
 
-# The minizip directory.
+LIBS = -lz
+
+ifdef USE_SYSTEM_MINIZIP
+LIBS   += -lminizip
+CFLAGS += -DUSE_SYSTEM_MINIZIP
+else
+# Use the local copy of minizip.
 MINIZIP_DIR = ../third_party/minizip
+MINIZIP_OBJ = $(MINIZIP_DIR)/ioapi.o  $(MINIZIP_DIR)/zip.o
+MINIZIP_SO  = $(MINIZIP_DIR)/ioapi.so $(MINIZIP_DIR)/zip.so
+endif
 
 
 ifdef USE_STANDARD_TMPFILE
@@ -29,8 +38,19 @@ TMPFILEPLUS_OBJ = $(TMPFILEPLUS_DIR)/tmpfileplus.o
 TMPFILEPLUS_SO  = $(TMPFILEPLUS_DIR)/tmpfileplus.so
 endif
 
+# Set flag for big endian architecture.
+ifdef USE_BIG_ENDIAN
+CFLAGS += -DLXW_BIG_ENDIAN
+endif
+
 # Flags passed to compiler.
 CFLAGS   += -g -O3 -Wall -Wextra -pedantic -ansi
+
+# Fix for modified zconf.h on Gentoo.
+ifneq (,$(findstring gentoo, $(shell uname -sr)))
+CFLAGS += -DOF=_Z_OF
+endif
+
 
 # Ignore icc remarks about inlining limits.
 ifeq ($(CC),icc)
@@ -97,7 +117,7 @@ test_lib : libxlsxwriter_test.a
 
 # The static library.
 $(LIBXLSXWRITER_A) : $(OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $(MINIZIP_DIR)/ioapi.o  $(MINIZIP_DIR)/zip.o $(TMPFILEPLUS_OBJ) $^
+	$(Q)$(AR) $(ARFLAGS) $@ $(MINIZIP_OBJ) $(TMPFILEPLUS_OBJ) $^
 
 # The dynamic library.
 ifeq ($(findstring m32,$(CFLAGS)),m32)
@@ -105,11 +125,11 @@ ARCH = -m32
 endif
 
 $(LIBXLSXWRITER_SO) : $(SOBJS)
-	$(Q)$(CC) $(SOFLAGS) $(ARCH) -o $@ $(MINIZIP_DIR)/ioapi.so $(MINIZIP_DIR)/zip.so $(TMPFILEPLUS_SO) $^ -lz
+	$(Q)$(CC) $(SOFLAGS) $(ARCH) -o $@ $(MINIZIP_SO) $(TMPFILEPLUS_SO) $^ $(LIBS)
 
 # The test library.
 $(LIBXLSXWRITER_TO) : $(TOBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $(MINIZIP_DIR)/ioapi.o  $(MINIZIP_DIR)/zip.o  $(TMPFILEPLUS_OBJ) $^
+	$(Q)$(AR) $(ARFLAGS) $@ $(MINIZIP_OBJ) $(TMPFILEPLUS_OBJ) $^
 
 # Minimal target for quick compile without creating the libs.
 test_compile : $(OBJS)

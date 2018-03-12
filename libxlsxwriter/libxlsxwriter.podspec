@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = "libxlsxwriter"
-  s.version               = "0.6.9"
+  s.version               = "0.7.6"
   s.summary               = "Libxlsxwriter: A C library for creating Excel XLSX files."
   s.ios.deployment_target = "6.0"
   s.osx.deployment_target = "10.8"
@@ -16,6 +16,7 @@ Pod::Spec.new do |s|
                             * Defined names.
                             * Autofilters.
                             * Charts.
+                            * Data validation and drop down lists.
                             * Worksheet PNG/JPEG images.
                             * Memory optimisation mode for writing large files.
                             * Source code available on [GitHub](https://github.com/jmcnamara/libxlsxwriter).
@@ -24,6 +25,7 @@ Pod::Spec.new do |s|
                             * Works with GCC, Clang, Xcode, MSVC 2015, ICC, TCC, MinGW, MingGW-w64/32.
                             * Works on Linux, FreeBSD, OpenBSD, OS X, iOS and Windows. Also works on MSYS/MSYS2 and Cygwin.
                             * Compiles for 32 and 64 bit.
+                            * Compiles and works on big and little endian systems.
                             * The only dependency is on `zlib`.
                             DESC
 
@@ -36,7 +38,7 @@ Pod::Spec.new do |s|
   s.source_files          = "src/**/*.c", "third_party/**/{zip.c,ioapi.c,tmpfileplus.c}", "include/**/*.h"
 
   s.header_dir            = "xlsxwriter"
-  s.header_mappings_dir   = "include/xlsxwriter"
+  s.header_mappings_dir   = "include"
   s.library               = "z"
   s.compiler_flags        = "-DNOCRYPT=1", "-DNOUNCRYPT=1"
   s.pod_target_xcconfig   = { 'USER_HEADER_SEARCH_PATHS' => '${PODS_ROOT}/libxlsxwriter/include' }

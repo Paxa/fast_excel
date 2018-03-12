@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2017, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * chart - A libxlsxwriter library for creating Excel XLSX chart files.
  *
@@ -464,6 +464,17 @@ typedef enum lxw_chart_label_separator {
     LXW_CHART_LABEL_SEPARATOR_SPACE
 } lxw_chart_label_separator;
 
+/**
+ * @brief Chart axis types.
+ */
+typedef enum lxw_chart_axis_type {
+    /** Chart X axis. */
+    LXW_CHART_AXIS_TYPE_X,
+
+    /** Chart Y axis. */
+    LXW_CHART_AXIS_TYPE_Y
+} lxw_chart_axis_type;
+
 enum lxw_chart_subtype {
 
     LXW_CHART_SUBTYPE_NONE = 0,
@@ -613,7 +624,7 @@ typedef struct lxw_chart_line {
     /** The line dash type. See #lxw_chart_line_dash_type. */
     uint8_t dash_type;
 
-    /* Transparency for lines isn't generally useful. Undocumented for now. */
+    /** Set the transparency of the line. 0 - 100. Default 0. */
     uint8_t transparency;
 
     /* Members for internal use only. */
@@ -675,7 +686,7 @@ typedef struct lxw_chart_font {
     char *name;
 
     /** The chart font size. The default is 11. */
-    uint16_t size;
+    double size;
 
     /** The chart font bold property. Set to 0 or 1. */
     uint8_t bold;
@@ -692,10 +703,17 @@ typedef struct lxw_chart_font {
     /** The chart font color. See @ref working_with_colors. */
     lxw_color_t color;
 
-    /* Members for internal use only. */
+    /** The chart font pitch family property. Rarely required. set to 0. */
     uint8_t pitch_family;
+
+    /** The chart font character set property. Rarely required. set to 0. */
     uint8_t charset;
+
+    /** The chart font baseline property. Rarely required. set to 0. */
     int8_t baseline;
+
+    /* Members for internal use only. */
+
     uint8_t has_color;
 
 } lxw_chart_font;
@@ -807,6 +825,17 @@ typedef enum lxw_chart_error_bar_direction {
     /** Error bar extends in negative direction. */
     LXW_CHART_ERROR_BAR_DIR_MINUS
 } lxw_chart_error_bar_direction;
+
+/**
+ * @brief Direction for a data series error bar.
+ */
+typedef enum lxw_chart_error_bar_axis {
+    /** X axis error bar. */
+    LXW_CHART_ERROR_BAR_AXIS_X,
+
+    /** Y axis error bar. */
+    LXW_CHART_ERROR_BAR_AXIS_Y
+} lxw_chart_error_bar_axis;
 
 /**
  * @brief End cap styles for a data series error bar.
@@ -1768,7 +1797,7 @@ void chart_series_set_labels_percentage(lxw_chart_series *series);
  * For more information see @ref chart_labels.
  */
 void chart_series_set_labels_num_format(lxw_chart_series *series,
-                                        char *num_format);
+                                        const char *num_format);
 
 /**
  * @brief Set the font properties for chart data labels in a series
@@ -1983,7 +2012,8 @@ void chart_series_set_trendline_intercept(lxw_chart_series *series,
  *
  * For more information see @ref chart_trendlines.
  */
-void chart_series_set_trendline_name(lxw_chart_series *series, char *name);
+void chart_series_set_trendline_name(lxw_chart_series *series,
+                                     const char *name);
 
 /**
  * @brief Set the trendline line properties for a chart data series.
@@ -2008,6 +2038,46 @@ void chart_series_set_trendline_name(lxw_chart_series *series, char *name);
  */
 void chart_series_set_trendline_line(lxw_chart_series *series,
                                      lxw_chart_line *line);
+/**
+ * @brief           Get a pointer to X or Y error bars from a chart series.
+ *
+ * @param series    A series object created via `chart_add_series()`.
+ * @param axis_type The axis type (X or Y): #lxw_chart_error_bar_axis.
+ *
+ * The `%chart_series_get_error_bars()` function returns a pointer to the
+ * error bars of a series based on the type of #lxw_chart_error_bar_axis:
+ *
+ * @code
+ *     lxw_series_error_bars *x_error_bars;
+ *     lxw_series_error_bars *y_error_bars;
+ *
+ *     x_error_bars = chart_series_get_error_bars(series, LXW_CHART_ERROR_BAR_AXIS_X);
+ *     y_error_bars = chart_series_get_error_bars(series, LXW_CHART_ERROR_BAR_AXIS_Y);
+ *
+ *     // Use the error bar pointers.
+ *     chart_series_set_error_bars(x_error_bars,
+ *                                 LXW_CHART_ERROR_BAR_TYPE_STD_DEV, 1);
+ *
+ *     chart_series_set_error_bars(y_error_bars,
+ *                                 LXW_CHART_ERROR_BAR_TYPE_STD_ERROR, 0);
+ * @endcode
+ *
+ * Note, the series error bars can also be accessed directly:
+ *
+ * @code
+ *     // Equivalent to the above example, without function calls.
+ *     chart_series_set_error_bars(series->x_error_bars,
+ *                                 LXW_CHART_ERROR_BAR_TYPE_STD_DEV, 1);
+ *
+ *     chart_series_set_error_bars(series->y_error_bars,
+ *                                 LXW_CHART_ERROR_BAR_TYPE_STD_ERROR, 0);
+ * @endcode
+ *
+ * @return Pointer to the series error bars, or NULL if not found.
+ */
+
+lxw_series_error_bars *chart_series_get_error_bars(lxw_chart_series *series, lxw_chart_error_bar_axis
+                                                   axis_type);
 
 /**
  * Set the X or Y error bars for a chart series.
@@ -2071,7 +2141,7 @@ void chart_series_set_error_bars(lxw_series_error_bars *error_bars,
  *        series.
  *
  * @param error_bars A pointer to the series X or Y error bars.
- * @param direction  The bar direction: #lxw_chart_error_bar_direction .
+ * @param direction  The bar direction: #lxw_chart_error_bar_direction.
  *
  * The `%chart_series_set_error_bars_direction()` function sets the
  * direction of the error bars:
@@ -2152,6 +2222,37 @@ void chart_series_set_error_bars_endcap(lxw_series_error_bars *error_bars,
  */
 void chart_series_set_error_bars_line(lxw_series_error_bars *error_bars,
                                       lxw_chart_line *line);
+
+/**
+ * @brief           Get an axis pointer from a chart.
+ *
+ * @param chart     Pointer to a lxw_chart instance to be configured.
+ * @param axis_type The axis type (X or Y): #lxw_chart_axis_type.
+ *
+ * The `%chart_axis_get()` function returns a pointer to a chart axis based
+ * on the  #lxw_chart_axis_type:
+ *
+ * @code
+ *     lxw_chart_axis *x_axis = chart_axis_get(chart, LXW_CHART_AXIS_TYPE_X);
+ *     lxw_chart_axis *y_axis = chart_axis_get(chart, LXW_CHART_AXIS_TYPE_Y);
+ *
+ *     // Use the axis pointer in other functions.
+ *     chart_axis_major_gridlines_set_visible(x_axis, LXW_TRUE);
+ *     chart_axis_major_gridlines_set_visible(y_axis, LXW_TRUE);
+ * @endcode
+ *
+ * Note, the axis pointer can also be accessed directly:
+ *
+ * @code
+ *     // Equivalent to the above example, without function calls.
+ *     chart_axis_major_gridlines_set_visible(chart->x_axis, LXW_TRUE);
+ *     chart_axis_major_gridlines_set_visible(chart->y_axis, LXW_TRUE);
+ * @endcode
+ *
+ * @return Pointer to the chart axis, or NULL if not found.
+ */
+lxw_chart_axis *chart_axis_get(lxw_chart *chart,
+                               lxw_chart_axis_type axis_type);
 
 /**
  * @brief Set the name caption of the an axis.
@@ -2279,7 +2380,7 @@ void chart_axis_set_num_font(lxw_chart_axis *axis, lxw_chart_font *font);
  * **Axis types**: This function is applicable to to all axes types.
  *                 See @ref ww_charts_axes.
  */
-void chart_axis_set_num_format(lxw_chart_axis *axis, char *num_format);
+void chart_axis_set_num_format(lxw_chart_axis *axis, const char *num_format);
 
 /**
  * @brief Set the line properties for a chart axis.

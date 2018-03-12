@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2017, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @brief Common functions and defines for the libxlsxwriter library.
  *
- * <!-- Copyright 2014-2017, John McNamara, jmcnamara@cpan.org -->
+ * <!-- Copyright 2014-2018, John McNamara, jmcnamara@cpan.org -->
  *
  */
 #ifndef __LXW_COMMON_H__
@@ -88,6 +88,9 @@ typedef enum lxw_error {
 
     /** Worksheet name is already in use. */
     LXW_ERROR_SHEETNAME_ALREADY_USED,
+
+    /** Parameter exceeds Excel's limit of 32 characters. */
+    LXW_ERROR_32_STRING_LENGTH_EXCEEDED,
 
     /** Parameter exceeds Excel's limit of 128 characters. */
     LXW_ERROR_128_STRING_LENGTH_EXCEEDED,
@@ -265,9 +268,14 @@ enum lxw_custom_property_types {
                                (((n) & 0xFF0000)   >>  8) | \
                                (((n) & 0xFF000000) >> 24))
 #define LXW_UINT16_NETWORK(n) ((((n) & 0x00FF) << 8) | (((n) & 0xFF00) >> 8))
+#define LXW_UINT32_HOST(n)    (n)
 #else
 #define LXW_UINT32_NETWORK(n) (n)
 #define LXW_UINT16_NETWORK(n) (n)
+#define LXW_UINT32_HOST(n)    ((((n) & 0xFF)       << 24) | \
+                               (((n) & 0xFF00)     <<  8) | \
+                               (((n) & 0xFF0000)   >>  8) | \
+                               (((n) & 0xFF000000) >> 24))
 #endif
 
 /* *INDENT-OFF* */
