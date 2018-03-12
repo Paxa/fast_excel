@@ -1,3 +1,8 @@
+#### Version 0.2.4 - 13 mar 2018
+
+* Update libxlsxwriter to 0.7.6
+* Don’t crash process when duplicated worksheet name
+
 #### Version 0.2.3 - 27 oct 2017
 
 * Allow Date along with DateTime in write_value (thanks to @noxern)
