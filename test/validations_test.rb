@@ -5,7 +5,7 @@ describe "FastExcel validations" do
   it "should raise error when duplicate sheet name" do
     workbook = FastExcel.open(constant_memory: true)
 
-    worksheet1 = workbook.add_worksheet("Payments Report")
+    workbook.add_worksheet("Payments Report")
     error = assert_raises do
       workbook.add_worksheet("Payments Report")
     end

@@ -6,17 +6,17 @@ GIT
 
 GIT
   remote: https://github.com/randym/axlsx.git
-  revision: c8ac844572b25fda358cc01d2104720c4c42f450
+  revision: 73d9477fc33706f4a186e92794134248fb389183
   specs:
-    axlsx (2.1.0.pre)
-      htmlentities (~> 4.3.4)
+    axlsx (3.0.0.pre)
+      htmlentities (~> 4.3, >= 4.3.4)
       mimemagic (~> 0.3)
-      nokogiri (>= 1.6.6)
-      rubyzip (>= 1.2.1)
+      nokogiri (~> 1.8, >= 1.8.2)
+      rubyzip (~> 1.2, >= 1.2.1)
 
 GIT
   remote: https://github.com/roo-rb/roo.git
-  revision: 85c2736b0ea1c984391688c5aeb4acf85f225405
+  revision: 3ed05e1caef0ce3c5db5c19f1fa14e6f74193079
   specs:
     roo (2.7.1)
       nokogiri (~> 1)
@@ -28,24 +28,24 @@ GEM
     ansi (1.5.0)
     benchmark-ips (2.7.2)
     builder (3.2.3)
-    ffi (1.9.18)
+    ffi (1.9.23)
     ffi_gen (1.2.0)
       ffi (~> 1.0)
     htmlentities (4.3.4)
     mimemagic (0.3.2)
-    mini_portile2 (2.2.0)
-    minitest (5.10.2)
-    minitest-reporters (1.1.14)
+    mini_portile2 (2.3.0)
+    minitest (5.11.3)
+    minitest-reporters (1.1.19)
       ansi
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    nokogiri (1.8.0)
-      mini_portile2 (~> 2.2.0)
-    rake (12.0.0)
-    ruby-progressbar (1.8.1)
+    nokogiri (1.8.2)
+      mini_portile2 (~> 2.3.0)
+    rake (12.3.0)
+    ruby-progressbar (1.9.0)
     rubyzip (1.2.1)
-    write_xlsx (0.85.1)
+    write_xlsx (0.85.3)
       rubyzip (>= 1.0.0)
       zip-zip
     zip-zip (0.3)
@@ -67,4 +67,4 @@ DEPENDENCIES
   write_xlsx
 
 BUNDLED WITH
-   1.15.1
+   1.16.1
