@@ -40,12 +40,14 @@ def parse_xlsx_as_matrix(file_path)
   sheet = excel.sheet(0)
 
   rows = []
-  1.upto(sheet.last_row) do |row_number|
-    row = 1.upto(sheet.last_column).map do |col|
-      sheet.cell(row_number, col)
-    end
+  if sheet.last_row
+    1.upto(sheet.last_row) do |row_number|
+      row = 1.upto(sheet.last_column).map do |col|
+        sheet.cell(row_number, col)
+      end
 
-    rows << row
+      rows << row
+    end
   end
 
   return rows

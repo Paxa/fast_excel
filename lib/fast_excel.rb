@@ -323,6 +323,7 @@ module FastExcel
 
     def initialize(struct)
       @is_open = true
+      @sheet_names = Set.new
       super(struct)
     end
 
@@ -347,8 +348,16 @@ module FastExcel
     end
 
     def add_worksheet(sheetname = nil)
+      sheetname = nil if sheetname == ""
+
+      if !sheetname.nil? && @sheet_names.include?(sheetname)
+        raise ArgumentError, "Worksheet name '#{sheetname}' is already in use"
+      end
+      @sheet_names << sheetname
+
       sheet = super
       sheet.workbook = self
+
       sheet
     end
 
