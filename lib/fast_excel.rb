@@ -13,14 +13,14 @@ module FastExcel
 
   def self.open(filename = nil, constant_memory: false, default_format: nil)
     tmp_file = false
-    unless filename
+    if filename
+      if File.exist?(filename)
+        raise ArgumentError, "File '#{filename}' already exists. FastExcel can not open existing files, only create new files"
+      end
+    else
       require 'tmpdir'
       filename = "#{Dir.mktmpdir}/fast_excel.xlsx"
       tmp_file = true
-    end
-
-    unless filename
-      raise ArgumentError, "filename is required"
     end
 
     filename = filename.to_s if defined?(Pathname) && filename.is_a?(Pathname)
@@ -356,6 +356,13 @@ module FastExcel
       @sheet_names << sheetname
 
       sheet = super
+      sheet.workbook = self
+
+      sheet
+    end
+
+    def get_worksheet_by_name(name)
+      sheet = super(name)
       sheet.workbook = self
 
       sheet
