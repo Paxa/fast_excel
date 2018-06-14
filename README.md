@@ -1,4 +1,4 @@
-# Ultra Fast Excel Writter for Ruby
+# Ultra Fast Excel Writer for Ruby
 
 ```ruby
 require 'fast_excel'
