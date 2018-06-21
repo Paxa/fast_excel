@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "fast_excel"
-  s.version     = "0.2.4"
+  s.version     = "0.2.5"
   s.author      = ["Pavel Evstigneev"]
   s.email       = ["pavel.evst@gmail.com"]
   s.homepage    = "https://github.com/paxa/fast_excel"

@@ -1,3 +1,7 @@
+#### Version 0.2.5 - 22 jun 2018
+
+* Update libxlsxwriter to 0.7.7
+
 #### Version 0.2.4 - 13 mar 2018
 
 * Update libxlsxwriter to 0.7.6
