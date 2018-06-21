@@ -1154,7 +1154,7 @@ _chart_write_v_num(lxw_chart *self, double number)
 {
     char data[LXW_ATTR_32];
 
-    lxw_snprintf(data, LXW_ATTR_32, "%.16g", number);
+    lxw_sprintf_dbl(data, number);
 
     lxw_xml_data_element(self->file, "c:v", data, NULL);
 }
@@ -4581,6 +4581,10 @@ _chart_write_pie_plot_area(lxw_chart *self)
 
     /* Write subclass chart type elements for primary and secondary axes. */
     self->write_chart_type(self);
+
+    /* Write the c:spPr element for the plotarea formatting. */
+    _chart_write_sp_pr(self, self->plotarea_line, self->plotarea_fill,
+                       self->plotarea_pattern);
 
     lxw_xml_end_tag(self->file, "c:plotArea");
 }
