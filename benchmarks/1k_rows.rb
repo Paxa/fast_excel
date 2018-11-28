@@ -1,6 +1,6 @@
 require_relative 'init'
 
-HEADERS = ["id", "name", "age", "date"]
+HEADERS = ["id", "name", "age", "date"].freeze
 
 DATA = []
 1000.times do |n|
@@ -8,15 +8,15 @@ DATA = []
 end
 
 Benchmark.ips do |x|
-  x.config(time: 10, warmup: 2)
+  x.config(time: 10, warmup: 40)
 
   x.report("FastExcel") do
     workbook = FastExcel.open(constant_memory: true)
     worksheet = workbook.add_worksheet("benchmark")
 
     worksheet.write_row(0, HEADERS)
-    DATA.each_with_index do |row, i|
-      worksheet.write_row(i + 1, row)
+    DATA.each do |row|
+      worksheet.append_row(row)
     end
     workbook.read_string
   end
@@ -53,6 +53,19 @@ Benchmark.ips do |x|
     workbook.close
     File.open(filename, 'rb', &:read)
     File.delete(filename)
+  end
+
+  x.report("xlsxtream") do
+    filename = "#{Dir.mktmpdir}/xlsxtream.xlsx"
+
+    Xlsxtream::Workbook.open(filename) do |xlsx|
+      xlsx.write_worksheet do |sheet|
+        sheet << HEADERS
+        DATA.each do |row|
+          sheet << row
+        end
+      end
+    end
   end
 
   x.compare!

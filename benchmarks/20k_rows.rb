@@ -22,5 +22,9 @@ Benchmark.ips do |x|
     write_xlsx_20k
   end
 
+  x.report("xlsxtream") do
+    write_xlsxtream_20k
+  end
+
   x.compare!
 end

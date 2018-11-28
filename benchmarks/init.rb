@@ -8,9 +8,8 @@ require_relative '../lib/fast_excel'
 require "benchmark/ips"
 require 'axlsx'
 require 'write_xlsx'
+require 'xlsxtream'
 require 'process_memory'
-
-require_relative 'init'
 
 def write_fast_excel_20k
   workbook = FastExcel.open(constant_memory: true)
@@ -55,5 +54,18 @@ def write_axlsx_20k
     package.serialize(filename)
     File.open(filename, 'rb', &:read)
     File.delete(filename)
+  end
+end
+
+def write_xlsxtream_20k
+  filename = "#{Dir.mktmpdir}/xlsxtream.xlsx"
+
+  Xlsxtream::Workbook.open(filename) do |xlsx|
+    xlsx.write_worksheet do |sheet|
+      sheet << HEADERS
+      DATA.each do |row|
+        sheet << row
+      end
+    end
   end
 end

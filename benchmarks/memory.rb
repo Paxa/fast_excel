@@ -11,6 +11,7 @@ puts "warm up..."
 write_fast_excel_20k
 write_axlsx_20k
 write_xlsx_20k
+write_xlsxtream_20k
 
 DATA.clear
 50_000.times do |n|
@@ -46,4 +47,11 @@ sleep 5
 
 measure_memory("write_xlsx") do
   write_xlsx_20k
+end
+
+GC.start
+sleep 5
+
+measure_memory("xlsxtream") do
+  write_xlsxtream_20k
 end
