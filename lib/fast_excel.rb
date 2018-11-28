@@ -1,4 +1,5 @@
 require_relative './fast_excel/binding'
+require 'set'
 
 module FastExcel
 
