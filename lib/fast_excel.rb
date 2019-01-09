@@ -481,8 +481,8 @@ module FastExcel
       @last_row_number
     end
 
-    def set_column(start_col, end_col, width, format = nil)
-      super(start_col, end_col, width, format)
+    def set_column(start_col, end_col, width = nil, format = nil)
+      super(start_col, end_col, width || DEF_COL_WIDTH, format)
 
       return unless format
       start_col.upto(end_col) do |i|

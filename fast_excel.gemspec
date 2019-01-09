@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.author      = ["Pavel Evstigneev"]
   s.email       = ["pavel.evst@gmail.com"]
   s.homepage    = "https://github.com/paxa/fast_excel"
-  s.summary     = %q{Ultra Fast Excel Writter}
+  s.summary     = %q{Ultra Fast Excel Writer}
   s.description = "Wrapper for libxlsxwriter using ffi"
   s.license     = 'MIT'
   s.required_ruby_version = '~> 2.0'
