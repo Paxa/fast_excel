@@ -467,35 +467,13 @@ module FastExcel
 
       font_size = 13 if font_size == nil || font_size == 0
 
-      font_family = ''
-      if format
-        font_family = format.font_family
-      end
-
-      if font_family == ''
-        if @col_formats[cell_number] && @col_formats[cell_number].font_family
-          font_family = @col_formats[cell_number].font_family
-        end
-      end
-
-      if font_family == ''
-        font_family = workbook.default_format.font_family || 'Arial'
-      end
-
-      #p [value, font_family, font_size]
-
-      base_width = case font_family
-        when "Calibri" then FastExcel.calibri_text_width(value)
-        when "Times New Roman" then FastExcel.times_new_roman_text_width(value)
-        else FastExcel.arial_text_width(value)
-      end
-      new_width = (base_width / 100 * font_size / 8) #.round
-      #p [:text_width, font_family, value, base_width]
+      scale = 0.08
+      new_width = (scale * font_size * value.to_s.length )
       @column_widths[cell_number] = new_width > (@column_widths[cell_number] || 0) ? new_width : @column_widths[cell_number]
     end
 
     def append_row(values, formats = nil)
-      increment_last_row_number!
+      @last_row_number += 1
       write_row(last_row_number, values, formats)
     end
 
@@ -503,16 +481,13 @@ module FastExcel
       @last_row_number
     end
 
-    def increment_last_row_number!
-      @last_row_number += 1
-    end
-
     def set_column(start_col, end_col, width, format = nil)
       super(start_col, end_col, width, format)
 
+      return unless format
       start_col.upto(end_col) do |i|
         @col_formats[i] = format
-      end if format
+      end
     end
 
     def set_column_width(col, width)
@@ -520,7 +495,6 @@ module FastExcel
     end
 
     def set_columns_width(start_col, end_col, width)
-      #set_column(start_col, end_col, width, nil)
       start_col.upto(end_col) do |i|
         set_column_width(i, width)
       end
@@ -533,7 +507,6 @@ module FastExcel
         end
       end
     end
-
   end
 
   module FormatExt

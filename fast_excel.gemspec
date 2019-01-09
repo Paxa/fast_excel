@@ -7,7 +7,6 @@ Gem::Specification.new do |s|
   s.summary     = %q{Ultra Fast Excel Writter}
   s.description = "Wrapper for libxlsxwriter using ffi"
   s.license     = 'MIT'
-  s.has_rdoc    = false
   s.required_ruby_version = '~> 2.0'
 
   s.files       = `git ls-files`.split("\n")
