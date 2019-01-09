@@ -1,5 +1,6 @@
 require_relative './fast_excel/binding'
 require 'set'
+require_relative '../ext/fast_excel/text_width_ext'
 
 module FastExcel
 
@@ -325,6 +326,7 @@ module FastExcel
     def initialize(struct)
       @is_open = true
       @sheet_names = Set.new
+      @sheets = []
       super(struct)
     end
 
@@ -358,7 +360,7 @@ module FastExcel
 
       sheet = super
       sheet.workbook = self
-
+      @sheets << sheet
       sheet
     end
 
@@ -371,6 +373,7 @@ module FastExcel
 
     def close
       @is_open = false
+      @sheets.each(&:close)
       super
     end
 
@@ -396,6 +399,13 @@ module FastExcel
 
     include AttributeHelper
 
+    def initialize(struct)
+      @is_open = true
+      @col_formats = {}
+      @last_row_number = -1
+      super(struct)
+    end
+
     def write_row(row_number, values, formats = nil)
       values.each_with_index do |value, index|
         format = if formats
@@ -406,9 +416,18 @@ module FastExcel
       end
     end
 
+    def auto_width?
+      defined?(@auto_width) && @auto_width
+    end
+
+    def auto_width=(v)
+      @auto_width = v
+      @column_widths = {}
+    end
+
     def write_value(row_number, cell_number, value, format = nil)
 
-      if workbook.constant_memory? && row_number < last_row_number
+      if workbook.constant_memory? && row_number < @last_row_number
         raise ArgumentError, "Can not write to saved row in constant_memory mode (attempted row: #{row_number}, last saved row: #{last_row_number})"
       end
 
@@ -417,14 +436,62 @@ module FastExcel
       elsif defined?(Date) && value.is_a?(Date)
         write_datetime(row_number, cell_number, FastExcel.lxw_datetime(value.to_datetime), format)
       elsif value.is_a?(Time)
-        write_datetime(row_number, cell_number, FastExcel.lxw_time(value), format)
+        write_number(row_number, cell_number, FastExcel.date_num(value), format)
+      elsif defined?(DateTime) && value.is_a?(DateTime)
+        write_number(row_number, cell_number, FastExcel.date_num(value), format)
       elsif value.is_a?(Formula)
         write_formula(row_number, cell_number, value.fml, format)
       else
         write_string(row_number, cell_number, value.to_s, format)
+        add_text_width(value, format, cell_number) if auto_width?
       end
 
-      @last_row_number = row_number > last_row_number ? row_number : last_row_number
+      @last_row_number = row_number > @last_row_number ? row_number : @last_row_number
+    end
+
+    def add_text_width(value, format, cell_number)
+      font_size = 0
+      if format
+        font_size = format.font_size
+      end
+
+      if font_size == 0
+        if @col_formats[cell_number] && @col_formats[cell_number].font_size
+          font_size = @col_formats[cell_number].font_size
+        end
+      end
+
+      if font_size == 0
+        font_size = workbook.default_format.font_size
+      end
+
+      font_size = 13 if font_size == nil || font_size == 0
+
+      font_family = ''
+      if format
+        font_family = format.font_family
+      end
+
+      if font_family == ''
+        if @col_formats[cell_number] && @col_formats[cell_number].font_family
+          font_family = @col_formats[cell_number].font_family
+        end
+      end
+
+      if font_family == ''
+        font_family = workbook.default_format.font_family || 'Arial'
+      end
+
+      #p [value, font_family, font_size]
+
+      base_width = case font_family
+        when "Calibri" then FastExcel.calibri_text_width(value)
+        when "Times New Roman" then FastExcel.times_new_roman_text_width(value)
+        else FastExcel.arial_text_width(value)
+      end
+      new_width = (base_width / 100 * font_size / 8) #.round
+      #p [:text_width, font_family, value, base_width]
+      @column_widths[cell_number] = new_width > (@column_widths[cell_number] || 0) ? new_width : @column_widths[cell_number]
     end
 
     def append_row(values, formats = nil)
@@ -433,23 +500,38 @@ module FastExcel
     end
 
     def last_row_number
-      defined?(@last_row_number) ? @last_row_number : -1
+      @last_row_number
     end
 
     def increment_last_row_number!
-      @last_row_number = last_row_number + 1
+      @last_row_number += 1
     end
 
     def set_column(start_col, end_col, width, format = nil)
       super(start_col, end_col, width, format)
+
+      start_col.upto(end_col) do |i|
+        @col_formats[i] = format
+      end if format
     end
 
     def set_column_width(col, width)
-      set_column(col, col, width, nil)
+      set_column(col, col, width, @col_formats[col])
     end
 
     def set_columns_width(start_col, end_col, width)
-      set_column(start_col, end_col, width, nil)
+      #set_column(start_col, end_col, width, nil)
+      start_col.upto(end_col) do |i|
+        set_column_width(i, width)
+      end
+    end
+
+    def close
+      if auto_width?
+        @column_widths.each do |num, width|
+          set_column_width(num, width + 0.2)
+        end
+      end
     end
 
   end

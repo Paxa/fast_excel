@@ -1,4 +1,5 @@
 .ruby-version
+.idea/
 try.c
 try.rb
 gen.rb
@@ -11,6 +12,6 @@ libxlsxwriter/dev
 libxlsxwriter/docs
 libxlsxwriter/examples
 libxlsxwriter/test
-
+ext/fast_excel/text_width_ext.o
 ext/fast_excel/Makefile
 ext/fast_excel/text_width_ext.bundle

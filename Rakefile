@@ -22,3 +22,11 @@ task :examples do
     require './' + file.sub(/\.rb$/, '')
   end
 end
+
+task :compile do
+  %x{
+    cd ext/fast_excel
+    ruby ./extconf.rb
+    make
+  }
+end

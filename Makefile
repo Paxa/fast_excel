@@ -4,6 +4,8 @@ Q=
 endif
 
 all :
+	@echo "Compiling ext/text_width ..."
+	rake compile
 	@echo "Compiling libxlsxwriter ..."
 	$(Q)$(MAKE) -C libxlsxwriter
 
