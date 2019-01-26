@@ -1,3 +1,7 @@
+#### Version 0.2.6 - 26 jan 2019
+
+* Add column auto width (thanks to @duffyjp)
+
 #### Version 0.2.5 - 22 jun 2018
 
 * Update libxlsxwriter to 0.7.7
