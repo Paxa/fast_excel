@@ -3,10 +3,10 @@ language: ruby
 
 matrix:
   include:
-  - os: linux
-    rvm: 2.2.10
-  - os: osx
-    rvm: 2.2.10
+#  - os: linux
+#    rvm: 2.2.10
+#  - os: osx
+#    rvm: 2.2.10
   - os: linux
     rvm: 2.3.8
   - os: osx
