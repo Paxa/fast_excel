@@ -20,16 +20,18 @@ worksheet.set_column(1, 1, 20, price)
 date_format = workbook.number_format("[$-409]m/d/yy h:mm AM/PM;@")
 worksheet.set_column(2, 2, 20, date_format)
 
-worksheet.write_row(0, ["message", "price", "date"], bold)
+worksheet.append_row(["message", "price", "date"], bold)
 
 for i in 1..1000
-  worksheet.write_row(i, ["Hello", (rand * 10_000_000).round(2), Time.now])
+  worksheet.append_row(["Hello", (rand * 10_000_000).round(2), Time.now])
 end
 
-worksheet.write_row(1001, ["Sum", FastExcel::Formula.new("SUM(B2:B1001)")], bold)
+worksheet.append_row(["Sum", FastExcel::Formula.new("SUM(B2:B1001)")], bold)
 
 workbook.close
 ```
+
+See [more examples](https://github.com/Paxa/fast_excel/tree/master/examples)
 
 This repository and gem contain sources of [libxlsxwriter](https://github.com/jmcnamara/libxlsxwriter)
 
@@ -69,6 +71,29 @@ Or
 gem install fast_excel
 ```
 
+## Column Auto Width
+
+Column authwidth only works for string values, because numbers may have custom formatting
+
+Enabling column auto widths will slow down writing string values for about 15-25%
+
+```ruby
+require 'fast_excel'
+
+workbook = FastExcel.open(constant_memory: true)
+
+worksheet = workbook.add_worksheet
+worksheet.auto_width = true
+
+worksheet.append_row(["some text", "some longer text for example"])
+
+content = workbook.read_string
+File.open('./some_file.xlsx', 'wb') {|f| f.write(content) }
+```
+
+![fast_excel_auto_width](https://user-images.githubusercontent.com/26019/51788441-ba981300-21b0-11e9-9611-54dda78effcd.png)
+
+
 ## API
 
 This gem is FFI binding for libxlsxwriter C library with some syntax sugar. All original functions is avaliable, for example:
@@ -93,3 +118,5 @@ Helper Methods:
 * `worksheet.write_row(row_num, array_of_mixed_value, formats = nil)` - write values one by one, detecting type automatically. `formats` can be array, or Format object or nil
 * `format.font_family` - alias for `format.font_name`
 * `workbook.default_format.font_size` - set it to 0 if you want to use default font size (that what user set in Excel settings)
+* `worksheet.write_row(num, values_array, formats = nil)` - Write row of values
+* `worksheet.append_row(values_array, formats = nil)` - Append row of values ot the bottom of worksheet

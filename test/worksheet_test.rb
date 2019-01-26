@@ -79,7 +79,7 @@ describe "FastExcel::WorksheetExt append_row" do
     @workbook = FastExcel.open(constant_memory: true)
     @worksheet = @workbook.add_worksheet
 
-    @worksheet.append_row([BigDecimal.new("0.1234")])
+    @worksheet.append_row([BigDecimal("0.1234")])
 
     assert_equal([[0.1234]], get_arrays(@workbook))
   end

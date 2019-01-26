@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/paxa/process_memory
-  revision: 1aa4df28c9a98903301317236104abe591e086fd
+  revision: 282c75336a4a6b92207cd1eaa57f20887b92601e
   specs:
     process_memory (0.1)
 
@@ -16,9 +16,10 @@ GIT
 
 GIT
   remote: https://github.com/roo-rb/roo.git
-  revision: 8f65109c6728dd77f62b0a5c68dd42ab207dd914
+  revision: 5bbda9849ca6deb0ad8020c4476c1ab9ddfd824b
+  tag: v2.8.1
   specs:
-    roo (2.7.1)
+    roo (2.8.1)
       nokogiri (~> 1)
       rubyzip (>= 1.2.1, < 2.0.0)
 
@@ -28,21 +29,21 @@ GEM
     ansi (1.5.0)
     benchmark-ips (2.7.2)
     builder (3.2.3)
-    ffi (1.9.25)
+    ffi (1.10.0)
     ffi_gen (1.2.0)
       ffi (~> 1.0)
     htmlentities (4.3.4)
-    mimemagic (0.3.2)
-    mini_portile2 (2.3.0)
+    mimemagic (0.3.3)
+    mini_portile2 (2.4.0)
     minitest (5.11.3)
-    minitest-reporters (1.3.5)
+    minitest-reporters (1.3.6)
       ansi
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    nokogiri (1.8.5)
-      mini_portile2 (~> 2.3.0)
-    rake (12.3.1)
+    nokogiri (1.10.1)
+      mini_portile2 (~> 2.4.0)
+    rake (12.3.2)
     ruby-progressbar (1.10.0)
     rubyzip (1.2.2)
     write_xlsx (0.85.5)
@@ -66,9 +67,9 @@ DEPENDENCIES
   minitest-reporters
   process_memory!
   rake
-  roo (= 2.7.1)!
+  roo (= 2.8.1)!
   write_xlsx
   xlsxtream
 
 BUNDLED WITH
-   1.16.1
+   1.17.2

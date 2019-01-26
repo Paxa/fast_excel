@@ -1,6 +1,8 @@
 require_relative './fast_excel/binding'
 require 'set'
-require_relative '../ext/fast_excel/text_width_ext'
+
+# not used for now
+#require_relative '../ext/fast_excel/text_width_ext'
 
 module FastExcel
 
@@ -425,6 +427,10 @@ module FastExcel
       @column_widths = {}
     end
 
+    def calculated_column_widths
+      @column_widths || {}
+    end
+
     def write_value(row_number, cell_number, value, format = nil)
 
       if workbook.constant_memory? && row_number < @last_row_number
@@ -469,7 +475,11 @@ module FastExcel
 
       scale = 0.08
       new_width = (scale * font_size * value.to_s.length )
-      @column_widths[cell_number] = new_width > (@column_widths[cell_number] || 0) ? new_width : @column_widths[cell_number]
+      @column_widths[cell_number] = if new_width > (@column_widths[cell_number] || 0)
+        new_width
+      else
+        @column_widths[cell_number]
+      end
     end
 
     def append_row(values, formats = nil)

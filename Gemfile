@@ -5,7 +5,7 @@ gem 'ffi_gen', require: false
 
 gem 'rake'
 
-gem 'roo', '2.7.1', git: 'https://github.com/roo-rb/roo.git'
+gem 'roo', '2.8.1', git: 'https://github.com/roo-rb/roo.git', tag: 'v2.8.1'
 
 gem 'minitest'
 gem 'minitest-reporters'
