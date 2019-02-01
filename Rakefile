@@ -17,12 +17,14 @@ end
 
 #task :default => :test
 
+desc "Run all examples"
 task :examples do
   Dir.glob('examples/**/*.rb').each do |file|
     require './' + file.sub(/\.rb$/, '')
   end
 end
 
+desc "Compile libxlsxwriter shared library"
 task :compile do
   %x{
     cd ext/fast_excel

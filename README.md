@@ -3,7 +3,7 @@
 ```ruby
 require 'fast_excel'
 
-workbook = FastExcel.open("hello_world_ffi.xlsx", constant_memory: true)
+workbook = FastExcel.open("hello_world.xlsx", constant_memory: true)
 workbook.default_format.set(
   font_size: 0, # user's default
   font_family: "Arial"
@@ -11,7 +11,7 @@ workbook.default_format.set(
 
 worksheet = workbook.add_worksheet("Example Report")
 
-bold = workbook.bold_cell_format
+bold = workbook.bold_format
 worksheet.set_column(0, 0, FastExcel::DEF_COL_WIDTH, bold)
 
 price = workbook.number_format("#,##0.00")
@@ -34,6 +34,161 @@ workbook.close
 See [more examples](https://github.com/Paxa/fast_excel/tree/master/examples)
 
 This repository and gem contain sources of [libxlsxwriter](https://github.com/jmcnamara/libxlsxwriter)
+
+## Install
+
+```ruby
+# Gemfile
+gem 'fast_excel'
+```
+Or
+```
+gem install fast_excel
+```
+
+
+
+### Create Document
+```ruby
+workbook = FastExcel.open # creates tmp file
+# ...
+send_data(workbook.read_string, filename: "table.xlsx") # read tmp file and delete it
+```
+
+Also can use  `workbook.remove_tmp_file` to delete tmp file manually
+
+
+**Constant memory mode**: saves each row to disk, good for really big files but can not change previous lines that already saved
+```ruby
+workbook = FastExcel.open(constant_memory: true)
+```
+
+**Save to file**
+```ruby
+workbook = FastExcel.open("my_dinner.xlsx")
+```
+
+### Write Data
+FastExcel will automatically detect data type and one of `write_number` or `write_datetime` or `write_formula` or `write_string`
+```ruby
+workbook = FastExcel.open
+worksheet = workbook.add_worksheet
+
+# write specific type value value
+worksheet.write_number(row = 0, col = 5, 1_234_567, format = nil)
+
+# write value with type detection
+worksheet.write_value(row = 0, col = 5, 1_234_567, format = nil)
+
+# write row of values. format argument can be format object or array of format objects
+worksheet.write_row(row = 1, ["strong", 123_456, Time.now], format = nil)
+
+# write row to the bottom
+worksheet.append_row(["strong", 123_456, Time.now], )
+
+# shortcut for append_row()
+worksheet << ["strong", 123_456, Time.now]
+```
+
+**Saving dates**: excel store dates as number of days since 1st January 1900, and FastExcel will make it for you.
+
+To make saving of dates slightly faster can use `FastExcel.date_num` helper:
+```ruby
+date_format = workbook.number_format("[$-409]m/d/yy hh:mm;@")
+worksheet.write_number(0, 0, FastExcel.date_num(Time.now, Time.zone.utc_offset), date_format)
+```
+
+**Formulas**: special type of value in excel
+```ruby
+worksheet << [1, 2, 3, 4]
+worksheet << [FastExcel::Formula.new("SUM(A1:D1)")] # A2 will be shown as 10
+
+```
+
+### Data Formatting
+```ruby
+format = worksheet.add_format(
+  bold: true,
+  italic: true,
+  font_outline: true,
+  font_shadow: true,
+  text_wrap: true,
+  font_strikeout: true,
+  shrink: true,
+  text_justlast: true,
+  font_size: 13, # default is 11, use 0 for user's default
+  font_name: "Arial", # default is Calibri, also accessible via font_family
+  font_color: :orange,
+  font_script: :font_subscript,
+  rotation: 10,
+  underline: :underline_single, # or :underline_double or :underline_single_accounting or :underline_double_accounting
+  indent: 1,
+  # border styles
+  border: :border_thin,
+  left: :medium,
+  top: :dashed,
+  right: :double,
+  bottom: :hair,
+  bottom_color: :alice_blue,
+  top_color: "#11ABCD",
+  # Align
+  align: {h: :align_center, v: :align_vertical_center},
+  num_format: "#,##0.00"
+)
+```
+
+**Shortcuts**:
+```ruby
+workbook.bold_format # bold text
+workbook.number_format("[$-409]m/d/yy h:mm AM/PM;@") # format for date
+```
+
+### Set Column Width
+
+```ruby
+workbook.set_column(start_col, end_col, width = nil, format = nil)
+# or
+workbook.set_column_width(col, width = 60)
+# or 
+workbook.set_columns_width(start_col, end_col, width = 60)
+```
+
+### Column Auto Width
+
+Column authwidth only works for string values, because numbers may have custom formatting
+
+Enabling column auto widths will slow down writing string values for about 15-25%
+
+```ruby
+require 'fast_excel'
+
+workbook = FastExcel.open(constant_memory: true)
+
+worksheet = workbook.add_worksheet
+worksheet.auto_width = true
+
+worksheet.append_row(["some text", "some longer text for example"])
+
+content = workbook.read_string
+File.open('./some_file.xlsx', 'wb') {|f| f.write(content) }
+```
+
+![fast_excel_auto_width](https://user-images.githubusercontent.com/26019/51788441-ba981300-21b0-11e9-9611-54dda78effcd.png)
+
+
+### API
+
+This gem is FFI binding for libxlsxwriter C library with some syntax sugar. All original functions is avaliable, for example:
+
+```ruby
+Libxlsxwriter.worksheet_activate(worksheet) # => will call void worksheet_activate(lxw_worksheet *worksheet)
+# or shorter:
+worksheet.activate
+```
+
+Full libxlsxwriter documentation: [http://libxlsxwriter.github.io/](http://libxlsxwriter.github.io/)
+
+Generated rdoc: [rubydoc.info/github/Paxa/fast_excel](https://www.rubydoc.info/github/Paxa/fast_excel)
 
 ## Benchmarks
 
@@ -59,64 +214,3 @@ FastExcel   - 20 MB
 Axlsx       - 60 MB
 write_xlsx - 100 MB
 ```
-
-## Install
-
-```ruby
-# Gemfile
-gem 'fast_excel'
-```
-Or
-```
-gem install fast_excel
-```
-
-## Column Auto Width
-
-Column authwidth only works for string values, because numbers may have custom formatting
-
-Enabling column auto widths will slow down writing string values for about 15-25%
-
-```ruby
-require 'fast_excel'
-
-workbook = FastExcel.open(constant_memory: true)
-
-worksheet = workbook.add_worksheet
-worksheet.auto_width = true
-
-worksheet.append_row(["some text", "some longer text for example"])
-
-content = workbook.read_string
-File.open('./some_file.xlsx', 'wb') {|f| f.write(content) }
-```
-
-![fast_excel_auto_width](https://user-images.githubusercontent.com/26019/51788441-ba981300-21b0-11e9-9611-54dda78effcd.png)
-
-
-## API
-
-This gem is FFI binding for libxlsxwriter C library with some syntax sugar. All original functions is avaliable, for example:
-
-```ruby
-Libxlsxwriter.worksheet_activate(worksheet) # => will call void worksheet_activate(lxw_worksheet *worksheet)
-# or shorter:
-worksheet.activate
-```
-
-Full libxlsxwriter documentation: [http://libxlsxwriter.github.io/](http://libxlsxwriter.github.io/)
-
-Helper Methods:
-
-* `FastExcel.open(filename = nil, constant_memory: false, default_format: {})` - open new workbook, if `filename` is nil - it will create tmp file, `default_format` will be called with `workbook.default_format.set(...)`
-* `FastExcel.date_num(time, offset = nil)` - generate Excel's internal date value, number of days since 1900-Jan-01, works faster then creating `Libxlsxwriter::Datetime` struct. `offset` argument is number hours from UTC, e.g. `3.5`
-* `FastExcel.print_ffi_obj(object)` - print FFI object fields, just for debugging
-* `workbook.bold_cell_format` - shortcut for creating bold format
-* `workbook.number_format(num_format)` - create number or date format, for money usually: `"#,##0.00"`, for date: `"[$-409]m/d/yy h:mm AM/PM;@"`
-* `workbook.read_string` - close workbook, read file to string, delete file (only if tmp file)
-* `workbook.remove_tmp_file` - delete tmp file (only if tmp file)
-* `worksheet.write_row(row_num, array_of_mixed_value, formats = nil)` - write values one by one, detecting type automatically. `formats` can be array, or Format object or nil
-* `format.font_family` - alias for `format.font_name`
-* `workbook.default_format.font_size` - set it to 0 if you want to use default font size (that what user set in Excel settings)
-* `worksheet.write_row(num, values_array, formats = nil)` - Write row of values
-* `worksheet.append_row(values_array, formats = nil)` - Append row of values ot the bottom of worksheet

@@ -11,7 +11,7 @@ workbook.default_format.set(
 
 worksheet = workbook.add_worksheet("Payments Report")
 
-bold = workbook.bold_cell_format
+bold = workbook.bold_format
 worksheet.set_column(0, 0, FastExcel::DEF_COL_WIDTH, bold)
 
 price = workbook.number_format("#,##0.00")

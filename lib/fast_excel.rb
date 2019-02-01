@@ -298,7 +298,7 @@ module FastExcel
         if respond_to?("#{key}=")
           send("#{key}=", value)
         elsif respond_to?("set_#{key}=")
-            send("set_#{key}=", value)
+          send("set_#{key}=", value)
         else
           self[key] = value
         end
@@ -343,6 +343,8 @@ module FastExcel
       bold.set_bold
       bold
     end
+
+    alias_method :bold_format, :bold_cell_format
 
     # "#,##0.00"
     # "[$-409]m/d/yy h:mm AM/PM;@"
@@ -485,6 +487,10 @@ module FastExcel
     def append_row(values, formats = nil)
       @last_row_number += 1
       write_row(last_row_number, values, formats)
+    end
+
+    def <<(values)
+      append_row(values)
     end
 
     def last_row_number
