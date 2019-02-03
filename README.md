@@ -118,7 +118,7 @@ format = worksheet.add_format(
   text_justlast: true,
   font_size: 13, # default is 11, use 0 for user's default
   font_name: "Arial", # default is Calibri, also accessible via font_family
-  font_color: :orange,
+  font_color: :orange, # can use RGB hex as "#FF0000" or 0x00FF00 or color name as symbol or string
   font_script: :font_subscript,
   rotation: 10,
   underline: :underline_single, # or :underline_double or :underline_single_accounting or :underline_double_accounting
@@ -151,6 +151,11 @@ workbook.set_column(start_col, end_col, width = nil, format = nil)
 workbook.set_column_width(col, width = 60)
 # or 
 workbook.set_columns_width(start_col, end_col, width = 60)
+```
+
+### Set Row Height
+```ruby
+worksheet.set_row(row_num = 0, height = 30, format = nil)
 ```
 
 ### Column Auto Width
