@@ -69,7 +69,7 @@ workbook = FastExcel.open("my_dinner.xlsx")
 ```
 
 ### Write Data
-FastExcel will automatically detect data type and one of `write_number` or `write_datetime` or `write_formula` or `write_string`
+FastExcel will automatically detect data type and one of `write_number` or `write_datetime` or `write_formula` or `write_string` or `write_url`
 ```ruby
 workbook = FastExcel.open
 worksheet = workbook.add_worksheet
@@ -102,8 +102,19 @@ worksheet.write_number(0, 0, FastExcel.date_num(Time.now, Time.zone.utc_offset),
 ```ruby
 worksheet << [1, 2, 3, 4]
 worksheet << [FastExcel::Formula.new("SUM(A1:D1)")] # A2 will be shown as 10
-
 ```
+
+**URL**: Link to website or something else
+```ruby
+url_format = workbook.add_format(underline: :underline_single, font_color: :blue) # format is optional
+worksheet.append_row([
+  FastExcel::URL.new("https://github.com/Paxa/fast_excel"),
+  FastExcel::URL.new("postgres://localhost")
+], url_format)
+# or
+worksheet.write_url(0, 2, "https://github.com/Paxa/fast_excel", url_format)
+```
+
 
 ### Data Formatting
 ```ruby

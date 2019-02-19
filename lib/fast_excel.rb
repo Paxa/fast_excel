@@ -13,6 +13,13 @@ module FastExcel
     end
   end
 
+  class URL
+    attr_accessor :url
+    def initialize(url)
+      @url = url
+    end
+  end
+
   DEF_COL_WIDTH = 8.43
 
   def self.open(filename = nil, constant_memory: false, default_format: nil)
@@ -449,6 +456,9 @@ module FastExcel
         write_number(row_number, cell_number, FastExcel.date_num(value), format)
       elsif value.is_a?(Formula)
         write_formula(row_number, cell_number, value.fml, format)
+      elsif value.is_a?(FastExcel::URL)
+        write_url(row_number, cell_number, value.url, format)
+        add_text_width(value.url, format, cell_number) if auto_width?
       else
         write_string(row_number, cell_number, value.to_s, format)
         add_text_width(value, format, cell_number) if auto_width?
