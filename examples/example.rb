@@ -20,10 +20,10 @@ worksheet.set_column(1, 1, 20, price)
 date_format = workbook.number_format("[$-409]m/d/yy h:mm AM/PM;@")
 worksheet.set_column(2, 2, 20, date_format)
 
-worksheet.write_row(0, ["message", "price", "date"], bold)
+worksheet.write_row(0, ["message", "price", "date", "complete"], bold)
 
 for i in 1..1000
-  worksheet.write_row(i, ["Hello", (rand * 10_000_000).round(2), Time.now])
+  worksheet.write_row(i, ["Hello", (rand * 10_000_000).round(2), Time.now, i % 2 == 0])
 
   # Or manually
   # worksheet.write_string(i, 0, "Hello", nil)
