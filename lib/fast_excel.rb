@@ -528,6 +528,10 @@ module FastExcel
       end
     end
 
+    def enable_filters!(start_col: 0, end_col:)
+      autofilter(start_col, 0, @last_row_number, end_col)
+    end
+
     def close
       if auto_width?
         @column_widths.each do |num, width|
