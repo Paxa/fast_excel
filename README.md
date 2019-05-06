@@ -157,11 +157,11 @@ workbook.number_format("[$-409]m/d/yy h:mm AM/PM;@") # format for date
 ### Set Column Width
 
 ```ruby
-workbook.set_column(start_col, end_col, width = nil, format = nil)
+worksheet.set_column(start_col, end_col, width = nil, format = nil)
 # or
-workbook.set_column_width(col, width = 60)
-# or 
-workbook.set_columns_width(start_col, end_col, width = 60)
+worksheet.set_column_width(col, width = 60)
+# or
+worksheet.set_columns_width(start_col, end_col, width = 60)
 ```
 
 ### Set Row Height
