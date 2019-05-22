@@ -46,7 +46,7 @@ GEM
     rake (12.3.2)
     ruby-progressbar (1.10.0)
     rubyzip (1.2.2)
-    write_xlsx (0.85.5)
+    write_xlsx (0.85.6)
       rubyzip (>= 1.0.0)
       zip-zip
     xlsxtream (2.1.0)
