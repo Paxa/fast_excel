@@ -29,7 +29,7 @@ GEM
     ansi (1.5.0)
     benchmark-ips (2.7.2)
     builder (3.2.3)
-    ffi (1.10.0)
+    ffi (1.11.1)
     ffi_gen (1.2.0)
       ffi (~> 1.0)
     htmlentities (4.3.4)
