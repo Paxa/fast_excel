@@ -25,7 +25,7 @@ module FastExcel
   def self.open(filename = nil, constant_memory: false, default_format: nil)
     tmp_file = false
     if filename
-      if File.exist?(filename)
+      if File.exist?(filename) && File.size(filename) > 0
         raise ArgumentError, "File '#{filename}' already exists. FastExcel can not open existing files, only create new files"
       end
     else
