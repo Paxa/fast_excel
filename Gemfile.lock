@@ -29,7 +29,7 @@ GEM
     ansi (1.5.0)
     benchmark-ips (2.7.2)
     builder (3.2.3)
-    ffi (1.10.0)
+    ffi (1.11.1)
     ffi_gen (1.2.0)
       ffi (~> 1.0)
     htmlentities (4.3.4)
@@ -41,19 +41,19 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    nokogiri (1.10.1)
+    nokogiri (1.10.3)
       mini_portile2 (~> 2.4.0)
     rake (12.3.2)
-    ruby-progressbar (1.10.0)
-    rubyzip (1.2.2)
-    write_xlsx (0.85.5)
+    ruby-progressbar (1.10.1)
+    rubyzip (1.2.3)
+    write_xlsx (0.85.6)
       rubyzip (>= 1.0.0)
       zip-zip
     xlsxtream (2.1.0)
       zip_tricks (~> 4.5)
     zip-zip (0.3)
       rubyzip (>= 1.0.0)
-    zip_tricks (4.7.1)
+    zip_tricks (4.7.4)
 
 PLATFORMS
   ruby
@@ -72,4 +72,4 @@ DEPENDENCIES
   xlsxtream
 
 BUNDLED WITH
-   1.17.2
+   2.0.2
