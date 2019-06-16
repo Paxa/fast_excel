@@ -23,6 +23,7 @@ matrix:
     rvm: 2.6.0
   - os: osx
     rvm: 2.6.0
+    osx_image: xcode10.2
   fast_finish: true
 
 script:
