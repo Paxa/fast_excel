@@ -14,14 +14,14 @@ describe "FastExcel validations" do
     assert_equal("Worksheet name 'Payments Report' is already in use", error.message)
   end
 
-  it "should not raise error when worksheet name is empty string" do
+  it "should not raise error when worksheet name is null" do
     workbook = FastExcel.open(constant_memory: true)
 
-    ws1 = workbook.add_worksheet("")
-    ws2 = workbook.add_worksheet("")
+    ws1 = workbook.add_worksheet()
+    ws2 = workbook.add_worksheet()
     ws2.write_value(0, 2, "aaa")
 
-    assert_equal("", ws1[:name])
-    assert_equal("", ws2[:name])
+    assert_equal("Sheet1", ws1[:name])
+    assert_equal("Sheet2", ws2[:name])
   end
 end

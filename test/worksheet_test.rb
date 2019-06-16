@@ -83,4 +83,13 @@ describe "FastExcel::WorksheetExt append_row" do
 
     assert_equal([[0.1234]], get_arrays(@workbook))
   end
+
+  it "should set name correctly" do
+    workbook = FastExcel.open(constant_memory: true)
+    ws1 = workbook.add_worksheet("foo")
+    ws2 = workbook.add_worksheet("")
+
+    assert_equal("foo", ws1[:name])
+    assert_equal("", ws2[:name])
+  end
 end

@@ -362,16 +362,14 @@ module FastExcel
     end
 
     def add_worksheet(sheetname = nil)
-      sheetname = nil if sheetname == ""
-
       if !sheetname.nil? && @sheet_names.include?(sheetname)
         raise ArgumentError, "Worksheet name '#{sheetname}' is already in use"
       end
-      @sheet_names << sheetname
 
-      sheet = super
+      sheet = super(sheetname)
       sheet.workbook = self
       @sheets << sheet
+      @sheet_names << sheet[:name]
       sheet
     end
 
