@@ -119,6 +119,10 @@ module Libxlsxwriter
   
   SCHEMA_ROOT = "http://schemas.openxmlformats.org"
   
+
+  PORTRAIT = 1
+  LANDSCAPE = 0
+
   def error(message)
     fprintf(STDERR, "[ERROR][%s:%d]: \"message\"\n", FILE, LINE)
   end
@@ -317,24 +321,31 @@ module Libxlsxwriter
     :error_memory_malloc_failed, 1,
     :error_creating_xlsx_file, 2,
     :error_creating_tmpfile, 3,
-    :error_zip_file_operation, 4,
-    :error_zip_file_add, 5,
-    :error_zip_close, 6,
-    :error_null_parameter_ignored, 7,
-    :error_parameter_validation, 8,
-    :error_sheetname_length_exceeded, 9,
-    :error_invalid_sheetname_character, 10,
-    :error_sheetname_already_used, 11,
-    :error_128_string_length_exceeded, 12,
-    :error_255_string_length_exceeded, 13,
-    :error_max_string_length_exceeded, 14,
-    :error_shared_string_index_not_found, 15,
-    :error_worksheet_index_out_of_range, 16,
-    :error_worksheet_max_number_urls_exceeded, 17,
-    :error_image_dimensions, 18,
-    :max_errno, 19
+    :error_reading_tmpfile, 4,
+    :error_zip_file_operation, 5,
+    :error_zip_parameter_error, 6,
+    :error_zip_bad_zip_file, 7,
+    :error_zip_internal_error, 8,
+    :error_zip_file_add, 9,
+    :error_zip_close, 10,
+    :error_null_parameter_ignored, 11,
+    :error_parameter_validation, 12,
+    :error_sheetname_length_exceeded, 13,
+    :error_invalid_sheetname_character, 14,
+    :error_sheetname_start_end_apostrophe, 15,
+    :error_sheetname_already_used, 16,
+    :error_sheetname_reserved, 17,
+    :error_32_string_length_exceeded, 18,
+    :error_128_string_length_exceeded, 19,
+    :error_255_string_length_exceeded, 20,
+    :error_max_string_length_exceeded, 21,
+    :error_shared_string_index_not_found, 22,
+    :error_worksheet_index_out_of_range, 23,
+    :error_worksheet_max_number_urls_exceeded, 24,
+    :error_image_dimensions, 25,
+    :max_errno, 26
   ]
-  
+
   # = Fields:
   # :year ::
   #   (Integer) Year     : 1900 - 9999
@@ -887,6 +898,7 @@ module Libxlsxwriter
     include DrawingWrappers
     layout :file, :pointer,
            :embedded, :uchar,
+           :orientation, :uchar,
            :drawing_objects, DrawingObjects
   end
   
@@ -2610,9 +2622,7 @@ module Libxlsxwriter
            :zipfile_info, ZipFileinfo.by_value,
            :filename, :string,
            :buffer, :string,
-           :tmpdir, :string,
-           :chart_count, :ushort,
-           :drawing_count, :ushort
+           :tmpdir, :string
   end
   
   # @method packager_new(filename, tmpdir)
@@ -2620,7 +2630,7 @@ module Libxlsxwriter
   # @param [String] tmpdir 
   # @return [Packager] 
   # @scope class
-  attach_function :packager_new, :lxw_packager_new, [:string, :string], Packager
+  attach_function :packager_new, :lxw_packager_new, [:string, :string, :uchar], Packager
   
   # @method packager_free(packager)
   # @param [Packager] packager 

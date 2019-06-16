@@ -705,6 +705,7 @@ module Libxlsxwriter
            :hidden, :uint8,
            :active_sheet, :pointer,
            :first_sheet, :pointer,
+           :is_chartsheet, :uint8,
            :col_options, :pointer,
            :col_options_max, :uint16,
            :col_sizes, :pointer,
@@ -740,9 +741,10 @@ module Libxlsxwriter
            :right_to_left, :uint8,
            :screen_gridlines, :uint8,
            :show_zeros, :uint8,
-           :vba_codename, :uint8,
            :vcenter, :uint8,
            :zoom_scale_normal, :uint8,
+           :num_validations, :uint8,
+           :vba_codename, :pointer,
            :tab_color, :int,
            :margin_left, :double,
            :margin_right, :double,
@@ -891,13 +893,14 @@ module Libxlsxwriter
     :number_cell, 1,
     :string_cell, 2,
     :inline_string_cell, 3,
-    :formula_cell, 4,
-    :array_formula_cell, 5,
-    :blank_cell, 6,
-    :boolean_cell, 7,
-    :hyperlink_url, 8,
-    :hyperlink_internal, 9,
-    :hyperlink_external, 10
+    :inline_rich_string_cell, 4,
+    :formula_cell, 5,
+    :array_formula_cell, 6,
+    :blank_cell, 7,
+    :boolean_cell, 8,
+    :hyperlink_url, 9,
+    :hyperlink_internal, 10,
+    :hyperlink_external, 11
   ]
 
   # = Fields:
@@ -1550,6 +1553,16 @@ module Libxlsxwriter
   #   (FFI::Pointer(**Worksheet)) 
   class Worksheets < FFI::Struct
     layout :stqh_first, Worksheet.ptr,
+           :stqh_last, :pointer
+  end
+
+  class Sheet < FFI::Struct
+    layout :is_chartsheet, :uchar,
+           :list_pointers, :pointer
+  end
+
+  class Sheets < FFI::Struct
+    layout :stqh_first, Sheet.ptr,
            :stqh_last, :pointer
   end
 end

@@ -1284,6 +1284,7 @@ module Libxlsxwriter
            :show_labels_legend, :uchar,
            :show_labels_percent, :uchar,
            :label_position, :uchar,
+           :label_align, :uchar,
            :label_separator, :uchar,
            :default_label_position, :uchar,
            :label_num_format, :string,
@@ -1950,6 +1951,7 @@ module Libxlsxwriter
            :in_use, :uchar,
            :chart_group, :uchar,
            :cat_has_num_fmt, :uchar,
+           :is_chartsheet, :uchar,
            :has_horiz_cat_axis, :uchar,
            :has_horiz_val_axis, :uchar,
            :style_id, :uchar,
@@ -1992,6 +1994,7 @@ module Libxlsxwriter
            :up_bar_fill, ChartFill,
            :down_bar_fill, ChartFill,
            :default_label_position, :uchar,
+           :is_protected, :uchar,
            :ordered_list_pointers, ChartOrderedListPointers.by_value,
            :list_pointers, ChartListPointers.by_value
   end

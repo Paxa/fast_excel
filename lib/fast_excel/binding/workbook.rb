@@ -6,7 +6,8 @@ module Libxlsxwriter
   #   (String) Directory to use for the temporary files created by libxlsxwriter.
   class WorkbookOptions < FFI::Struct
     layout :constant_memory, :uchar,
-           :tmpdir, :string
+           :tmpdir, :string,
+           :use_zip64, :uchar
   end
 
   # = Fields:
@@ -168,8 +169,11 @@ module Libxlsxwriter
   class Workbook < FFI::Struct
     include WorkbookWrappers
     layout :file, :pointer,
+           :sheets, Sheets.ptr,
            :worksheets, Worksheets.ptr,
+           :chartsheets, :pointer,
            :worksheet_names, WorksheetNames.ptr,
+           :chartsheet_names, :pointer,
            :charts, Charts.ptr,
            :ordered_charts, Charts.ptr,
            :formats, Formats.ptr,
@@ -180,6 +184,8 @@ module Libxlsxwriter
            :filename, :pointer,
            :options, WorkbookOptions.by_value,
            :num_sheets, :uint16,
+           :num_worksheets, :uint16,
+           :num_chartsheets, :uint16,
            :first_sheet, :uint16,
            :active_sheet, :uint16,
            :num_xf_formats, :uint16,
@@ -192,7 +198,9 @@ module Libxlsxwriter
            :has_png, :uchar,
            :has_jpeg, :uchar,
            :has_bmp, :uchar,
-           :used_xf_formats, HashTable.ptr
+           :used_xf_formats, HashTable.ptr,
+           :vba_project, :pointer,
+           :vba_codename, :pointer
   end
 
   attach_function :workbook_default_format, :workbook_default_format, [Workbook], Format
