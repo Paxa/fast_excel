@@ -689,6 +689,7 @@ module Libxlsxwriter
            :array, :pointer,
            :merged_ranges, MergedRanges.ptr,
            :selections, Selections.ptr,
+           :data_validations, :pointer, # TODO add real definition for lxw_data_validations
            :image_data, ImageData.ptr,
            :chart_data, ChartData.ptr,
            :dim_rowmin, :uint32,
