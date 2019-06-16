@@ -906,7 +906,23 @@ module Libxlsxwriter
     :end_, 0,
     :no, 1
   ]
-  
+
+  enum :chart_error_bar_axis, [
+    :axis_x, 0,
+    :axis_y, 1
+  ]
+
+  enum :chart_axis_label_alignment, [
+    :align_center, 0,
+    :align_left, 1,
+    :align_right, 2
+  ]
+
+  enum :chart_axis_type, [
+    :axis_type_x, 0,
+    :axis_type_y, 1
+  ]
+
   # = Fields:
   # :type ::
   #   (Integer) 
