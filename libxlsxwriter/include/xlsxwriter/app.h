@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * app - A libxlsxwriter library for creating Excel XLSX app files.
  *
@@ -56,7 +56,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_app *lxw_app_new();
+lxw_app *lxw_app_new(void);
 void lxw_app_free(lxw_app *app);
 void lxw_app_assemble_xml_file(lxw_app *self);
 void lxw_app_add_part_name(lxw_app *self, const char *name);

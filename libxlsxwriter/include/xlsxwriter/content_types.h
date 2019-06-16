@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * content_types - A libxlsxwriter library for creating Excel XLSX
  *                 content_types files.
@@ -17,6 +17,7 @@
 
 #define LXW_APP_PACKAGE  "application/vnd.openxmlformats-package."
 #define LXW_APP_DOCUMENT "application/vnd.openxmlformats-officedocument."
+#define LXW_APP_MSEXCEL  "application/vnd.ms-excel."
 
 /*
  * Struct to represent a content_types.
@@ -37,7 +38,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_content_types *lxw_content_types_new();
+lxw_content_types *lxw_content_types_new(void);
 void lxw_content_types_free(lxw_content_types *content_types);
 void lxw_content_types_assemble_xml_file(lxw_content_types *content_types);
 void lxw_ct_add_default(lxw_content_types *content_types, const char *key,
@@ -46,6 +47,8 @@ void lxw_ct_add_override(lxw_content_types *content_types, const char *key,
                          const char *value);
 void lxw_ct_add_worksheet_name(lxw_content_types *content_types,
                                const char *name);
+void lxw_ct_add_chartsheet_name(lxw_content_types *content_types,
+                                const char *name);
 void lxw_ct_add_chart_name(lxw_content_types *content_types,
                            const char *name);
 void lxw_ct_add_drawing_name(lxw_content_types *content_types,

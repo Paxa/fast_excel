@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * custom - A libxlsxwriter library for creating Excel custom property files.
  *
@@ -32,7 +32,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_custom *lxw_custom_new();
+lxw_custom *lxw_custom_new(void);
 void lxw_custom_free(lxw_custom *custom);
 void lxw_custom_assemble_xml_file(lxw_custom *self);
 

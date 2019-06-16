@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @brief Utility functions for libxlsxwriter.
  *
- * <!-- Copyright 2014-2018, John McNamara, jmcnamara@cpan.org -->
+ * <!-- Copyright 2014-2019, John McNamara, jmcnamara@cpan.org -->
  *
  */
 
@@ -17,6 +17,7 @@
 #define __LXW_UTILITY_H__
 
 #include <stdint.h>
+#include <strings.h>
 #include "common.h"
 #include "xmlwriter.h"
 
@@ -87,6 +88,20 @@ extern "C" {
 /* *INDENT-ON* */
 
 /**
+ * @brief Retrieve the library version.
+ *
+ * @return The "X.Y.Z" version string.
+ *
+ * Get the library version as a "X.Y.Z" version string
+ *
+ *  @code
+ *      printf("Libxlsxwriter version = %s\n", lxw_version());
+ *  @endcode
+ *
+ */
+const char *lxw_version(void);
+
+/**
  * @brief Converts a libxlsxwriter error number to a string.
  *
  * The `%lxw_strerror` function converts a libxlsxwriter error number defined
@@ -152,6 +167,13 @@ size_t lxw_utf8_strlen(const char *str);
 
 void lxw_str_tolower(char *str);
 
+/* Define a portable version of strcasecmp(). */
+#ifdef _MSC_VER
+#define lxw_strcasecmp _stricmp
+#else
+#define lxw_strcasecmp strcasecmp
+#endif
+
 FILE *lxw_tmpfile(char *tmpdir);
 
 /* Use a user defined function to format doubles in sprintf or else a simple
@@ -162,6 +184,8 @@ int lxw_sprintf_dbl(char *data, double number);
 #define lxw_sprintf_dbl(data, number) \
         lxw_snprintf(data, LXW_ATTR_32, "%.16g", number)
 #endif
+
+uint16_t lxw_hash_password(const char *password);
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

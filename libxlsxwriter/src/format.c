@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -21,7 +21,7 @@
  * Create a new format object.
  */
 lxw_format *
-lxw_format_new()
+lxw_format_new(void)
 {
     lxw_format *format = calloc(1, sizeof(lxw_format));
     GOTO_LABEL_ON_MEM_ERROR(format, mem_error);
@@ -455,7 +455,7 @@ format_set_rotation(lxw_format *self, int16_t angle)
     if (angle == 270) {
         self->rotation = 255;
     }
-    else if (angle >= -90 || angle <= 90) {
+    else if (angle >= -90 && angle <= 90) {
         if (angle < 0)
             angle = -angle + 90;
 

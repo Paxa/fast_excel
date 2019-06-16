@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * shared_strings - A libxlsxwriter library for creating Excel XLSX
  *                  sst files.
@@ -37,6 +37,7 @@ STAILQ_HEAD(sst_order_list, sst_element);
 struct sst_element {
     uint32_t index;
     char *string;
+    uint8_t is_rich_string;
 
     STAILQ_ENTRY (sst_element) sst_order_pointers;
     RB_ENTRY (sst_element) sst_tree_pointers;
@@ -62,9 +63,10 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_sst *lxw_sst_new();
+lxw_sst *lxw_sst_new(void);
 void lxw_sst_free(lxw_sst *sst);
-struct sst_element *lxw_get_sst_index(lxw_sst *sst, const char *string);
+struct sst_element *lxw_get_sst_index(lxw_sst *sst, const char *string,
+                                      uint8_t is_rich_string);
 void lxw_sst_assemble_xml_file(lxw_sst *self);
 
 /* Declarations required for unit testing. */

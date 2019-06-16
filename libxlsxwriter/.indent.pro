@@ -50,6 +50,7 @@
 -T lxw_chart
 -T lxw_chart_axis
 -T lxw_chart_axis_display_unit
+-T lxw_chart_axis_label_alignment
 -T lxw_chart_axis_label_position
 -T lxw_chart_axis_tick_mark
 -T lxw_chart_axis_tick_position
@@ -77,6 +78,8 @@
 -T lxw_chart_title
 -T lxw_chart_trendline_type
 -T lxw_chart_type
+-T lxw_chartsheet
+-T lxw_chartsheet_name
 -T lxw_col_options
 -T lxw_col_t
 -T lxw_color_t
@@ -110,6 +113,7 @@
 -T lxw_relationships
 -T lxw_repeat_cols
 -T lxw_repeat_rows
+-T lxw_rich_string_tuple
 -T lxw_row
 -T lxw_row_col_options
 -T lxw_row_t
@@ -117,6 +121,7 @@
 -T lxw_series_data_point
 -T lxw_series_error_bars
 -T lxw_series_range
+-T lxw_sheet
 -T lxw_sst
 -T lxw_styles
 -T lxw_theme

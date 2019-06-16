@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  */
 
 /**
@@ -480,7 +480,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_format *lxw_format_new();
+lxw_format *lxw_format_new(void);
 void lxw_format_free(lxw_format *format);
 int32_t lxw_format_get_xf_index(lxw_format *format);
 lxw_font *lxw_format_get_font_key(lxw_format *format);
@@ -691,7 +691,7 @@ void format_set_num_format(lxw_format *format, const char *num_format);
  *
  * @code
  *     format = workbook_add_format(workbook);
- *     format_set_num_format(format, 0x0F);     // d-mmm-yy
+ *     format_set_num_format_index(format, 0x0F); // d-mmm-yy
  * @endcode
  *
  * @note

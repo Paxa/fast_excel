@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -25,7 +25,7 @@
  * Create a new core object.
  */
 lxw_core *
-lxw_core_new()
+lxw_core_new(void)
 {
     lxw_core *core = calloc(1, sizeof(lxw_core));
     GOTO_LABEL_ON_MEM_ERROR(core, mem_error);

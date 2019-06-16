@@ -169,7 +169,7 @@ static char *getenv_save(const char *varname, char *buf, size_t bufsize)
 	buf[0] = '\0';
 	if (ptr)
 	{
-		strncpy(buf, ptr, bufsize);
+		strncpy(buf, ptr, bufsize-1);
 		buf[bufsize-1] = '\0';
 		return buf;
 	}
@@ -189,7 +189,7 @@ static FILE *mktempfile_internal(const char *tmpdir, const char *pfx, char **tmp
  */
 {
 	FILE *fp;
-	int fd;
+	int fd = 0;
 	char randpart[] = "1234567890";
 	size_t lentempname;
 	int i;

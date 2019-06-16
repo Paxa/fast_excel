@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  */
 
 /**
@@ -53,18 +53,19 @@
 #include "drawing.h"
 #include "common.h"
 #include "format.h"
+#include "styles.h"
 #include "utility.h"
 
-#define LXW_ROW_MAX 1048576
-#define LXW_COL_MAX 16384
-#define LXW_COL_META_MAX 128
+#define LXW_ROW_MAX           1048576
+#define LXW_COL_MAX           16384
+#define LXW_COL_META_MAX      128
 #define LXW_HEADER_FOOTER_MAX 255
-#define LXW_MAX_NUMBER_URLS 65530
-#define LXW_PANE_NAME_LENGTH 12 /* bottomRight + 1 */
+#define LXW_MAX_NUMBER_URLS   65530
+#define LXW_PANE_NAME_LENGTH  12        /* bottomRight + 1 */
 
 /* The Excel 2007 specification says that the maximum number of page
  * breaks is 1026. However, in practice it is actually 1023. */
-#define LXW_BREAKS_MAX 1023
+#define LXW_BREAKS_MAX        1023
 
 /** Default column width in Excel */
 #define LXW_DEF_COL_WIDTH (double)8.43
@@ -205,6 +206,7 @@ enum cell_types {
     NUMBER_CELL = 1,
     STRING_CELL,
     INLINE_STRING_CELL,
+    INLINE_RICH_STRING_CELL,
     FORMULA_CELL,
     ARRAY_FORMULA_CELL,
     BLANK_CELL,
@@ -546,6 +548,7 @@ typedef struct lxw_image_options {
     lxw_row_t row;
     lxw_col_t col;
     char *filename;
+    char *description;
     char *url;
     char *tip;
     uint8_t anchor;
@@ -553,9 +556,11 @@ typedef struct lxw_image_options {
     /* Internal metadata. */
     FILE *stream;
     uint8_t image_type;
+    uint8_t is_image_buffer;
+    unsigned char *image_buffer;
+    size_t image_buffer_size;
     double width;
     double height;
-    char *short_name;
     char *extension;
     double x_dpi;
     double y_dpi;
@@ -623,14 +628,38 @@ typedef struct lxw_protection {
     /** Protect scenarios. */
     uint8_t scenarios;
 
-    /** Protect drawing objects. */
+    /** Protect drawing objects. Worksheets only. */
     uint8_t objects;
 
+    /** Turn off chartsheet content protection. */
+    uint8_t no_content;
+
+    /** Turn off chartsheet objects. */
+    uint8_t no_objects;
+
     uint8_t no_sheet;
-    uint8_t content;
     uint8_t is_configured;
     char hash[5];
 } lxw_protection;
+
+/**
+ * @brief Struct to represent a rich string format/string pair.
+ *
+ * Arrays of this struct are used to define "rich" multi-format strings that
+ * are passed to `worksheet_write_rich_string()`. Each struct represents a
+ * fragment of the rich multi-format string with a lxw_format to define the
+ * format for the string part. If the string fragment is unformatted then
+ * `NULL` can be used for the format.
+ */
+typedef struct lxw_rich_string_tuple {
+
+    /** The format for a string fragment in a rich string. NULL if the string
+     *  isn't formatted. */
+    lxw_format *format;
+
+    /** The string fragment. */
+    char *string;
+} lxw_rich_string_tuple;
 
 /**
  * @brief Struct to represent an Excel worksheet.
@@ -668,6 +697,7 @@ typedef struct lxw_worksheet {
     uint8_t hidden;
     uint16_t *active_sheet;
     uint16_t *first_sheet;
+    uint8_t is_chartsheet;
 
     lxw_col_options **col_options;
     uint16_t col_options_max;
@@ -711,10 +741,10 @@ typedef struct lxw_worksheet {
     uint8_t right_to_left;
     uint8_t screen_gridlines;
     uint8_t show_zeros;
-    uint8_t vba_codename;
     uint8_t vcenter;
     uint8_t zoom_scale_normal;
     uint8_t num_validations;
+    char *vba_codename;
 
     lxw_color_t tab_color;
 
@@ -1306,6 +1336,81 @@ lxw_error worksheet_write_formula_num(lxw_worksheet *worksheet,
                                       lxw_format *format, double result);
 
 /**
+ * @brief Write a "Rich" multi-format string to a worksheet cell.
+ *
+ * @param worksheet   pointer to a lxw_worksheet instance to be updated.
+ * @param row         The zero indexed row number.
+ * @param col         The zero indexed column number.
+ * @param rich_string An array of format/string lxw_rich_string_tuple fragments.
+ * @param format      A pointer to a Format instance or NULL.
+ *
+ * @return A #lxw_error code.
+ *
+ * The `%worksheet_write_rich_string()` function is used to write strings with
+ * multiple formats. For example to write the string 'This is **bold**
+ * and this is *italic*' you would use the following:
+ *
+ * @code
+ *     lxw_format *bold = workbook_add_format(workbook);
+ *     format_set_bold(bold);
+ *
+ *     lxw_format *italic = workbook_add_format(workbook);
+ *     format_set_italic(italic);
+ *
+ *     lxw_rich_string_tuple fragment11 = {.format = NULL,   .string = "This is "     };
+ *     lxw_rich_string_tuple fragment12 = {.format = bold,   .string = "bold"         };
+ *     lxw_rich_string_tuple fragment13 = {.format = NULL,   .string = " and this is "};
+ *     lxw_rich_string_tuple fragment14 = {.format = italic, .string = "italic"       };
+ *
+ *     lxw_rich_string_tuple *rich_string1[] = {&fragment11, &fragment12,
+ *                                              &fragment13, &fragment14, NULL};
+ *
+ *     worksheet_write_rich_string(worksheet, CELL("A1"), rich_string1, NULL);
+ *
+ * @endcode
+ *
+ * @image html rich_strings_small.png
+ *
+ * The basic rule is to break the string into fragments and put a lxw_format
+ * object before the fragment that you want to format. So if we look at the
+ * above example again:
+ *
+ * This is **bold** and this is *italic*
+ *
+ * The would be broken down into 4 fragments:
+ *
+ *      default: |This is |
+ *      bold:    |bold|
+ *      default: | and this is |
+ *      italic:  |italic|
+ *
+ * This in then converted to the lxw_rich_string_tuple fragments shown in the
+ * example above. For the default format we use `NULL`.
+ *
+ * The fragments are passed to `%worksheet_write_rich_string()` as a `NULL`
+ * terminated array:
+ *
+ * @code
+ *     lxw_rich_string_tuple *rich_string1[] = {&fragment11, &fragment12,
+ *                                              &fragment13, &fragment14, NULL};
+ *
+ *     worksheet_write_rich_string(worksheet, CELL("A1"), rich_string1, NULL);
+ *
+ * @endcode
+ *
+ * **Note**:
+ * Excel doesn't allow the use of two consecutive formats in a rich string or
+ * an empty string fragment. For either of these conditions a warning is
+ * raised and the input to `%worksheet_write_rich_string()` is ignored.
+ *
+ */
+lxw_error worksheet_write_rich_string(lxw_worksheet *worksheet,
+                                      lxw_row_t row,
+                                      lxw_col_t col,
+                                      lxw_rich_string_tuple *rich_string[],
+                                      lxw_format *format);
+
+/**
  * @brief Set the properties for a row of cells.
  *
  * @param worksheet Pointer to a lxw_worksheet instance to be updated.
@@ -1487,7 +1592,7 @@ lxw_error worksheet_set_row_opt(lxw_worksheet *worksheet,
  *     format_set_bold(bold);
  *
  *     // Set the first column to bold.
- *     worksheet_set_column(worksheet, 0, 0, LXW_DEF_COL_HEIGHT, bold);
+ *     worksheet_set_column(worksheet, 0, 0, LXW_DEF_COL_WIDTH, bold);
  * @endcode
  *
  * The `format` parameter will be applied to any cells in the column that
@@ -1643,6 +1748,77 @@ lxw_error worksheet_insert_image_opt(lxw_worksheet *worksheet,
                                      lxw_row_t row, lxw_col_t col,
                                      const char *filename,
                                      lxw_image_options *options);
+
+/**
+ * @brief Insert an image in a worksheet cell, from a memory buffer.
+ *
+ * @param worksheet    Pointer to a lxw_worksheet instance to be updated.
+ * @param row          The zero indexed row number.
+ * @param col          The zero indexed column number.
+ * @param image_buffer Pointer to an array of bytes that holds the image data.
+ * @param image_size   The size of the array of bytes.
+ *
+ * @return A #lxw_error code.
+ *
+ * This function can be used to insert a image into a worksheet from a memory
+ * buffer:
+ *
+ * @code
+ *     worksheet_insert_image_buffer(worksheet, CELL("B3"), image_buffer, image_size);
+ * @endcode
+ *
+ * @image html image_buffer.png
+ *
+ * The buffer should be a pointer to an array of unsigned char data with a
+ * specified size.
+ *
+ * See `worksheet_insert_image()` for details about the supported image
+ * formats, and other image features.
+ */
+lxw_error worksheet_insert_image_buffer(lxw_worksheet *worksheet,
+                                        lxw_row_t row,
+                                        lxw_col_t col,
+                                        const unsigned char *image_buffer,
+                                        size_t image_size);
+
+/**
+ * @brief Insert an image in a worksheet cell, from a memory buffer.
+ *
+ * @param worksheet    Pointer to a lxw_worksheet instance to be updated.
+ * @param row          The zero indexed row number.
+ * @param col          The zero indexed column number.
+ * @param image_buffer Pointer to an array of bytes that holds the image data.
+ * @param image_size   The size of the array of bytes.
+ * @param options      Optional image parameters.
+ *
+ * @return A #lxw_error code.
+ *
+ * The `%worksheet_insert_image_buffer_opt()` function is like
+ * `worksheet_insert_image_buffer()` function except that it takes an optional
+ * #lxw_image_options struct to scale and position the image:
+ *
+ * @code
+ *     lxw_image_options options = {.x_offset = 32, .y_offset = 4,
+ *                                  .x_scale  = 2,  .y_scale  = 1};
+ *
+ *     worksheet_insert_image_buffer_opt(worksheet, CELL("B3"), image_buffer, image_size, &options);
+ * @endcode
+ *
+ * @image html image_buffer_opt.png
+ *
+ * The buffer should be a pointer to an array of unsigned char data with a
+ * specified size.
+ *
+ * See `worksheet_insert_image_buffer_opt()` for details about the supported
+ * image formats, and other image options.
+ */
+lxw_error worksheet_insert_image_buffer_opt(lxw_worksheet *worksheet,
+                                            lxw_row_t row,
+                                            lxw_col_t col,
+                                            const unsigned char *image_buffer,
+                                            size_t image_size,
+                                            lxw_image_options *options);
+
 /**
  * @brief Insert a chart object into a worksheet.
  *
@@ -1653,8 +1829,8 @@ lxw_error worksheet_insert_image_opt(lxw_worksheet *worksheet,
  *
  * @return A #lxw_error code.
  *
- * The `%worksheet_insert_chart()` can be used to insert a chart into a
- * worksheet. The chart object must be created first using the
+ * The `%worksheet_insert_chart()` function can be used to insert a chart into
+ * a worksheet. The chart object must be created first using the
  * `workbook_add_chart()` function and configured using the @ref chart.h
  * functions.
  *
@@ -1665,12 +1841,11 @@ lxw_error worksheet_insert_image_opt(lxw_worksheet *worksheet,
  *     // Add a data series to the chart.
  *     chart_add_series(chart, NULL, "=Sheet1!$A$1:$A$6");
  *
- *     // Insert the chart into the worksheet
+ *     // Insert the chart into the worksheet.
  *     worksheet_insert_chart(worksheet, 0, 2, chart);
  * @endcode
  *
  * @image html chart_working.png
- *
  *
  * **Note:**
  *
@@ -2282,26 +2457,26 @@ void worksheet_set_margins(lxw_worksheet *worksheet, double left,
  * @code
  *     worksheet_set_header(worksheet, "&LHello");
  *
- *      ---------------------------------------------------------------
- *     |                                                               |
- *     | Hello                                                         |
- *     |                                                               |
+ *     //     ---------------------------------------------------------------
+ *     //    |                                                               |
+ *     //    | Hello                                                         |
+ *     //    |                                                               |
  *
  *
  *     worksheet_set_header(worksheet, "&CHello");
  *
- *      ---------------------------------------------------------------
- *     |                                                               |
- *     |                          Hello                                |
- *     |                                                               |
+ *     //     ---------------------------------------------------------------
+ *     //    |                                                               |
+ *     //    |                          Hello                                |
+ *     //    |                                                               |
  *
  *
  *     worksheet_set_header(worksheet, "&RHello");
  *
- *      ---------------------------------------------------------------
- *     |                                                               |
- *     |                                                         Hello |
- *     |                                                               |
+ *     //     ---------------------------------------------------------------
+ *     //    |                                                               |
+ *     //    |                                                         Hello |
+ *     //    |                                                               |
  *
  *
  * @endcode
@@ -2313,10 +2488,10 @@ void worksheet_set_margins(lxw_worksheet *worksheet, double left,
  * @code
  *     worksheet_set_header(worksheet, "Hello");
  *
- *      ---------------------------------------------------------------
- *     |                                                               |
- *     |                          Hello                                |
- *     |                                                               |
+ *     //     ---------------------------------------------------------------
+ *     //    |                                                               |
+ *     //    |                          Hello                                |
+ *     //    |                                                               |
  *
  * @endcode
  *
@@ -2325,10 +2500,10 @@ void worksheet_set_margins(lxw_worksheet *worksheet, double left,
  * @code
  *     worksheet_set_header(worksheet, "&LCiao&CBello&RCielo");
  *
- *      ---------------------------------------------------------------
- *     |                                                               |
- *     | Ciao                     Bello                          Cielo |
- *     |                                                               |
+ *     //     ---------------------------------------------------------------
+ *     //    |                                                               |
+ *     //    | Ciao                     Bello                          Cielo |
+ *     //    |                                                               |
  *
  * @endcode
  *
@@ -2339,17 +2514,17 @@ void worksheet_set_margins(lxw_worksheet *worksheet, double left,
  * @code
  *     worksheet_set_header(worksheet, "&CPage &P of &N");
  *
- *      ---------------------------------------------------------------
- *     |                                                               |
- *     |                        Page 1 of 6                            |
- *     |                                                               |
+ *     //     ---------------------------------------------------------------
+ *     //    |                                                               |
+ *     //    |                        Page 1 of 6                            |
+ *     //    |                                                               |
  *
  *     worksheet_set_header(worksheet, "&CUpdated at &T");
  *
- *      ---------------------------------------------------------------
- *     |                                                               |
- *     |                    Updated at 12:30 PM                        |
- *     |                                                               |
+ *     //     ---------------------------------------------------------------
+ *     //    |                                                               |
+ *     //    |                    Updated at 12:30 PM                        |
+ *     //    |                                                               |
  *
  * @endcode
  *
@@ -2889,8 +3064,8 @@ void worksheet_hide_zero(lxw_worksheet *worksheet);
  * @param worksheet Pointer to a lxw_worksheet instance to be updated.
  * @param color     The tab color.
  *
- * The `%worksheet_set_tab_color()` function is used to change the color of the worksheet
- * tab:
+ * The `%worksheet_set_tab_color()` function is used to change the color of
+ * the worksheet tab:
  *
  * @code
  *      worksheet_set_tab_color(worksheet1, LXW_COLOR_RED);
@@ -2973,11 +3148,10 @@ void worksheet_set_tab_color(lxw_worksheet *worksheet, lxw_color_t color);
  *
  * See also the format_set_unlocked() and format_set_hidden() format functions.
  *
- * **Note:** Worksheet level passwords in Excel offer **very** weak
+ * **Note:** Sheet level passwords in Excel offer **very** weak
  * protection. They don't encrypt your data and are very easy to
  * deactivate. Full workbook encryption is not supported by `libxlsxwriter`
- * since it requires a completely different file format and would take several
- * man months to implement.
+ * since it requires a completely different file format.
  */
 void worksheet_protect(lxw_worksheet *worksheet, const char *password,
                        lxw_protection *options);
@@ -3061,21 +3235,57 @@ void worksheet_outline_settings(lxw_worksheet *worksheet, uint8_t visible,
 void worksheet_set_default_row(lxw_worksheet *worksheet, double height,
                                uint8_t hide_unused_rows);
 
+/**
+ * @brief Set the VBA name for the worksheet.
+ *
+ * @param worksheet Pointer to a lxw_worksheet instance.
+ * @param name      Name of the worksheet used by VBA.
+ *
+ * The `worksheet_set_vba_name()` function can be used to set the VBA name for
+ * the worksheet. This is sometimes required when a vbaProject macro included
+ * via `workbook_add_vba_project()` refers to the worksheet.
+ *
+ * @code
+ *     workbook_set_vba_name (workbook,  "MyWorkbook");
+ *     worksheet_set_vba_name(worksheet, "MySheet1");
+ * @endcode
+ *
+ * In general Excel uses the worksheet name such as "Sheet1" as the VBA name.
+ * However, this can be changed in the VBA environment or if the the macro was
+ * extracted from a foreign language version of Excel.
+ *
+ * @return A #lxw_error.
+ */
+lxw_error worksheet_set_vba_name(lxw_worksheet *worksheet, const char *name);
+
 lxw_worksheet *lxw_worksheet_new(lxw_worksheet_init_data *init_data);
 void lxw_worksheet_free(lxw_worksheet *worksheet);
 void lxw_worksheet_assemble_xml_file(lxw_worksheet *worksheet);
 void lxw_worksheet_write_single_row(lxw_worksheet *worksheet);
 
 void lxw_worksheet_prepare_image(lxw_worksheet *worksheet,
-                                 uint16_t image_ref_id, uint16_t drawing_id,
+                                 uint32_t image_ref_id, uint32_t drawing_id,
                                  lxw_image_options *image_data);
 
 void lxw_worksheet_prepare_chart(lxw_worksheet *worksheet,
-                                 uint16_t chart_ref_id, uint16_t drawing_id,
-                                 lxw_image_options *image_data);
+                                 uint32_t chart_ref_id, uint32_t drawing_id,
+                                 lxw_image_options *image_data,
+                                 uint8_t is_chartsheet);
 
 lxw_row *lxw_worksheet_find_row(lxw_worksheet *worksheet, lxw_row_t row_num);
 lxw_cell *lxw_worksheet_find_cell(lxw_row *row, lxw_col_t col_num);
+
+/*
+ * External functions to call intern XML methods shared with chartsheet.
+ */
+void lxw_worksheet_write_sheet_views(lxw_worksheet *worksheet);
+void lxw_worksheet_write_page_margins(lxw_worksheet *worksheet);
+void lxw_worksheet_write_drawings(lxw_worksheet *worksheet);
+void lxw_worksheet_write_sheet_protection(lxw_worksheet *worksheet,
+                                          lxw_protection *protect);
+void lxw_worksheet_write_sheet_pr(lxw_worksheet *worksheet);
+void lxw_worksheet_write_page_setup(lxw_worksheet *worksheet);
+void lxw_worksheet_write_header_footer(lxw_worksheet *worksheet);
 
 /* Declarations required for unit testing. */
 #ifdef TESTING
@@ -3106,7 +3316,8 @@ STATIC void _worksheet_write_header_footer(lxw_worksheet *worksheet);
 STATIC void _worksheet_write_print_options(lxw_worksheet *worksheet);
 STATIC void _worksheet_write_sheet_pr(lxw_worksheet *worksheet);
 STATIC void _worksheet_write_tab_color(lxw_worksheet *worksheet);
-STATIC void _worksheet_write_sheet_protection(lxw_worksheet *worksheet);
+STATIC void _worksheet_write_sheet_protection(lxw_worksheet *worksheet,
+                                              lxw_protection *protect);
 STATIC void _worksheet_write_data_validations(lxw_worksheet *self);
 #endif /* TESTING */
 

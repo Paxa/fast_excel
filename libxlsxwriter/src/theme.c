@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -289,7 +289,7 @@ const char *theme_strs[] = {
  * Create a new theme object.
  */
 lxw_theme *
-lxw_theme_new()
+lxw_theme_new(void)
 {
     lxw_theme *theme = calloc(1, sizeof(lxw_theme));
     GOTO_LABEL_ON_MEM_ERROR(theme, mem_error);

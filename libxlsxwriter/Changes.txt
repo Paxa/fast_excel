@@ -1,6 +1,90 @@
 /**
 @page changes Changes
 
+## 0.8.6 April 7 2019
+
+- Fixed issue where images that started in hidden rows/columns weren't placed
+  correctly in the worksheet.
+
+- Fixed the mime-type reported by system `file(1)`. The mime-type reported
+  by "file --mime-type"/magic was incorrect for XlsxWriter files since it
+  expected the `[Content_types]` to be the first file in the zip container.
+
+
+## 0.8.5 February 10 2019
+
+- Fix compile-time warnings with strict prototypes enabled.
+  Issue [#208][gh_208].
+
+  [gh_208]: https://github.com/jmcnamara/libxlsxwriter/issues/208
+
+- Make py.test name configurable.
+  Pull request [#206][gh_206].
+
+  [gh_206]: https://github.com/jmcnamara/libxlsxwriter/pull/206
+
+
+## 0.8.4 November 10 2018
+
+- Fix for issue when hashing number formats.
+  Issue [#203][gh_203].
+
+  [gh_203]: https://github.com/jmcnamara/libxlsxwriter/issues/203
+
+
+## 0.8.3 October 1 2018
+
+- Added `worksheet_write_rich_string()` function to allow writing of
+  multi-format rich strings. See @ref rich_strings.c
+  Feature request [#37][gh_37].
+
+  [gh_37]: https://github.com/jmcnamara/libxlsxwriter/issues/37
+
+
+## 0.8.2 September 16 2018
+
+- Added new chartsheet functionality: `chartsheet_set_tab_color()`, and
+  `chartsheet_set_zoom()`.
+
+
+## 0.8.1 September 15 2018
+
+- Fix for chartsheet and worksheet ordering issue.
+
+- Added new chartsheet functionality: `chartsheet_protect()`,
+  `chartsheet_hide()`, `chartsheet_select()` and
+  `chartsheet_set_first_sheet()`.
+
+
+## 0.8.0 September 12 2018
+
+- Added chartsheet support. A chartsheet is a type of worksheet that only
+  contains a chart. See the @ref chartsheet.h "Chartsheet" object and @ref
+  chartsheet.c.
+
+
+## 0.7.9 September 1 2018
+
+- Added `chart_axis_set_label_align()` function to set the alignment of chart
+  category axis labels.
+  Feature request [#186][gh_186].
+
+  [gh_186]: https://github.com/jmcnamara/libxlsxwriter/issues/186
+
+- Added `lxw_version()` function to get the library version.
+  Feature request [#194][gh_194].
+
+  [gh_194]: https://github.com/jmcnamara/libxlsxwriter/pull/194
+
+
+## 0.7.8 August 30 2018
+
+- Added `worksheet_insert_image_buffer()` function to insert images from
+  memory buffers. See @ref image_buffer.c.
+  Feature request [#125][gh_125].
+
+  [gh_125]: https://github.com/jmcnamara/libxlsxwriter/issues/125
+
 
 ## 0.7.7 May 16 2018
 

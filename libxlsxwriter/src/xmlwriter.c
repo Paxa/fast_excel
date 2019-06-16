@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -141,6 +141,15 @@ lxw_xml_data_element(FILE * xmlfile,
 }
 
 /*
+ * Write an XML <si> element for rich strings, without encoding.
+ */
+void
+lxw_xml_rich_si_element(FILE * xmlfile, const char *string)
+{
+    fprintf(xmlfile, "<si>%s</si>", string);
+}
+
+/*
  * Escape XML characters in attributes.
  */
 STATIC char *
@@ -153,19 +162,19 @@ _escape_attributes(struct xml_attribute *attribute)
     while (*p_attr) {
         switch (*p_attr) {
             case '&':
-                strncat(p_encoded, LXW_AMP, sizeof(LXW_AMP) - 1);
+                memcpy(p_encoded, LXW_AMP, sizeof(LXW_AMP) - 1);
                 p_encoded += sizeof(LXW_AMP) - 1;
                 break;
             case '<':
-                strncat(p_encoded, LXW_LT, sizeof(LXW_LT) - 1);
+                memcpy(p_encoded, LXW_LT, sizeof(LXW_LT) - 1);
                 p_encoded += sizeof(LXW_LT) - 1;
                 break;
             case '>':
-                strncat(p_encoded, LXW_GT, sizeof(LXW_GT) - 1);
+                memcpy(p_encoded, LXW_GT, sizeof(LXW_GT) - 1);
                 p_encoded += sizeof(LXW_GT) - 1;
                 break;
             case '"':
-                strncat(p_encoded, LXW_QUOT, sizeof(LXW_QUOT) - 1);
+                memcpy(p_encoded, LXW_QUOT, sizeof(LXW_QUOT) - 1);
                 p_encoded += sizeof(LXW_QUOT) - 1;
                 break;
             default:
@@ -195,15 +204,15 @@ lxw_escape_data(const char *data)
     while (*data) {
         switch (*data) {
             case '&':
-                strncat(p_encoded, LXW_AMP, sizeof(LXW_AMP) - 1);
+                memcpy(p_encoded, LXW_AMP, sizeof(LXW_AMP) - 1);
                 p_encoded += sizeof(LXW_AMP) - 1;
                 break;
             case '<':
-                strncat(p_encoded, LXW_LT, sizeof(LXW_LT) - 1);
+                memcpy(p_encoded, LXW_LT, sizeof(LXW_LT) - 1);
                 p_encoded += sizeof(LXW_LT) - 1;
                 break;
             case '>':
-                strncat(p_encoded, LXW_GT, sizeof(LXW_GT) - 1);
+                memcpy(p_encoded, LXW_GT, sizeof(LXW_GT) - 1);
                 p_encoded += sizeof(LXW_GT) - 1;
                 break;
             default:

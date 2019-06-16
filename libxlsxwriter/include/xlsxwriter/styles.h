@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * styles - A libxlsxwriter library for creating Excel XLSX styles files.
  *
@@ -10,6 +10,7 @@
 #define __LXW_STYLES_H__
 
 #include <stdint.h>
+#include <ctype.h>
 
 #include "format.h"
 
@@ -37,9 +38,11 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_styles *lxw_styles_new();
+lxw_styles *lxw_styles_new(void);
 void lxw_styles_free(lxw_styles *styles);
 void lxw_styles_assemble_xml_file(lxw_styles *self);
+void lxw_styles_write_string_fragment(lxw_styles *self, char *string);
+void lxw_styles_write_rich_font(lxw_styles *lxw_styles, lxw_format *format);
 
 /* Declarations required for unit testing. */
 #ifdef TESTING
@@ -48,10 +51,12 @@ STATIC void _styles_xml_declaration(lxw_styles *self);
 STATIC void _write_style_sheet(lxw_styles *self);
 STATIC void _write_font_size(lxw_styles *self, double font_size);
 STATIC void _write_font_color_theme(lxw_styles *self, uint8_t theme);
-STATIC void _write_font_name(lxw_styles *self, const char *font_name);
+STATIC void _write_font_name(lxw_styles *self, const char *font_name,
+                             uint8_t is_rich_string);
 STATIC void _write_font_family(lxw_styles *self, uint8_t font_family);
 STATIC void _write_font_scheme(lxw_styles *self, const char *font_scheme);
-STATIC void _write_font(lxw_styles *self, lxw_format *format);
+STATIC void _write_font(lxw_styles *self, lxw_format *format,
+                        uint8_t is_rich_string);
 STATIC void _write_fonts(lxw_styles *self);
 STATIC void _write_default_fill(lxw_styles *self, const char *pattern);
 STATIC void _write_fills(lxw_styles *self);

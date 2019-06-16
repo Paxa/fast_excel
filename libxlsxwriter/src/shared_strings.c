@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -34,7 +34,7 @@ LXW_RB_GENERATE_ELEMENT(sst_rb_tree, sst_element, sst_tree_pointers,
  * Create a new SST SharedString object.
  */
 lxw_sst *
-lxw_sst_new()
+lxw_sst_new(void)
 {
     /* Create the new shared string table. */
     lxw_sst *sst = calloc(1, sizeof(lxw_sst));
@@ -162,6 +162,15 @@ _write_si(lxw_sst *self, char *string)
 }
 
 /*
+ * Write the <si> element for rich strings.
+ */
+STATIC void
+_write_rich_si(lxw_sst *self, char *string)
+{
+    lxw_xml_rich_si_element(self->file, string);
+}
+
+/*
  * Write the <sst> element.
  */
 STATIC void
@@ -198,7 +207,11 @@ _write_sst_strings(lxw_sst *self)
 
     STAILQ_FOREACH(sst_element, self->order_list, sst_order_pointers) {
         /* Write the si element. */
-        _write_si(self, sst_element->string);
+        if (sst_element->is_rich_string)
+            _write_rich_si(self, sst_element->string);
+        else
+            _write_si(self, sst_element->string);
+
     }
 }
 
@@ -230,7 +243,7 @@ lxw_sst_assemble_xml_file(lxw_sst *self)
  * Add to or find a string in the SST SharedString table and return it's index.
  */
 struct sst_element *
-lxw_get_sst_index(lxw_sst *sst, const char *string)
+lxw_get_sst_index(lxw_sst *sst, const char *string, uint8_t is_rich_string)
 {
     struct sst_element *element;
     struct sst_element *existing_element;
@@ -243,6 +256,7 @@ lxw_get_sst_index(lxw_sst *sst, const char *string)
     /* Create potential new element with the string and its index. */
     element->index = sst->unique_count;
     element->string = lxw_strdup(string);
+    element->is_rich_string = is_rich_string;
 
     /* Try to insert it and see whether we already have that string. */
     existing_element = RB_INSERT(sst_rb_tree, sst->rb_tree, element);

@@ -2,7 +2,7 @@
 #
 # Makefile for libxlsxwriter library.
 #
-# Copyright 2014-2018, John McNamara, jmcnamara@cpan.org
+# Copyright 2014-2019, John McNamara, jmcnamara@cpan.org
 #
 
 # Keep the output quiet by default.
@@ -12,6 +12,8 @@ Q=
 endif
 
 INSTALL_DIR ?= /usr/local
+
+PYTEST ?= py.test
 
 .PHONY: docs tags examples
 
@@ -58,7 +60,7 @@ test_const : all
 # Run the functional tests.
 test_functional : all
 	$(Q)$(MAKE) -C test/functional/src
-	$(Q)py.test test/functional -v
+	$(Q)$(PYTEST) test/functional -v
 
 # Run all tests.
 test_unit :

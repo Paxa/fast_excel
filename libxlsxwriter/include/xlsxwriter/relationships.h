@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * relationships - A libxlsxwriter library for creating Excel XLSX
  *                 relationships files.
@@ -47,7 +47,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_relationships *lxw_relationships_new();
+lxw_relationships *lxw_relationships_new(void);
 void lxw_free_relationships(lxw_relationships *relationships);
 void lxw_relationships_assemble_xml_file(lxw_relationships *self);
 

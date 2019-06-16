@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -571,6 +571,15 @@ STATIC void
 _chart_xml_declaration(lxw_chart *self)
 {
     lxw_xml_declaration(self->file);
+}
+
+/*
+ * Write the <c:protection> element.
+ */
+STATIC void
+_chart_write_protection(lxw_chart *self)
+{
+    lxw_xml_empty_tag(self->file, "c:protection", NULL);
 }
 
 /*
@@ -3201,13 +3210,19 @@ _chart_write_auto(lxw_chart *self)
  * Write the <c:lblAlgn> element.
  */
 STATIC void
-_chart_write_label_align(lxw_chart *self)
+_chart_write_label_align(lxw_chart *self, lxw_chart_axis *axis)
 {
     struct xml_attribute_list attributes;
     struct xml_attribute *attribute;
 
     LXW_INIT_ATTRIBUTES();
-    LXW_PUSH_ATTRIBUTES_STR("val", "ctr");
+
+    if (axis->label_align == LXW_CHART_AXIS_LABEL_ALIGN_LEFT)
+        LXW_PUSH_ATTRIBUTES_STR("val", "l");
+    else if (axis->label_align == LXW_CHART_AXIS_LABEL_ALIGN_RIGHT)
+        LXW_PUSH_ATTRIBUTES_STR("val", "r");
+    else
+        LXW_PUSH_ATTRIBUTES_STR("val", "ctr");
 
     lxw_xml_empty_tag(self->file, "c:lblAlgn", &attributes);
 
@@ -3585,12 +3600,19 @@ _chart_write_legend(lxw_chart *self)
         case LXW_CHART_LEGEND_BOTTOM:
             _chart_write_legend_pos(self, "b");
             break;
+        case LXW_CHART_LEGEND_TOP_RIGHT:
+            _chart_write_legend_pos(self, "tr");
+            break;
         case LXW_CHART_LEGEND_OVERLAY_RIGHT:
             _chart_write_legend_pos(self, "r");
             has_overlay = LXW_TRUE;
             break;
         case LXW_CHART_LEGEND_OVERLAY_LEFT:
             _chart_write_legend_pos(self, "l");
+            has_overlay = LXW_TRUE;
+            break;
+        case LXW_CHART_LEGEND_OVERLAY_TOP_RIGHT:
+            _chart_write_legend_pos(self, "tr");
             has_overlay = LXW_TRUE;
             break;
         default:
@@ -4091,7 +4113,7 @@ _chart_write_cat_axis(lxw_chart *self)
     _chart_write_auto(self);
 
     /* Write the c:lblAlgn element. */
-    _chart_write_label_align(self);
+    _chart_write_label_align(self, self->x_axis);
 
     /* Write the c:lblOffset element. */
     _chart_write_label_offset(self);
@@ -4928,6 +4950,10 @@ lxw_chart_assemble_xml_file(lxw_chart *self)
     /* Write the c:style element. */
     _chart_write_style(self);
 
+    /* Write the c:protection element. */
+    if (self->is_protected)
+        _chart_write_protection(self);
+
     /* Write the c:chart element. */
     _chart_write_chart(self);
 
@@ -4936,7 +4962,8 @@ lxw_chart_assemble_xml_file(lxw_chart *self)
                        self->chartarea_pattern);
 
     /* Write the c:printSettings element. */
-    _chart_write_print_settings(self);
+    if (!self->is_chartsheet)
+        _chart_write_print_settings(self);
 
     lxw_xml_end_tag(self->file, "c:chartSpace");
 }
@@ -6038,6 +6065,15 @@ chart_axis_minor_gridlines_set_line(lxw_chart_axis *axis,
     /* If the gridline has a format it should also be visible. */
     if (axis->minor_gridlines.line)
         axis->minor_gridlines.visible = LXW_TRUE;
+}
+
+/*
+ * Set the chart axis label alignment.
+ */
+void
+chart_axis_set_label_align(lxw_chart_axis *axis, uint8_t align)
+{
+    axis->label_align = align;
 }
 
 /*

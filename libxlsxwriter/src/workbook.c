@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -13,10 +13,15 @@
 #include "xlsxwriter/packager.h"
 #include "xlsxwriter/hash_table.h"
 
-STATIC int _name_cmp(lxw_worksheet_name *name1, lxw_worksheet_name *name2);
+STATIC int _worksheet_name_cmp(lxw_worksheet_name *name1,
+                               lxw_worksheet_name *name2);
+STATIC int _chartsheet_name_cmp(lxw_chartsheet_name *name1,
+                                lxw_chartsheet_name *name2);
 #ifndef __clang_analyzer__
-LXW_RB_GENERATE_NAMES(lxw_worksheet_names, lxw_worksheet_name, tree_pointers,
-                      _name_cmp);
+LXW_RB_GENERATE_WORKSHEET_NAMES(lxw_worksheet_names, lxw_worksheet_name,
+                                tree_pointers, _worksheet_name_cmp);
+LXW_RB_GENERATE_CHARTSHEET_NAMES(lxw_chartsheet_names, lxw_chartsheet_name,
+                                 tree_pointers, _chartsheet_name_cmp);
 #endif
 
 /*
@@ -30,12 +35,18 @@ LXW_RB_GENERATE_NAMES(lxw_worksheet_names, lxw_worksheet_name, tree_pointers,
  ****************************************************************************/
 
 /*
- * Comparator for the worksheet names structure red/black tree.
+ * Comparators for the sheet names structure red/black tree.
  */
 STATIC int
-_name_cmp(lxw_worksheet_name *name1, lxw_worksheet_name *name2)
+_worksheet_name_cmp(lxw_worksheet_name *name1, lxw_worksheet_name *name2)
 {
-    return strcmp(name1->name, name2->name);
+    return lxw_strcasecmp(name1->name, name2->name);
+}
+
+STATIC int
+_chartsheet_name_cmp(lxw_chartsheet_name *name1, lxw_chartsheet_name *name2)
+{
+    return lxw_strcasecmp(name1->name, name2->name);
 }
 
 /*
@@ -81,9 +92,11 @@ _free_custom_doc_property(lxw_custom_property *custom_property)
 void
 lxw_workbook_free(lxw_workbook *workbook)
 {
-    lxw_worksheet *worksheet;
+    lxw_sheet *sheet;
     struct lxw_worksheet_name *worksheet_name;
-    struct lxw_worksheet_name *next_name;
+    struct lxw_worksheet_name *next_worksheet_name;
+    struct lxw_chartsheet_name *chartsheet_name;
+    struct lxw_chartsheet_name *next_chartsheet_name;
     lxw_chart *chart;
     lxw_format *format;
     lxw_defined_name *defined_name;
@@ -97,16 +110,25 @@ lxw_workbook_free(lxw_workbook *workbook)
 
     free(workbook->filename);
 
-    /* Free the worksheets in the workbook. */
-    if (workbook->worksheets) {
-        while (!STAILQ_EMPTY(workbook->worksheets)) {
-            worksheet = STAILQ_FIRST(workbook->worksheets);
-            STAILQ_REMOVE_HEAD(workbook->worksheets, list_pointers);
-            lxw_worksheet_free(worksheet);
-        }
-        free(workbook->worksheets);
+    /* Free the sheets in the workbook. */
+    if (workbook->sheets) {
+        while (!STAILQ_EMPTY(workbook->sheets)) {
+            sheet = STAILQ_FIRST(workbook->sheets);
 
+            if (sheet->is_chartsheet)
+                lxw_chartsheet_free(sheet->u.chartsheet);
+            else
+                lxw_worksheet_free(sheet->u.worksheet);
+
+            STAILQ_REMOVE_HEAD(workbook->sheets, list_pointers);
+            free(sheet);
+        }
+        free(workbook->sheets);
     }
+
+    /* Free the sheet lists. The worksheet objects are freed above. */
+    free(workbook->worksheets);
+    free(workbook->chartsheets);
 
     /* Free the charts in the workbook. */
     if (workbook->charts) {
@@ -153,22 +175,41 @@ lxw_workbook_free(lxw_workbook *workbook)
     if (workbook->worksheet_names) {
         for (worksheet_name =
              RB_MIN(lxw_worksheet_names, workbook->worksheet_names);
-             worksheet_name; worksheet_name = next_name) {
+             worksheet_name; worksheet_name = next_worksheet_name) {
 
-            next_name = RB_NEXT(lxw_worksheet_names,
-                                workbook->worksheet_name, worksheet_name);
-            RB_REMOVE(lxw_worksheet_names,
-                      workbook->worksheet_names, worksheet_name);
+            next_worksheet_name = RB_NEXT(lxw_worksheet_names,
+                                          workbook->worksheet_name,
+                                          worksheet_name);
+            RB_REMOVE(lxw_worksheet_names, workbook->worksheet_names,
+                      worksheet_name);
             free(worksheet_name);
         }
 
         free(workbook->worksheet_names);
     }
 
+    if (workbook->chartsheet_names) {
+        for (chartsheet_name =
+             RB_MIN(lxw_chartsheet_names, workbook->chartsheet_names);
+             chartsheet_name; chartsheet_name = next_chartsheet_name) {
+
+            next_chartsheet_name = RB_NEXT(lxw_chartsheet_names,
+                                           workbook->chartsheet_name,
+                                           chartsheet_name);
+            RB_REMOVE(lxw_chartsheet_names, workbook->chartsheet_names,
+                      chartsheet_name);
+            free(chartsheet_name);
+        }
+
+        free(workbook->chartsheet_names);
+    }
+
     lxw_hash_free(workbook->used_xf_formats);
     lxw_sst_free(workbook->sst);
     free(workbook->options.tmpdir);
     free(workbook->ordered_charts);
+    free(workbook->vba_project);
+    free(workbook->vba_codename);
     free(workbook);
 }
 
@@ -432,7 +473,7 @@ _prepare_num_formats(lxw_workbook *self)
                 num_format_index = calloc(1, sizeof(uint16_t));
                 *num_format_index = index;
                 format->num_format_index = index;
-                lxw_insert_hash_element(num_formats, num_format,
+                lxw_insert_hash_element(num_formats, format->num_format,
                                         num_format_index,
                                         LXW_FORMAT_FIELD_LEN);
                 index++;
@@ -496,6 +537,7 @@ _store_defined_name(lxw_workbook *self, const char *name,
                     const char *app_name, const char *formula, int16_t index,
                     uint8_t hidden)
 {
+    lxw_sheet *sheet;
     lxw_worksheet *worksheet;
     lxw_defined_name *defined_name;
     lxw_defined_name *list_defined_name;
@@ -546,7 +588,12 @@ _store_defined_name(lxw_workbook *self, const char *name,
             worksheet_name[strlen(worksheet_name) - 1] = '\0';
 
         /* Search for worksheet name to get the equivalent worksheet index. */
-        STAILQ_FOREACH(worksheet, self->worksheets, list_pointers) {
+        STAILQ_FOREACH(sheet, self->sheets, list_pointers) {
+            if (sheet->is_chartsheet)
+                continue;
+            else
+                worksheet = sheet->u.worksheet;
+
             if (strcmp(worksheet_name, worksheet->name) == 0) {
                 defined_name->index = worksheet->index;
                 lxw_strcpy(defined_name->normalised_sheetname,
@@ -837,13 +884,23 @@ _add_chart_cache_data(lxw_workbook *self)
 STATIC void
 _prepare_drawings(lxw_workbook *self)
 {
+    lxw_sheet *sheet;
     lxw_worksheet *worksheet;
     lxw_image_options *image_options;
-    uint16_t chart_ref_id = 0;
-    uint16_t image_ref_id = 0;
-    uint16_t drawing_id = 0;
+    uint32_t chart_ref_id = 0;
+    uint32_t image_ref_id = 0;
+    uint32_t drawing_id = 0;
+    uint8_t is_chartsheet;
 
-    STAILQ_FOREACH(worksheet, self->worksheets, list_pointers) {
+    STAILQ_FOREACH(sheet, self->sheets, list_pointers) {
+        if (sheet->is_chartsheet) {
+            worksheet = sheet->u.chartsheet->worksheet;
+            is_chartsheet = LXW_TRUE;
+        }
+        else {
+            worksheet = sheet->u.worksheet;
+            is_chartsheet = LXW_FALSE;
+        }
 
         if (STAILQ_EMPTY(worksheet->image_data)
             && STAILQ_EMPTY(worksheet->chart_data))
@@ -854,7 +911,7 @@ _prepare_drawings(lxw_workbook *self)
         STAILQ_FOREACH(image_options, worksheet->chart_data, list_pointers) {
             chart_ref_id++;
             lxw_worksheet_prepare_chart(worksheet, chart_ref_id, drawing_id,
-                                        image_options);
+                                        image_options, is_chartsheet);
             if (image_options->chart)
                 STAILQ_INSERT_TAIL(self->ordered_charts, image_options->chart,
                                    ordered_list_pointers);
@@ -889,14 +946,18 @@ STATIC void
 _prepare_defined_names(lxw_workbook *self)
 {
     lxw_worksheet *worksheet;
+    lxw_sheet *sheet;
     char app_name[LXW_DEFINED_NAME_LENGTH];
     char range[LXW_DEFINED_NAME_LENGTH];
     char area[LXW_MAX_CELL_RANGE_LENGTH];
     char first_col[8];
     char last_col[8];
 
-    STAILQ_FOREACH(worksheet, self->worksheets, list_pointers) {
-
+    STAILQ_FOREACH(sheet, self->sheets, list_pointers) {
+        if (sheet->is_chartsheet)
+            continue;
+        else
+            worksheet = sheet->u.worksheet;
         /*
          * Check for autofilter settings and store them.
          */
@@ -1076,6 +1137,10 @@ _write_file_version(lxw_workbook *self)
     LXW_PUSH_ATTRIBUTES_STR("lowestEdited", "4");
     LXW_PUSH_ATTRIBUTES_STR("rupBuild", "4505");
 
+    if (self->vba_project)
+        LXW_PUSH_ATTRIBUTES_STR("codeName",
+                                "{37E998C4-C9E5-D4B9-71C8-EB1FF731991C}");
+
     lxw_xml_empty_tag(self->file, "fileVersion", &attributes);
 
     LXW_FREE_ATTRIBUTES();
@@ -1091,6 +1156,10 @@ _write_workbook_pr(lxw_workbook *self)
     struct xml_attribute *attribute;
 
     LXW_INIT_ATTRIBUTES();
+
+    if (self->vba_codename)
+        LXW_PUSH_ATTRIBUTES_STR("codeName", self->vba_codename);
+
     LXW_PUSH_ATTRIBUTES_STR("defaultThemeVersion", "124226");
 
     lxw_xml_empty_tag(self->file, "workbookPr", &attributes);
@@ -1170,13 +1239,23 @@ _write_sheet(lxw_workbook *self, const char *name, uint32_t sheet_id,
 STATIC void
 _write_sheets(lxw_workbook *self)
 {
+    lxw_sheet *sheet;
     lxw_worksheet *worksheet;
+    lxw_chartsheet *chartsheet;
 
     lxw_xml_start_tag(self->file, "sheets", NULL);
 
-    STAILQ_FOREACH(worksheet, self->worksheets, list_pointers) {
-        _write_sheet(self, worksheet->name, worksheet->index + 1,
-                     worksheet->hidden);
+    STAILQ_FOREACH(sheet, self->sheets, list_pointers) {
+        if (sheet->is_chartsheet) {
+            chartsheet = sheet->u.chartsheet;
+            _write_sheet(self, chartsheet->name, chartsheet->index + 1,
+                         chartsheet->hidden);
+        }
+        else {
+            worksheet = sheet->u.worksheet;
+            _write_sheet(self, worksheet->name, worksheet->index + 1,
+                         worksheet->hidden);
+        }
     }
 
     lxw_xml_end_tag(self->file, "sheets");
@@ -1224,9 +1303,6 @@ _write_defined_name(lxw_workbook *self, lxw_defined_name *defined_name)
     LXW_FREE_ATTRIBUTES();
 }
 
-/*
- * Write the <definedNames> element.
- */
 STATIC void
 _write_defined_names(lxw_workbook *self)
 {
@@ -1330,15 +1406,31 @@ workbook_new_opt(const char *filename, lxw_workbook_options *options)
     GOTO_LABEL_ON_MEM_ERROR(workbook, mem_error);
     workbook->filename = lxw_strdup(filename);
 
+    /* Add the sheets list. */
+    workbook->sheets = calloc(1, sizeof(struct lxw_sheets));
+    GOTO_LABEL_ON_MEM_ERROR(workbook->sheets, mem_error);
+    STAILQ_INIT(workbook->sheets);
+
     /* Add the worksheets list. */
     workbook->worksheets = calloc(1, sizeof(struct lxw_worksheets));
     GOTO_LABEL_ON_MEM_ERROR(workbook->worksheets, mem_error);
     STAILQ_INIT(workbook->worksheets);
 
+    /* Add the chartsheets list. */
+    workbook->chartsheets = calloc(1, sizeof(struct lxw_chartsheets));
+    GOTO_LABEL_ON_MEM_ERROR(workbook->chartsheets, mem_error);
+    STAILQ_INIT(workbook->chartsheets);
+
     /* Add the worksheet names tree. */
     workbook->worksheet_names = calloc(1, sizeof(struct lxw_worksheet_names));
     GOTO_LABEL_ON_MEM_ERROR(workbook->worksheet_names, mem_error);
     RB_INIT(workbook->worksheet_names);
+
+    /* Add the chartsheet names tree. */
+    workbook->chartsheet_names = calloc(1,
+                                        sizeof(struct lxw_chartsheet_names));
+    GOTO_LABEL_ON_MEM_ERROR(workbook->chartsheet_names, mem_error);
+    RB_INIT(workbook->chartsheet_names);
 
     /* Add the charts list. */
     workbook->charts = calloc(1, sizeof(struct lxw_charts));
@@ -1388,6 +1480,7 @@ workbook_new_opt(const char *filename, lxw_workbook_options *options)
     if (options) {
         workbook->options.constant_memory = options->constant_memory;
         workbook->options.tmpdir = lxw_strdup(options->tmpdir);
+        workbook->options.use_zip64 = options->use_zip64;
     }
 
     return workbook;
@@ -1404,7 +1497,8 @@ mem_error:
 lxw_worksheet *
 workbook_add_worksheet(lxw_workbook *self, const char *sheetname)
 {
-    lxw_worksheet *worksheet;
+    lxw_sheet *sheet = NULL;
+    lxw_worksheet *worksheet = NULL;
     lxw_worksheet_name *worksheet_name = NULL;
     lxw_error error;
     lxw_worksheet_init_data init_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -1421,13 +1515,13 @@ workbook_add_worksheet(lxw_workbook *self, const char *sheetname)
         GOTO_LABEL_ON_MEM_ERROR(new_name, mem_error);
 
         lxw_snprintf(new_name, LXW_MAX_SHEETNAME_LENGTH, "Sheet%d",
-                     self->num_sheets + 1);
+                     self->num_worksheets + 1);
         init_data.name = new_name;
         init_data.quoted_name = lxw_strdup(new_name);
     }
 
     /* Check that the worksheet name is valid. */
-    error = workbook_validate_worksheet_name(self, init_data.name);
+    error = workbook_validate_sheet_name(self, init_data.name);
     if (error) {
         LXW_WARN_FORMAT2("workbook_add_worksheet(): worksheet name '%s' has "
                          "error: %s", init_data.name, lxw_strerror(error));
@@ -1451,8 +1545,18 @@ workbook_add_worksheet(lxw_workbook *self, const char *sheetname)
     worksheet = lxw_worksheet_new(&init_data);
     GOTO_LABEL_ON_MEM_ERROR(worksheet, mem_error);
 
-    self->num_sheets++;
+    /* Add it to the worksheet list. */
+    self->num_worksheets++;
     STAILQ_INSERT_TAIL(self->worksheets, worksheet, list_pointers);
+
+    /* Create a new sheet object. */
+    sheet = calloc(1, sizeof(lxw_sheet));
+    GOTO_LABEL_ON_MEM_ERROR(sheet, mem_error);
+    sheet->u.worksheet = worksheet;
+
+    /* Add it to the worksheet list. */
+    self->num_sheets++;
+    STAILQ_INSERT_TAIL(self->sheets, sheet, list_pointers);
 
     /* Store the worksheet so we can look it up by name. */
     worksheet_name->name = init_data.name;
@@ -1465,6 +1569,91 @@ mem_error:
     free(init_data.name);
     free(init_data.quoted_name);
     free(worksheet_name);
+    free(worksheet);
+    return NULL;
+}
+
+/*
+ * Add a new chartsheet to the Excel workbook.
+ */
+lxw_chartsheet *
+workbook_add_chartsheet(lxw_workbook *self, const char *sheetname)
+{
+    lxw_sheet *sheet = NULL;
+    lxw_chartsheet *chartsheet = NULL;
+    lxw_chartsheet_name *chartsheet_name = NULL;
+    lxw_error error;
+    lxw_worksheet_init_data init_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    char *new_name = NULL;
+
+    if (sheetname) {
+        /* Use the user supplied name. */
+        init_data.name = lxw_strdup(sheetname);
+        init_data.quoted_name = lxw_quote_sheetname((char *) sheetname);
+    }
+    else {
+        /* Use the default SheetN name. */
+        new_name = malloc(LXW_MAX_SHEETNAME_LENGTH);
+        GOTO_LABEL_ON_MEM_ERROR(new_name, mem_error);
+
+        lxw_snprintf(new_name, LXW_MAX_SHEETNAME_LENGTH, "Chart%d",
+                     self->num_chartsheets + 1);
+        init_data.name = new_name;
+        init_data.quoted_name = lxw_strdup(new_name);
+    }
+
+    /* Check that the chartsheet name is valid. */
+    error = workbook_validate_sheet_name(self, init_data.name);
+    if (error) {
+        LXW_WARN_FORMAT2
+            ("workbook_add_chartsheet(): chartsheet name '%s' has "
+             "error: %s", init_data.name, lxw_strerror(error));
+        goto mem_error;
+    }
+
+    /* Create a struct to find/store the chartsheet name/pointer. */
+    chartsheet_name = calloc(1, sizeof(struct lxw_chartsheet_name));
+    GOTO_LABEL_ON_MEM_ERROR(chartsheet_name, mem_error);
+
+    /* Initialize the metadata to pass to the chartsheet. */
+    init_data.hidden = 0;
+    init_data.index = self->num_sheets;
+    init_data.sst = self->sst;
+    init_data.optimize = self->options.constant_memory;
+    init_data.active_sheet = &self->active_sheet;
+    init_data.first_sheet = &self->first_sheet;
+    init_data.tmpdir = self->options.tmpdir;
+
+    /* Create a new chartsheet object. */
+    chartsheet = lxw_chartsheet_new(&init_data);
+    GOTO_LABEL_ON_MEM_ERROR(chartsheet, mem_error);
+
+    /* Add it to the chartsheet list. */
+    self->num_chartsheets++;
+    STAILQ_INSERT_TAIL(self->chartsheets, chartsheet, list_pointers);
+
+    /* Create a new sheet object. */
+    sheet = calloc(1, sizeof(lxw_sheet));
+    GOTO_LABEL_ON_MEM_ERROR(sheet, mem_error);
+    sheet->is_chartsheet = LXW_TRUE;
+    sheet->u.chartsheet = chartsheet;
+
+    /* Add it to the chartsheet list. */
+    self->num_sheets++;
+    STAILQ_INSERT_TAIL(self->sheets, sheet, list_pointers);
+
+    /* Store the chartsheet so we can look it up by name. */
+    chartsheet_name->name = init_data.name;
+    chartsheet_name->chartsheet = chartsheet;
+    RB_INSERT(lxw_chartsheet_names, self->chartsheet_names, chartsheet_name);
+
+    return chartsheet;
+
+mem_error:
+    free(init_data.name);
+    free(init_data.quoted_name);
+    free(chartsheet_name);
+    free(chartsheet);
     return NULL;
 }
 
@@ -1528,6 +1717,7 @@ workbook_default_format(lxw_workbook *self)
 lxw_error
 workbook_close(lxw_workbook *self)
 {
+    lxw_sheet *sheet = NULL;
     lxw_worksheet *worksheet = NULL;
     lxw_packager *packager = NULL;
     lxw_error error = LXW_NO_ERROR;
@@ -1538,15 +1728,39 @@ workbook_close(lxw_workbook *self)
 
     /* Ensure that at least one worksheet has been selected. */
     if (self->active_sheet == 0) {
-        worksheet = STAILQ_FIRST(self->worksheets);
-        worksheet->selected = 1;
-        worksheet->hidden = 0;
+        sheet = STAILQ_FIRST(self->sheets);
+        if (!sheet->is_chartsheet) {
+            worksheet = sheet->u.worksheet;
+            worksheet->selected = 1;
+            worksheet->hidden = 0;
+        }
     }
 
     /* Set the active sheet. */
-    STAILQ_FOREACH(worksheet, self->worksheets, list_pointers) {
+    STAILQ_FOREACH(sheet, self->sheets, list_pointers) {
+        if (sheet->is_chartsheet)
+            continue;
+        else
+            worksheet = sheet->u.worksheet;
+
         if (worksheet->index == self->active_sheet)
             worksheet->active = 1;
+    }
+
+    /* Set workbook and worksheet VBA codenames if a macro has been added. */
+    if (self->vba_project) {
+        if (!self->vba_codename)
+            workbook_set_vba_name(self, "ThisWorkbook");
+
+        STAILQ_FOREACH(sheet, self->sheets, list_pointers) {
+            if (sheet->is_chartsheet)
+                continue;
+            else
+                worksheet = sheet->u.worksheet;
+
+            if (!worksheet->vba_codename)
+                worksheet_set_vba_name(worksheet, worksheet->name);
+        }
     }
 
     /* Set the defined names for the worksheets such as Print Titles. */
@@ -1559,13 +1773,15 @@ workbook_close(lxw_workbook *self)
     _add_chart_cache_data(self);
 
     /* Create a packager object to assemble sub-elements into a zip file. */
-    packager = lxw_packager_new(self->filename, self->options.tmpdir);
+    packager = lxw_packager_new(self->filename,
+                                self->options.tmpdir,
+                                self->options.use_zip64);
 
     /* If the packager fails it is generally due to a zip permission error. */
     if (packager == NULL) {
         fprintf(stderr, "[ERROR] workbook_close(): "
                 "Error creating '%s'. "
-                "Error = %s\n", self->filename, strerror(errno));
+                "System error = %s\n", self->filename, strerror(errno));
 
         error = LXW_ERROR_CREATING_XLSX_FILE;
         goto mem_error;
@@ -1581,26 +1797,47 @@ workbook_close(lxw_workbook *self)
     if (error == LXW_ERROR_CREATING_TMPFILE) {
         fprintf(stderr, "[ERROR] workbook_close(): "
                 "Error creating tmpfile(s) to assemble '%s'. "
-                "Error = %s\n", self->filename, strerror(errno));
+                "System error = %s\n", self->filename, strerror(errno));
     }
 
-    /* If LXW_ERROR_ZIP_FILE_OPERATION then errno is set by zlib. */
+    /* If LXW_ERROR_ZIP_FILE_OPERATION then errno is set by zip. */
     if (error == LXW_ERROR_ZIP_FILE_OPERATION) {
         fprintf(stderr, "[ERROR] workbook_close(): "
-                "Zlib error while creating xlsx file '%s'. "
-                "Error = %s\n", self->filename, strerror(errno));
+                "Zip ZIP_ERRNO error while creating xlsx file '%s'. "
+                "System error = %s\n", self->filename, strerror(errno));
+    }
+
+    /* If LXW_ERROR_ZIP_PARAMETER_ERROR then errno is set by zip. */
+    if (error == LXW_ERROR_ZIP_PARAMETER_ERROR) {
+        fprintf(stderr, "[ERROR] workbook_close(): "
+                "Zip ZIP_PARAMERROR error while creating xlsx file '%s'. "
+                "System error = %s\n", self->filename, strerror(errno));
+    }
+
+    /* If LXW_ERROR_ZIP_BAD_ZIP_FILE then errno is set by zip. */
+    if (error == LXW_ERROR_ZIP_BAD_ZIP_FILE) {
+        fprintf(stderr, "[ERROR] workbook_close(): "
+                "Zip ZIP_BADZIPFILE error while creating xlsx file '%s'. "
+                "This may require the use_zip64 option for large files. "
+                "System error = %s\n", self->filename, strerror(errno));
+    }
+
+    /* If LXW_ERROR_ZIP_INTERNAL_ERROR then errno is set by zip. */
+    if (error == LXW_ERROR_ZIP_INTERNAL_ERROR) {
+        fprintf(stderr, "[ERROR] workbook_close(): "
+                "Zip ZIP_INTERNALERROR error while creating xlsx file '%s'. "
+                "System error = %s\n", self->filename, strerror(errno));
     }
 
     /* The next 2 error conditions don't set errno. */
     if (error == LXW_ERROR_ZIP_FILE_ADD) {
         fprintf(stderr, "[ERROR] workbook_close(): "
-                "Zlib error adding file to xlsx file '%s'.\n",
-                self->filename);
+                "Zip error adding file to xlsx file '%s'.\n", self->filename);
     }
 
     if (error == LXW_ERROR_ZIP_CLOSE) {
         fprintf(stderr, "[ERROR] workbook_close(): "
-                "Zlib error closing xlsx file '%s'.\n", self->filename);
+                "Zip error closing xlsx file '%s'.\n", self->filename);
     }
 
 mem_error:
@@ -1911,10 +2148,32 @@ workbook_get_worksheet_by_name(lxw_workbook *self, const char *name)
 }
 
 /*
+ * Get a chartsheet object from its name.
+ */
+lxw_chartsheet *
+workbook_get_chartsheet_by_name(lxw_workbook *self, const char *name)
+{
+    lxw_chartsheet_name chartsheet_name;
+    lxw_chartsheet_name *found;
+
+    if (!name)
+        return NULL;
+
+    chartsheet_name.name = name;
+    found = RB_FIND(lxw_chartsheet_names,
+                    self->chartsheet_names, &chartsheet_name);
+
+    if (found)
+        return found->chartsheet;
+    else
+        return NULL;
+}
+
+/*
  * Validate the worksheet name based on Excel's rules.
  */
 lxw_error
-workbook_validate_worksheet_name(lxw_workbook *self, const char *sheetname)
+workbook_validate_sheet_name(lxw_workbook *self, const char *sheetname)
 {
     /* Check the UTF-8 length of the worksheet name. */
     if (lxw_utf8_strlen(sheetname) > LXW_SHEETNAME_MAX)
@@ -1924,9 +2183,66 @@ workbook_validate_worksheet_name(lxw_workbook *self, const char *sheetname)
     if (strpbrk(sheetname, "[]:*?/\\"))
         return LXW_ERROR_INVALID_SHEETNAME_CHARACTER;
 
+    /* Check that the worksheet doesn't start or end with an apostrophe. */
+    if (sheetname[0] == '\'' || sheetname[strlen(sheetname) - 1] == '\'')
+        return LXW_ERROR_SHEETNAME_START_END_APOSTROPHE;
+
+    /* Check that the worksheet name isn't the reserved work "History". */
+    if (lxw_strcasecmp(sheetname, "history") == 0)
+        return LXW_ERROR_SHEETNAME_RESERVED;
+
     /* Check if the worksheet name is already in use. */
     if (workbook_get_worksheet_by_name(self, sheetname))
         return LXW_ERROR_SHEETNAME_ALREADY_USED;
+
+    /* Check if the chartsheet name is already in use. */
+    if (workbook_get_chartsheet_by_name(self, sheetname))
+        return LXW_ERROR_SHEETNAME_ALREADY_USED;
+
+    return LXW_NO_ERROR;
+}
+
+/*
+ * Add a vbaProject binary to the Excel workbook.
+ */
+lxw_error
+workbook_add_vba_project(lxw_workbook *self, const char *filename)
+{
+    FILE *filehandle;
+
+    if (!filename) {
+        LXW_WARN("workbook_add_vba_project(): "
+                 "filename must be specified.");
+        return LXW_ERROR_NULL_PARAMETER_IGNORED;
+    }
+
+    /* Check that the vbaProject file exists and can be opened. */
+    filehandle = fopen(filename, "rb");
+    if (!filehandle) {
+        LXW_WARN_FORMAT1("workbook_add_vba_project(): "
+                         "file doesn't exist or can't be opened: %s.",
+                         filename);
+        return LXW_ERROR_PARAMETER_VALIDATION;
+    }
+    fclose(filehandle);
+
+    self->vba_project = lxw_strdup(filename);
+
+    return LXW_NO_ERROR;
+}
+
+/*
+ * Set the VBA name for the workbook.
+ */
+lxw_error
+workbook_set_vba_name(lxw_workbook *self, const char *name)
+{
+    if (!name) {
+        LXW_WARN("workbook_set_vba_name(): " "name must be specified.");
+        return LXW_ERROR_NULL_PARAMETER_IGNORED;
+    }
+
+    self->vba_codename = lxw_strdup(name);
 
     return LXW_NO_ERROR;
 }

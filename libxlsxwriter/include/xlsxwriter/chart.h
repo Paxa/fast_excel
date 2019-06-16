@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * chart - A libxlsxwriter library for creating Excel XLSX chart files.
  *
@@ -172,11 +172,17 @@ typedef enum lxw_chart_legend_position {
     /** Chart legend positioned at bottom. */
     LXW_CHART_LEGEND_BOTTOM,
 
+    /** Chart legend positioned at top right. */
+    LXW_CHART_LEGEND_TOP_RIGHT,
+
     /** Chart legend overlaid at right side. */
     LXW_CHART_LEGEND_OVERLAY_RIGHT,
 
     /** Chart legend overlaid at left side. */
-    LXW_CHART_LEGEND_OVERLAY_LEFT
+    LXW_CHART_LEGEND_OVERLAY_LEFT,
+
+    /** Chart legend overlaid at top right. */
+    LXW_CHART_LEGEND_OVERLAY_TOP_RIGHT
 } lxw_chart_legend_position;
 
 /**
@@ -522,6 +528,20 @@ typedef enum lxw_chart_axis_label_position {
     /** Turn off the the axis labels. */
     LXW_CHART_AXIS_LABEL_POSITION_NONE
 } lxw_chart_axis_label_position;
+
+/**
+ * @brief Axis label alignments.
+ */
+typedef enum lxw_chart_axis_label_alignment {
+    /** Chart axis label alignment: center. */
+    LXW_CHART_AXIS_LABEL_ALIGN_CENTER,
+
+    /** Chart axis label alignment: left. */
+    LXW_CHART_AXIS_LABEL_ALIGN_LEFT,
+
+    /** Chart axis label alignment: right. */
+    LXW_CHART_AXIS_LABEL_ALIGN_RIGHT
+} lxw_chart_axis_label_alignment;
 
 /**
  * @brief Display units for chart value axis.
@@ -981,6 +1001,7 @@ typedef struct lxw_chart_axis {
     uint8_t axis_position;
     uint8_t position_axis;
     uint8_t label_position;
+    uint8_t label_align;
     uint8_t hidden;
     uint8_t reverse;
 
@@ -1048,6 +1069,7 @@ typedef struct lxw_chart {
     uint8_t in_use;
     uint8_t chart_group;
     uint8_t cat_has_num_fmt;
+    uint8_t is_chartsheet;
 
     uint8_t has_horiz_cat_axis;
     uint8_t has_horiz_val_axis;
@@ -1103,6 +1125,7 @@ typedef struct lxw_chart {
     lxw_chart_fill *down_bar_fill;
 
     uint8_t default_label_position;
+    uint8_t is_protected;
 
     STAILQ_ENTRY (lxw_chart) ordered_list_pointers;
     STAILQ_ENTRY (lxw_chart) list_pointers;
@@ -1284,7 +1307,7 @@ void chart_series_set_values(lxw_chart_series *series, const char *sheetname,
  * @code
  *     lxw_chart_series *series = chart_add_series(chart, NULL, "=Sheet1!$B$2:$B$7");
  *
- *     chart_series_set_name(series, "=Sheet1!$B1$1");
+ *     chart_series_set_name(series, "=Sheet1!$B$1");
  * @endcode
  *
  * See also the `chart_series_set_name_range()` function to see how to set the
@@ -2275,7 +2298,7 @@ lxw_chart_axis *chart_axis_get(lxw_chart *chart,
  * a cell in the workbook that contains the name:
  *
  * @code
- *     chart_axis_set_name(chart->x_axis, "=Sheet1!$B1$1");
+ *     chart_axis_set_name(chart->x_axis, "=Sheet1!$B$1");
  * @endcode
  *
  * See also the `chart_axis_set_name_range()` function to see how to set the
@@ -2567,7 +2590,7 @@ void chart_axis_set_position(lxw_chart_axis *axis, uint8_t position);
  *
  * @code
  *     chart_axis_set_label_position(chart->x_axis, LXW_CHART_AXIS_LABEL_POSITION_HIGH);
-       chart_axis_set_label_position(chart->y_axis, LXW_CHART_AXIS_LABEL_POSITION_HIGH);
+ *     chart_axis_set_label_position(chart->y_axis, LXW_CHART_AXIS_LABEL_POSITION_HIGH);
  * @endcode
  *
  * @image html chart_label_position2.png
@@ -2589,6 +2612,31 @@ void chart_axis_set_position(lxw_chart_axis *axis, uint8_t position);
  *                 See @ref ww_charts_axes.
  */
 void chart_axis_set_label_position(lxw_chart_axis *axis, uint8_t position);
+
+/**
+ * @brief Set the alignment of the axis labels.
+ *
+ * @param axis  A pointer to a chart #lxw_chart_axis object.
+ * @param align A #lxw_chart_axis_label_alignment value.
+ *
+ * Position the category axis labels for the chart. The labels are the
+ * numbers, or strings or dates, on the axis that indicate the categories
+ * of the axis.
+ *
+ * The allowable values:
+ *
+ * - #LXW_CHART_AXIS_LABEL_ALIGN_CENTER - Align label center (default).
+ * - #LXW_CHART_AXIS_LABEL_ALIGN_LEFT - Align label left.
+ * - #LXW_CHART_AXIS_LABEL_ALIGN_RIGHT - Align label right.
+ *
+ * @code
+ *     chart_axis_set_label_align(chart->x_axis, LXW_CHART_AXIS_LABEL_ALIGN_RIGHT);
+ * @endcode
+ *
+ * **Axis types**: This function is applicable to category axes only.
+ *                 See @ref ww_charts_axes.
+ */
+void chart_axis_set_label_align(lxw_chart_axis *axis, uint8_t align);
 
 /**
  * @brief Set the minimum value for a chart axis.
@@ -2958,7 +3006,7 @@ void chart_axis_minor_gridlines_set_line(lxw_chart_axis *axis,
  * a cell in the workbook that contains the name:
  *
  * @code
- *     chart_title_set_name(chart, "=Sheet1!$B1$1");
+ *     chart_title_set_name(chart, "=Sheet1!$B$1");
  * @endcode
  *
  * See also the `chart_title_set_name_range()` function to see how to set the
@@ -3040,8 +3088,10 @@ void chart_title_off(lxw_chart *chart);
  *     LXW_CHART_LEGEND_LEFT
  *     LXW_CHART_LEGEND_TOP
  *     LXW_CHART_LEGEND_BOTTOM
+ *     LXW_CHART_LEGEND_TOP_RIGHT
  *     LXW_CHART_LEGEND_OVERLAY_RIGHT
  *     LXW_CHART_LEGEND_OVERLAY_LEFT
+ *     LXW_CHART_LEGEND_OVERLAY_TOP_RIGHT
  *
  * For example:
  *

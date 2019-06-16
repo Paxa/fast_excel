@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * theme - A libxlsxwriter library for creating Excel XLSX theme files.
  *
@@ -28,7 +28,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_theme *lxw_theme_new();
+lxw_theme *lxw_theme_new(void);
 void lxw_theme_free(lxw_theme *theme);
 void lxw_theme_xml_declaration(lxw_theme *self);
 void lxw_theme_assemble_xml_file(lxw_theme *self);

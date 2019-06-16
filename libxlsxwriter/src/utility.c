@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "xlsxwriter/utility.h"
+#include "xlsxwriter.h"
 #include "xlsxwriter/third_party/tmpfileplus.h"
 
 char *error_strings[LXW_MAX_ERRNO + 1] = {
@@ -20,14 +20,20 @@ char *error_strings[LXW_MAX_ERRNO + 1] = {
     "Memory error, failed to malloc() required memory.",
     "Error creating output xlsx file. Usually a permissions error.",
     "Error encountered when creating a tmpfile during file assembly.",
-    "Zlib error with a file operation while creating xlsx file.",
-    "Zlib error when adding sub file to xlsx file.",
-    "Zlib error when closing xlsx file.",
+    "Error reading a tmpfile.",
+    "Zip generic error ZIP_ERRNO while creating the xlsx file.",
+    "Zip error ZIP_PARAMERROR while creating the xlsx file.",
+    "Zip error ZIP_BADZIPFILE (use_zip64 option may be required).",
+    "Zip error ZIP_INTERNALERROR while creating the xlsx file.",
+    "File error or unknown zip error when adding sub file to xlsx file.",
+    "Unknown zip error when closing xlsx file.",
     "NULL function parameter ignored.",
     "Function parameter validation error.",
     "Worksheet name exceeds Excel's limit of 31 characters.",
-    "Worksheet name contains invalid Excel character: '[]:*?/\\'",
+    "Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'",
+    "Worksheet name cannot start or end with an apostrophe.",
     "Worksheet name is already in use.",
+    "Worksheet name 'History' is reserved by Excel.",
     "Parameter exceeds Excel's limit of 32 characters.",
     "Parameter exceeds Excel's limit of 128 characters.",
     "Parameter exceeds Excel's limit of 255 characters.",
@@ -553,3 +559,44 @@ lxw_sprintf_dbl(char *data, double number)
     return 0;
 }
 #endif
+
+/*
+ * Retrieve runtime library version
+ */
+const char *
+lxw_version(void)
+{
+    return LXW_VERSION;
+}
+
+/*
+ * Hash a worksheet password. Based on the algorithm provided by Daniel Rentz
+ * of OpenOffice.
+ */
+uint16_t
+lxw_hash_password(const char *password)
+{
+    size_t count;
+    uint8_t i;
+    uint16_t hash = 0x0000;
+
+    count = strlen(password);
+
+    for (i = 0; i < count; i++) {
+        uint32_t low_15;
+        uint32_t high_15;
+        uint32_t letter = password[i] << (i + 1);
+
+        low_15 = letter & 0x7fff;
+        high_15 = letter & (0x7fff << 15);
+        high_15 = high_15 >> 15;
+        letter = low_15 | high_15;
+
+        hash ^= letter;
+    }
+
+    hash ^= count;
+    hash ^= 0xCE4B;
+
+    return hash;
+}

@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * drawing - A libxlsxwriter library for creating Excel XLSX drawing files.
  *
@@ -77,6 +77,7 @@ typedef struct lxw_drawing {
     FILE *file;
 
     uint8_t embedded;
+    uint8_t orientation;
 
     struct lxw_drawing_objects *drawing_objects;
 
@@ -89,7 +90,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_drawing *lxw_drawing_new();
+lxw_drawing *lxw_drawing_new(void);
 void lxw_drawing_free(lxw_drawing *drawing);
 void lxw_drawing_assemble_xml_file(lxw_drawing *self);
 void lxw_free_drawing_object(struct lxw_drawing_object *drawing_object);

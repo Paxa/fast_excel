@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * xmlwriter - A libxlsxwriter library for creating Excel XLSX
  *             XML files.
@@ -164,6 +164,8 @@ void lxw_xml_data_element(FILE * xmlfile,
                           const char *tag,
                           const char *data,
                           struct xml_attribute_list *attributes);
+
+void lxw_xml_rich_si_element(FILE * xmlfile, const char *string);
 
 char *lxw_escape_control_characters(const char *string);
 

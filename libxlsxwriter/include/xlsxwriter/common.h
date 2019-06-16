@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @brief Common functions and defines for the libxlsxwriter library.
  *
- * <!-- Copyright 2014-2018, John McNamara, jmcnamara@cpan.org -->
+ * <!-- Copyright 2014-2019, John McNamara, jmcnamara@cpan.org -->
  *
  */
 #ifndef __LXW_COMMON_H__
@@ -65,13 +65,25 @@ typedef enum lxw_error {
     /** Error encountered when creating a tmpfile during file assembly. */
     LXW_ERROR_CREATING_TMPFILE,
 
-    /** Zlib error with a file operation while creating xlsx file. */
+    /** Error reading a tmpfile. */
+    LXW_ERROR_READING_TMPFILE,
+
+    /** Zip generic error ZIP_ERRNO while creating the xlsx file. */
     LXW_ERROR_ZIP_FILE_OPERATION,
 
-    /** Zlib error when adding sub file to xlsx file. */
+    /** Zip error ZIP_PARAMERROR while creating the xlsx file. */
+    LXW_ERROR_ZIP_PARAMETER_ERROR,
+
+    /** Zip error ZIP_BADZIPFILE (use_zip64 option may be required). */
+    LXW_ERROR_ZIP_BAD_ZIP_FILE,
+
+    /** Zip error ZIP_INTERNALERROR while creating the xlsx file. */
+    LXW_ERROR_ZIP_INTERNAL_ERROR,
+
+    /** File error or unknown zip error when adding sub file to xlsx file. */
     LXW_ERROR_ZIP_FILE_ADD,
 
-    /** Zlib error when closing xlsx file. */
+    /** Unknown zip error when closing xlsx file. */
     LXW_ERROR_ZIP_CLOSE,
 
     /** NULL function parameter ignored. */
@@ -83,11 +95,17 @@ typedef enum lxw_error {
     /** Worksheet name exceeds Excel's limit of 31 characters. */
     LXW_ERROR_SHEETNAME_LENGTH_EXCEEDED,
 
-    /** Worksheet name contains invalid Excel character: '[]:*?/\\' */
+    /** Worksheet name cannot contain invalid characters: '[ ] : * ? / \\' */
     LXW_ERROR_INVALID_SHEETNAME_CHARACTER,
+
+    /** Worksheet name cannot start or end with an apostrophe. */
+    LXW_ERROR_SHEETNAME_START_END_APOSTROPHE,
 
     /** Worksheet name is already in use. */
     LXW_ERROR_SHEETNAME_ALREADY_USED,
+
+    /** Worksheet name 'History' is reserved by Excel. */
+    LXW_ERROR_SHEETNAME_RESERVED,
 
     /** Parameter exceeds Excel's limit of 32 characters. */
     LXW_ERROR_32_STRING_LENGTH_EXCEEDED,
@@ -176,6 +194,9 @@ enum lxw_custom_property_types {
 #define LXW_UINT32_T_LENGTH       sizeof("4294967296")
 #define LXW_FILENAME_LENGTH       128
 #define LXW_IGNORE                1
+
+#define LXW_PORTRAIT              1
+#define LXW_LANDSCAPE             0
 
 #define LXW_SCHEMA_MS        "http://schemas.microsoft.com/office/2006/relationships"
 #define LXW_SCHEMA_ROOT      "http://schemas.openxmlformats.org"

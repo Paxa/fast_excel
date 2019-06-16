@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -25,7 +25,7 @@
  * Create a new custom object.
  */
 lxw_custom *
-lxw_custom_new()
+lxw_custom_new(void)
 {
     lxw_custom *custom = calloc(1, sizeof(lxw_custom));
     GOTO_LABEL_ON_MEM_ERROR(custom, mem_error);

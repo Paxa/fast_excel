@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2018, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * core - A libxlsxwriter library for creating Excel XLSX core files.
  *
@@ -31,7 +31,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_core *lxw_core_new();
+lxw_core *lxw_core_new(void);
 void lxw_core_free(lxw_core *core);
 void lxw_core_assemble_xml_file(lxw_core *self);
 
