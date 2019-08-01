@@ -17,6 +17,7 @@ describe "FastExcel" do
     workbook.read_string
 
     refute(File.exist?(workbook.filename))
+    refute(File.exist?(File.dirname(workbook.filename)))
     refute(workbook.is_open)
   end
 

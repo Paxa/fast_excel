@@ -390,11 +390,14 @@ module FastExcel
       close if @is_open
       File.open(filename, 'rb', &:read)
     ensure
-      remove_tmp_file
+      remove_tmp_folder
     end
 
-    def remove_tmp_file
-      File.delete(filename) if tmp_file
+    def remove_tmp_folder
+      if tmp_file
+        File.delete(filename)
+        FileUtils.remove_entry(File.dirname(filename))
+      end
     end
 
     def constant_memory?
