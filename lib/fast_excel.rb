@@ -394,10 +394,7 @@ module FastExcel
     end
 
     def remove_tmp_folder
-      if tmp_file
-        File.delete(filename)
-        FileUtils.remove_entry(File.dirname(filename))
-      end
+      FileUtils.remove_entry(File.dirname(filename)) if tmp_file
     end
 
     def constant_memory?
