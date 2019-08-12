@@ -106,7 +106,7 @@ worksheet << [FastExcel::Formula.new("SUM(A1:D1)")] # A2 will be shown as 10
 
 **URL**: Link to website or something else
 ```ruby
-url_format = workbook.add_format(underline: :underline_single, font_color: :blue) # format is optional
+url_format = worksheet.add_format(underline: :underline_single, font_color: :blue) # format is optional
 worksheet.append_row([
   FastExcel::URL.new("https://github.com/Paxa/fast_excel"),
   FastExcel::URL.new("postgres://localhost")
