@@ -92,4 +92,38 @@ describe "FastExcel::WorksheetExt append_row" do
     assert_equal("foo", ws1[:name])
     assert_equal("", ws2[:name])
   end
+
+  it "should map fields correctly" do
+    workbook = FastExcel.open(constant_memory: true)
+
+    ws = workbook.add_worksheet
+    ws.right_to_left
+    assert_equal(ws[:right_to_left], 1)
+
+    ws = workbook.add_worksheet
+    ws.center_vertically
+    assert_equal(ws[:print_options_changed], 1)
+    assert_equal(ws[:vcenter], 1)
+
+    ws = workbook.add_worksheet
+    ws.print_row_col_headers
+    assert_equal(ws[:print_headers], 1)
+    assert_equal(ws[:print_options_changed], 1)
+
+    ws = workbook.add_worksheet
+    ws.set_margins(1.5, 2.5, 3.5, 4.5)
+    assert_equal(ws[:margin_left], 1.5)
+    assert_equal(ws[:margin_right], 2.5)
+    assert_equal(ws[:margin_top], 3.5)
+    assert_equal(ws[:margin_bottom], 4.5)
+
+
+    breaks = [20, 40, 60, 20, 0]
+    FFI::MemoryPointer.new(:uint16, breaks.size) do |buffer|
+      buffer.write_array_of_uint16(breaks)
+      ws.set_v_pagebreaks(buffer)
+    end
+
+    assert_equal(ws[:vbreaks_count], 4)
+  end
 end
