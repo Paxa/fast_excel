@@ -43,7 +43,7 @@ GEM
       ruby-progressbar
     nokogiri (1.10.4)
       mini_portile2 (~> 2.4.0)
-    rake (12.3.3)
+    rake (13.0.0)
     ruby-progressbar (1.10.1)
     rubyzip (1.2.3)
     write_xlsx (0.85.7)
