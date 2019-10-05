@@ -41,4 +41,4 @@ script:
   - make
   - bundle exec rake test
   - bundle exec rake examples
-  - if [ -n "$BUILD_DOCKER" ]; then docker build . -f Dockerfile.test --build-arg TRAVIS_COMMIT ; fi
+  - if [ -n "$BUILD_DOCKER" ]; then docker build . -f Dockerfile.test --build-arg TRAVIS_COMMIT TRAVIS_BRANCH ; fi
