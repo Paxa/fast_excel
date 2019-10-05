@@ -22,6 +22,8 @@ matrix:
   - os: linux
     rvm: 2.6.3
     env: BUILD_DOCKER=true
+    services:
+      - docker
   - os: osx
     rvm: 2.6.3
     osx_image: xcode10.2
@@ -39,4 +41,4 @@ script:
   - make
   - bundle exec rake test
   - bundle exec rake examples
-  - [ -z "$BUILD_DOCKER" ] && docker build . -f Dockerfile.test --build-arg TRAVIS_COMMIT || true
+  - if [ -z "$BUILD_DOCKER" ]; then docker build . -f Dockerfile.test --build-arg TRAVIS_COMMIT ; fi
