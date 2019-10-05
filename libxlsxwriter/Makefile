@@ -36,7 +36,7 @@ clean :
 	$(Q)$(MAKE) clean -C src
 	# $(Q)$(MAKE) clean -C test/unit
 	# $(Q)$(MAKE) clean -C test/functional/src
-	$(Q)$(MAKE) clean -C examples
+	# $(Q)$(MAKE) clean -C examples
 	$(Q)rm -rf docs/html
 	$(Q)rm -rf test/functional/__pycache__
 	$(Q)rm -f  test/functional/*.pyc
