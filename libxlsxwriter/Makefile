@@ -34,8 +34,8 @@ examples :
 # Clean src and test directories.
 clean :
 	$(Q)$(MAKE) clean -C src
-	$(Q)$(MAKE) clean -C test/unit
-	$(Q)$(MAKE) clean -C test/functional/src
+	# $(Q)$(MAKE) clean -C test/unit
+	# $(Q)$(MAKE) clean -C test/functional/src
 	$(Q)$(MAKE) clean -C examples
 	$(Q)rm -rf docs/html
 	$(Q)rm -rf test/functional/__pycache__

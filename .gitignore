@@ -8,6 +8,9 @@ gen_ffi.rb
 a.out
 .DS_Store
 *.gem
+*.cmake
+libxlsxwriter/CmakeFiles
+libxlsxwriter/CmakeCache.txt
 libxlsxwriter/dev
 libxlsxwriter/docs
 libxlsxwriter/examples
