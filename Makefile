@@ -10,8 +10,8 @@ ifeq ($(UNAME_S),"Darwin")
 endif
 
 all :
-	@echo "Compiling ext/text_width ..."
-	rake compile
+	# @echo "Compiling ext/text_width ..."
+	# rake compile
 	@echo "Compiling libxlsxwriter ..."
 ifdef USE_CMAKE
 	@echo "run cmake libxlsxwriter ..."
