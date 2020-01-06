@@ -362,8 +362,12 @@ module FastExcel
     end
 
     def add_worksheet(sheetname = nil)
-      if !sheetname.nil? && @sheet_names.include?(sheetname)
-        raise ArgumentError, "Worksheet name '#{sheetname}' is already in use"
+      if !sheetname.nil?
+        if sheetname.length > Libxlsxwriter::SHEETNAME_MAX
+          raise ArgumentError, "Worksheet name '#{sheetname}' exceeds Excel's limit of #{Libxlsxwriter::SHEETNAME_MAX} characters"
+        elsif @sheet_names.include?(sheetname)
+          raise ArgumentError, "Worksheet name '#{sheetname}' is already in use"
+        end
       end
 
       sheet = super(sheetname)
