@@ -97,7 +97,7 @@ describe "FastExcel::WorksheetExt append_row" do
     workbook = FastExcel.open(constant_memory: true)
 
     ws = workbook.add_worksheet
-    ws.right_to_left
+    ws.set_right_to_left
     assert_equal(ws[:right_to_left], 1)
 
     ws = workbook.add_worksheet
