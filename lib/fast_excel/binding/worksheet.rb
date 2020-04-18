@@ -593,7 +593,7 @@ module Libxlsxwriter
     end
   
     # @return [nil] 
-    def right_to_left()
+    def set_right_to_left()
       Libxlsxwriter.worksheet_right_to_left(self)
     end
   

@@ -1,3 +1,8 @@
+#### Version 0.3.0 - 18 abr 2020
+
+* [BREAKING CHANGE] Rename `worksheet.right_to_left` to `worksheet.set_right_to_left`:
+  - now it will work properly when using the `pry-rails` gem, not forcing the document start from right even when this method is not called.
+
 #### Version 0.2.6 - 26 jan 2019
 
 * Add column auto width (thanks to @duffyjp)
