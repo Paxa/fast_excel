@@ -1,5 +1,13 @@
-#### Version 0.3.0 - 18 abr 2020
+#### Version 0.3.0 - 23 jul 2020
 
+* Add support for FastExcel::URL
+* Add support for writing boolean values
+* Add enable_filters!(end_col: X)
+* Allow to open with an empty existing file
+* Add missing enums to chart
+* Don't change sheet name from "" to nil
+* Support build with docker
+* Fix crash when sheet name exceeds maximum length.
 * [BREAKING CHANGE] Rename `worksheet.right_to_left` to `worksheet.set_right_to_left`:
   - now it will work properly when using the `pry-rails` gem, not forcing the document start from right even when this method is not called.
 
