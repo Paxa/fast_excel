@@ -361,6 +361,20 @@ module FastExcel
       format
     end
 
+    def set_default_formats(formats)
+      @formats = formats
+    end
+
+    def set_default_format(type, format)
+      @formats ||= {}
+      @formats[type] = format
+    end
+
+    def get_default_format(type)
+      return nil if @formats.blank?
+      @formats[type]
+    end
+
     def add_worksheet(sheetname = nil)
       if !sheetname.nil?
         if sheetname.length > Libxlsxwriter::SHEETNAME_MAX
@@ -449,23 +463,23 @@ module FastExcel
       end
 
       if value.is_a?(Numeric)
-        write_number(row_number, cell_number, value, format)
+        write_number(row_number, cell_number, value, format || workbook.get_default_format(:numeric))
       elsif defined?(Date) && value.is_a?(Date)
-        write_datetime(row_number, cell_number, FastExcel.lxw_datetime(value.to_datetime), format)
+        write_datetime(row_number, cell_number, FastExcel.lxw_datetime(value.to_datetime), format || workbook.get_default_format(:date))
       elsif value.is_a?(Time)
-        write_number(row_number, cell_number, FastExcel.date_num(value), format)
+        write_number(row_number, cell_number, FastExcel.date_num(value), format || workbook.get_default_format(:time))
       elsif defined?(DateTime) && value.is_a?(DateTime)
-        write_number(row_number, cell_number, FastExcel.date_num(value), format)
+        write_number(row_number, cell_number, FastExcel.date_num(value), format || workbook.get_default_format(:datetime))
       elsif value.is_a?(TrueClass) || value.is_a?(FalseClass)
-        write_boolean(row_number, cell_number, value ? 1 : 0, format)
+        write_boolean(row_number, cell_number, value ? 1 : 0, format || workbook.get_default_format(:boolean))
       elsif value.is_a?(FastExcel::Formula)
-        write_formula(row_number, cell_number, value.fml, format)
+        write_formula(row_number, cell_number, value.fml, format || workbook.get_default_format(:formula))
       elsif value.is_a?(FastExcel::URL)
-        write_url(row_number, cell_number, value.url, format)
-        add_text_width(value.url, format, cell_number) if auto_width?
+        write_url(row_number, cell_number, value.url, format || workbook.get_default_format(:url))
+        add_text_width(value.url, format || workbook.get_default_format(:numeric), cell_number) if auto_width?
       else
-        write_string(row_number, cell_number, value.to_s, format)
-        add_text_width(value, format, cell_number) if auto_width?
+        write_string(row_number, cell_number, value.to_s, format || workbook.get_default_format(:text))
+        add_text_width(value, format || workbook.get_default_format(:text), cell_number) if auto_width?
       end
 
       @last_row_number = row_number > @last_row_number ? row_number : @last_row_number
