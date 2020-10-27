@@ -156,6 +156,7 @@ workbook.number_format("[$-409]m/d/yy h:mm AM/PM;@") # format for date
 ```
 
 **Default formats**
+
 You may set default formats for the workbook so when you append_row, you don't need to specify formats for each column.
 ```ruby
 datetime_format = workbook.number_format("[$-409]m/d/yy h:mm AM/PM;@")
