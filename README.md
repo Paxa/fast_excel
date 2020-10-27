@@ -1,3 +1,4 @@
+
 # Ultra Fast Excel Writer for Ruby
 
 ```ruby
@@ -152,6 +153,25 @@ format = worksheet.add_format(
 ```ruby
 workbook.bold_format # bold text
 workbook.number_format("[$-409]m/d/yy h:mm AM/PM;@") # format for date
+```
+
+**Default formats**
+You may set default formats for the workbook so when you append_row, you don't need to specify formats for each column.
+```ruby
+datetime_format = workbook.number_format("[$-409]m/d/yy h:mm AM/PM;@")
+# ... set other formats (num_format, date_format, ...)
+workbook.set_default_formats({
+	numeric: num_format,
+	date: date_format,
+	time: time_format,
+	datetime: datetime_format,
+	boolean: boolean_format,
+	formula: formula_format,
+	url: url_format,
+	text: text_format
+})
+# or, set one by one
+workbook.set_default_format(:datetime, datetime_format)
 ```
 
 ### Set Column Width
