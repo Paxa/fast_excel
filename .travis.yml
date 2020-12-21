@@ -29,10 +29,20 @@ matrix:
       - ls -lah /Applications
       - sudo xcode-select -s /Applications/Xcode-10.2.1.app/Contents/Developer
       - clang --version
+  - os: linux
+    rvm: 2.7.2
+    env: BUILD_DOCKER=true
+    services:
+      - docker
+  - os: linux
+    rvm: 3.0.0-rc1
+    env: BUILD_DOCKER=true
+    services:
+      - docker
   fast_finish: true
 
 before_install:
-  - gem install bundler -v 2.0.2
+  - gem install bundler -v 2.2.2
 
 script:
   - bundle install
