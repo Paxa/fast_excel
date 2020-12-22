@@ -4,6 +4,7 @@ RUN gem install fast_excel
 
 ARG TRAVIS_COMMIT
 ARG TRAVIS_BRANCH
+ARG GIT_REPO
 
 RUN echo "source 'https://rubygems.org'" > Gemfile
 
