@@ -41,6 +41,6 @@ script:
   - make
   - bundle exec rake test
   - bundle exec rake examples
-  - GIT_REPO=${TRAVIS_PULL_REQUEST_SLUG:-$TRAVIS_REPO_SLUG}
+  - export GIT_REPO=${TRAVIS_PULL_REQUEST_SLUG:-$TRAVIS_REPO_SLUG}
   - env
   - if [ -n "$BUILD_DOCKER" ]; then docker build . -f Dockerfile.test --build-arg GIT_REPO --build-arg TRAVIS_COMMIT --build-arg TRAVIS_BRANCH ; fi
