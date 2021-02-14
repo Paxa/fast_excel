@@ -1,3 +1,8 @@
+#### Version 0.4.0 - 14 feb 2021
+
+* Support ruby 3.0
+* Fix for ffi library loading issue on Windows
+
 #### Version 0.3.0 - 23 jul 2020
 
 * Add support for FastExcel::URL
