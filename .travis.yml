@@ -32,10 +32,12 @@ matrix:
   - os: linux
     rvm: 2.7.2
   - os: linux
-    rvm: 3.0.0-preview2
+    rvm: 3.0.0
+  - os: linux
+    rvm: ruby-head
   fast_finish: true
   allow_failures:
-    - rvm: 3.0.0-preview2
+    - rvm: ruby-head
 
 before_install:
   - gem install bundler -v 2.2.2
