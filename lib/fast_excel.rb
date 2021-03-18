@@ -401,6 +401,8 @@ module FastExcel
       FileUtils.remove_entry(File.dirname(filename)) if tmp_file
     end
 
+    alias_method :remove_tmp_file, :remove_tmp_folder
+
     def constant_memory?
       #FastExcel.print_ffi_obj(self[:options])
       @constant_memory ||= self[:options][:constant_memory] != 0
