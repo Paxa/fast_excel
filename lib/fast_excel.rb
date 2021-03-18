@@ -92,7 +92,7 @@ module FastExcel
   def self.date_num(time, offset = nil)
     unless offset
       # Try use Rails' app timezone
-      if Time.respond_to?(:zone)
+      if Time.respond_to?(:zone) && !Time.zone.nil?
         offset = Time.zone.utc_offset
       else
         offset = 0 # rollback to UTC
