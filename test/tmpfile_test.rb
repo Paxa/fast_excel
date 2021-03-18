@@ -21,4 +21,11 @@ describe "FastExcel" do
     refute(workbook.is_open)
   end
 
+  it "should delete tmp file after 'remove_tmp_file' method is called" do
+      workbook = FastExcel.open
+
+      assert(File.exist?(workbook.filename))
+      workbook.remove_tmp_file
+      refute(File.exist?(workbook.filename))
+  end
 end
