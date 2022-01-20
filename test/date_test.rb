@@ -22,80 +22,49 @@ describe "FastExcel.date_num" do
 end
 
 describe "FastExcel.write_value" do
+  # Write a value to XLSX in a specific format, then parse it and return it.
+  def convert_via_xlsx(value, number_format)
+    tmp_filename = 'test.xlsx'
+    workbook = FastExcel.open(tmp_filename, constant_memory: true)
+    worksheet = workbook.add_worksheet("Conversion test")
 
-  it "should correctly save a DateTime" do
-    workbook = FastExcel.open(constant_memory: true)
-    worksheet = workbook.add_worksheet
-
-    format = workbook.number_format("yyyy-mm-dd hh:mm:ss")
-    value = DateTime.parse('2017-03-01 15:15:15 +0000')
-
+    format = workbook.number_format(number_format)
     worksheet.write_value(0, 0, value, format)
     workbook.close
 
-    data = parse_xlsx_as_matrix(workbook.filename)
+    data = parse_xlsx_as_matrix(tmp_filename)
 
-    assert_equal(value, data[0][0])
+    return data[0][0]
+  end
+
+  it "should correctly save a DateTime" do
+    value = DateTime.parse('2017-03-01 15:15:15 +0000')
+    xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
+    assert_equal(value, xlsx_value)
   end
 
   it "should correctly save and convert a DateTime with timezone to UTC" do
-    workbook = FastExcel.open(constant_memory: true)
-    worksheet = workbook.add_worksheet
-
-    format = workbook.number_format("yyyy-mm-dd hh:mm:ss")
     value = DateTime.parse('2017-01-01 15:11:22 +0100')
     utc_value = DateTime.parse('2017-01-01 14:11:22 +0000')
-
-    worksheet.write_value(0, 0, value, format)
-    workbook.close
-
-    data = parse_xlsx_as_matrix(workbook.filename)
-
-    assert_equal(utc_value, data[0][0])
+    xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
+    assert_equal(utc_value, xlsx_value)
   end
 
   it "should correctly save a Time" do
-    workbook = FastExcel.open(constant_memory: true)
-    worksheet = workbook.add_worksheet
-
-    format = workbook.number_format("yyyy-mm-dd hh:mm:ss")
     value = Time.new(2022, 1, 20, 14, 43, 10, '+00:00')
-
-    worksheet.write_value(0, 0, value, format)
-    workbook.close
-
-    data = parse_xlsx_as_matrix(workbook.filename)
-
-    assert_equal(value.to_datetime, data[0][0])
+    xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
+    assert_equal(value.to_datetime, xlsx_value)
   end
 
   it "should correctly save a Time with timezone" do
-    workbook = FastExcel.open(constant_memory: true)
-    worksheet = workbook.add_worksheet
-
-    format = workbook.number_format("yyyy-mm-dd hh:mm:ss")
     value = Time.new(2022, 1, 20, 14, 43, 10, '+01:00')
-
-    worksheet.write_value(0, 0, value, format)
-    workbook.close
-
-    data = parse_xlsx_as_matrix(workbook.filename)
-
-    assert_equal(value.to_datetime, data[0][0])
+    xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
+    assert_equal(value.to_datetime, xlsx_value)
   end
 
   it "should correctly save a Date" do
-    workbook = FastExcel.open(constant_memory: true)
-    worksheet = workbook.add_worksheet
-
-    format = workbook.number_format("yyyy-mm-dd")
     value = Date.parse('2017-03-01')
-
-    worksheet.write_value(0, 0, value, format)
-    workbook.close
-
-    data = parse_xlsx_as_matrix(workbook.filename)
-
-    assert_equal(value, data[0][0])
+    xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd")
+    assert_equal(value.to_datetime, xlsx_value)
   end
 end
