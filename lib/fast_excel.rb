@@ -91,8 +91,11 @@ module FastExcel
   # https://support.microsoft.com/en-us/help/214330/differences-between-the-1900-and-the-1904-date-system-in-excel
   def self.date_num(time, offset = nil)
     unless offset
-      # Try use Rails' app timezone
-      if Time.respond_to?(:zone)
+      # Try use value utc_offset
+      if time.respond_to?(:utc_offset)
+        offset = time.utc_offset
+      # Else try use Rails' app timezone
+      elsif Time.respond_to?(:zone)
         offset = Time.zone.utc_offset
       else
         offset = 0 # rollback to UTC
