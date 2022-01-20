@@ -37,26 +37,40 @@ describe "FastExcel.write_value" do
     return data[0][0]
   end
 
-  it "should correctly save a DateTime" do
+  it "should correctly save a DateTime without zone offset" do
     value = DateTime.parse('2017-03-01 15:15:15 +0000')
     xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
     assert_equal(value, xlsx_value)
   end
 
-  it "should correctly save and convert a DateTime with timezone to UTC" do
+  it "should correctly save and convert a DateTime with offset to +0000" do
     value = DateTime.parse('2017-01-01 15:11:22 +0100')
     utc_value = DateTime.parse('2017-01-01 14:11:22 +0000')
     xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
     assert_equal(utc_value, xlsx_value)
   end
 
-  it "should correctly save a Time" do
+  it "should correctly save and convert a DateTime with timezone to +0000" do
+    value = DateTime.parse('2017-01-01 15:11:22 CET')
+    utc_value = DateTime.parse('2017-01-01 14:11:22 +0000')
+    xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
+    assert_equal(utc_value, xlsx_value)
+  end
+
+  it "should correctly save and convert a DateTime with DST timezone to +0000" do
+    value = DateTime.parse('2017-07-01 15:11:22 CEST')
+    utc_value = DateTime.parse('2017-07-01 13:11:22 +0000')
+    xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
+    assert_equal(utc_value, xlsx_value)
+  end
+
+  it "should correctly save a Time without zone offset" do
     value = Time.new(2022, 1, 20, 14, 43, 10, '+00:00')
     xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
     assert_equal(value.to_datetime, xlsx_value)
   end
 
-  it "should correctly save a Time with timezone" do
+  it "should correctly save a Time with zone offset" do
     value = Time.new(2022, 1, 20, 14, 43, 10, '+01:00')
     xlsx_value = convert_via_xlsx(value, "yyyy-mm-dd hh:mm:ss")
     assert_equal(value.to_datetime, xlsx_value)
