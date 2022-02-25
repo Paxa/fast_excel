@@ -118,7 +118,7 @@ worksheet.write_url(0, 2, "https://github.com/Paxa/fast_excel", url_format)
 
 ### Data Formatting
 ```ruby
-format = worksheet.add_format(
+format = workbook.add_format(
   bold: true,
   italic: true,
   font_outline: true,
