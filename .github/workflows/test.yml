@@ -18,6 +18,10 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
 
-      - run: make
+      - run: bundle config set --local without 'benchmarks'
       - run: bundle install
+      - run: make
+
       - run: rake test
+      - run: rake examples
+      - run: gem build fast_excel.gemspec
