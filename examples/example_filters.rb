@@ -12,8 +12,8 @@ workbook.default_format.set(
 
 worksheet = workbook.add_worksheet("Payments Report")
 
-p worksheet[:filter_on]
-FastExcel.print_ffi_obj(worksheet)
+# p worksheet[:filter_on]
+# FastExcel.print_ffi_obj(worksheet)
 
 bold = workbook.bold_format
 worksheet.set_column(0, 0, FastExcel::DEF_COL_WIDTH, bold)
