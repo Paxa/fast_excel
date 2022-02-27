@@ -7,7 +7,7 @@ module Libxlsxwriter
 
   LIB_FILENAME = if RUBY_PLATFORM =~ /darwin/
     "libxlsxwriter.dylib"
-  elsif ['x64-mingw32', 'i386-mingw32'].include? RUBY_PLATFORM
+  elsif ['x64-mingw32', 'i386-mingw32', 'x64-mingw-ucrt', 'mswin'].include?(RUBY_PLATFORM)
     "libxlsxwriter.dll"
   else
     "libxlsxwriter.so"
