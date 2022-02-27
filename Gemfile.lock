@@ -30,8 +30,6 @@ GEM
     benchmark-ips (2.10.0)
     builder (3.2.4)
     ffi (1.15.5)
-    ffi_gen (1.2.0)
-      ffi (~> 1.0)
     htmlentities (4.3.4)
     mimemagic (0.4.3)
       nokogiri (~> 1)
@@ -64,7 +62,6 @@ DEPENDENCIES
   axlsx!
   benchmark-ips
   ffi
-  ffi_gen
   minitest
   minitest-reporters
   process_memory!

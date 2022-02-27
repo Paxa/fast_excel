@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'ffi'
-gem 'ffi_gen', require: false
+# gem 'ffi_gen', require: false
 
 gem 'rake'
 
