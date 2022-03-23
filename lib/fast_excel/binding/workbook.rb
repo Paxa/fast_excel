@@ -147,7 +147,7 @@ module Libxlsxwriter
     # @param [String] sheetname 
     # @return [Symbol from _enum_error_] 
     def validate_worksheet_name(sheetname)
-      Libxlsxwriter.workbook_validate_worksheet_name(self, sheetname)
+      Libxlsxwriter.workbook_validate_sheet_name(self, sheetname)
     end
   
     # @return [nil] 
@@ -319,12 +319,12 @@ module Libxlsxwriter
   # @scope class
   attach_function :workbook_get_worksheet_by_name, :workbook_get_worksheet_by_name, [Workbook, :string], Worksheet
 
-  # @method workbook_validate_worksheet_name(workbook, sheetname)
+  # @method workbook_validate_sheet_name(workbook, sheetname)
   # @param [Workbook] workbook 
   # @param [String] sheetname 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :workbook_validate_worksheet_name, :workbook_validate_worksheet_name, [Workbook, :string], :error
+  attach_function :workbook_validate_sheet_name, :workbook_validate_sheet_name, [Workbook, :string], :error
 
   # @method workbook_free(workbook)
   # @param [Workbook] workbook 

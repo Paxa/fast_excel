@@ -42,6 +42,8 @@ GEM
       ruby-progressbar
     nokogiri (1.13.3-x86_64-darwin)
       racc (~> 1.4)
+    nokogiri (1.13.3-x86_64-linux)
+      racc (~> 1.4)
     racc (1.6.0)
     rake (13.0.6)
     ruby-progressbar (1.11.0)
@@ -57,6 +59,7 @@ GEM
 
 PLATFORMS
   x86_64-darwin-20
+  x86_64-linux
 
 DEPENDENCIES
   axlsx!

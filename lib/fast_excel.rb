@@ -125,6 +125,7 @@ module FastExcel
   end
 
 
+  ERROR_ENUM = Libxlsxwriter.enum_type(:error)
   COLOR_ENUM = Libxlsxwriter.enum_type(:defined_colors)
   EXTRA_COLORS = {
     alice_blue: 0xF0F8FF,
@@ -366,10 +367,11 @@ module FastExcel
 
     def add_worksheet(sheetname = nil)
       if !sheetname.nil?
-        if sheetname.length > Libxlsxwriter::SHEETNAME_MAX
-          raise ArgumentError, "Worksheet name '#{sheetname}' exceeds Excel's limit of #{Libxlsxwriter::SHEETNAME_MAX} characters"
-        elsif @sheet_names.include?(sheetname)
-          raise ArgumentError, "Worksheet name '#{sheetname}' is already in use"
+        error = validate_worksheet_name(sheetname)
+        if error != :no_error
+          error_code = ERROR_ENUM.find(error)
+          error_str = error_code ? Libxlsxwriter.strerror(error_code) : ''
+          raise ArgumentError, "Invalid worksheet name '#{sheetname}': (#{error_code} - #{error}) #{error_str}"
         end
       end
 

@@ -11,7 +11,7 @@ describe "FastExcel validations" do
     end
 
     assert_equal(ArgumentError, error.class)
-    assert_equal("Worksheet name 'Payments Report' is already in use", error.message)
+    assert_equal("Invalid worksheet name 'Payments Report': (16 - error_sheetname_already_used) Worksheet name is already in use.", error.message)
   end
 
   it "should not raise error when worksheet name is null" do
@@ -33,7 +33,7 @@ describe "FastExcel validations" do
     end
 
     assert_equal(ArgumentError, error.class)
-    assert_equal("Worksheet name 'ABCDEFGHIJKLMNOPQRSTUVWXYZ012345' exceeds Excel's limit of 31 characters", error.message)
+    assert_equal("Invalid worksheet name 'ABCDEFGHIJKLMNOPQRSTUVWXYZ012345': (13 - error_sheetname_length_exceeded) Worksheet name exceeds Excel's limit of 31 characters.", error.message)
   end
 
   it "should not raise error when the sheet name is at maximum length" do
@@ -43,5 +43,16 @@ describe "FastExcel validations" do
     worksheet.append_row(["aaa", "bbb", "ccc"])
 
     assert_equal("ABCDEFGHIJKLMNOPQRSTUVWXYZ01234", worksheet[:name])
+  end
+
+  it "should validate using Libxlsxwriter validation" do
+    workbook = FastExcel.open(constant_memory: true)
+    error = assert_raises do
+      worksheet = workbook.add_worksheet('a?')
+      worksheet.write_value(1, 1, 'a') # without the validation, this method will crash the process
+    end
+
+    assert_equal(ArgumentError, error.class)
+    assert_equal("Invalid worksheet name 'a?': (14 - error_invalid_sheetname_character) Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'", error.message)
   end
 end
