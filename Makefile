@@ -20,8 +20,5 @@ else
 	$(Q)$(MAKE) -C libxlsxwriter
 endif
 
-clean :
-	$(Q)$(MAKE) clean -C libxlsxwriter
-
 install :
 	@echo "Nothing to install"
