@@ -13,7 +13,11 @@ module Libxlsxwriter
     "libxlsxwriter.so"
   end
 
-  ffi_lib File.expand_path("./../../../libxlsxwriter/lib/#{LIB_FILENAME}", __FILE__)
+  if Gem.loaded_specs['fast_excel']
+    ffi_lib File.join(Gem.loaded_specs['fast_excel'].extension_dir, LIB_FILENAME)
+  else
+    ffi_lib File.expand_path("../../#{LIB_FILENAME}", __FILE__)
+  end
 
   def self.attach_function(name, *_)
     begin; super; rescue FFI::NotFoundError => e
