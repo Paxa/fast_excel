@@ -95,7 +95,7 @@ module FastExcel
       if time.respond_to?(:utc_offset)
         offset = time.utc_offset
       # Else try use Rails' app timezone
-      elsif Time.respond_to?(:zone)
+      elsif Time.respond_to?(:zone) && !Time.zone.nil?
         offset = Time.zone.utc_offset
       else
         offset = 0 # rollback to UTC

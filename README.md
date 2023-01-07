@@ -55,7 +55,7 @@ workbook = FastExcel.open # creates tmp file
 send_data(workbook.read_string, filename: "table.xlsx") # read tmp file and delete it
 ```
 
-Also can use  `workbook.remove_tmp_file` to delete tmp file manually
+Also can use  `workbook.remove_tmp_folder` to delete tmp file manually
 
 
 **Constant memory mode**: saves each row to disk, good for really big files but can not change previous lines that already saved
