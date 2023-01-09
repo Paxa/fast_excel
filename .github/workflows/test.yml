@@ -21,6 +21,7 @@ jobs:
       - run: bundle config set --local without 'benchmarks'
       - run: bundle install
       - run: make
+      - run: make install
 
       - run: rake test
       - run: rake examples

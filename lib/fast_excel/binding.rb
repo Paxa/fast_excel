@@ -5,19 +5,12 @@ require 'ffi'
 module Libxlsxwriter
   extend FFI::Library
 
-  LIB_FILENAME = if RUBY_PLATFORM =~ /darwin/
-    "libxlsxwriter.dylib"
-  elsif ['x64-mingw32', 'i386-mingw32', 'x64-mingw-ucrt', 'mswin'].include?(RUBY_PLATFORM)
-    "libxlsxwriter.dll"
-  else
-    "libxlsxwriter.so"
-  end
+  LIB_FILENAME = "libxlsxwriter.#{FFI::Platform::LIBSUFFIX}".freeze
 
-  if Gem.loaded_specs['fast_excel']
-    ffi_lib File.join(Gem.loaded_specs['fast_excel'].extension_dir, LIB_FILENAME)
-  else
-    ffi_lib File.expand_path("../../#{LIB_FILENAME}", __FILE__)
-  end
+  libs = [File.expand_path("../../#{LIB_FILENAME}", __FILE__)]
+  libs.unshift(File.join(Gem.loaded_specs['fast_excel'].extension_dir, LIB_FILENAME)) if Gem.loaded_specs['fast_excel']
+
+  ffi_lib(libs)
 
   def self.attach_function(name, *_)
     begin; super; rescue FFI::NotFoundError => e
