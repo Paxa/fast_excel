@@ -1,3 +1,12 @@
+#### Version 0.4.1 - 13 jan 2023
+
+* Support ruby 3.2
+* Improve library loading (Thanks to @sly7-7 and @BrianHawley)
+* Ensure Time.zone is not nil (Thanks to @ksuh90)
+* Get utc_offset from current value if possible (Thanks to @KevinSchiffmann)
+* Validate worksheet name using Libxlsxwriter (Thanks to @datbth)
+* Fix readme typo (Thanks to @sw4d)
+
 #### Version 0.4.0 - 14 feb 2021
 
 * Support ruby 3.0
