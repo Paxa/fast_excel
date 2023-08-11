@@ -46,4 +46,4 @@ all: ioapi.o zip.o  ioapi.so zip.so
 	$(Q)$(CC) $(FPIC) -c $(CFLAGS) $< -o $@
 
 clean:
-	$(Q)/bin/rm -f *.o *.so
+	$(Q)rm -f *.o *.so
