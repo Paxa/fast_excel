@@ -541,7 +541,7 @@ module FastExcel
 
     def close
       if auto_width?
-        @column_widths.each do |num, width|
+        @column_widths.transform_values!{ |width| width || DEF_COL_WIDTH }.each do |num, width|
           set_column_width(num, width + 0.2)
         end
       end
