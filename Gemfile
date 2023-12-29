@@ -4,7 +4,7 @@ gemspec
 
 gem 'rake'
 
-gem 'roo', '2.8.3', git: 'https://github.com/roo-rb/roo.git', tag: 'v2.8.3'
+gem 'roo'
 
 gem 'minitest'
 gem 'minitest-reporters'
