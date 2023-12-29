@@ -39,4 +39,4 @@ all: md5.o md5.so
 	$(Q)$(CC) $(FPIC) -c $(CFLAGS) $(TARGET_ARCH) $< -o $@
 
 clean:
-	$(Q)/bin/rm -f *.o *.so
+	$(Q)rm -f *.o *.so
