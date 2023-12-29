@@ -21,7 +21,10 @@ It supports features such as:
 - Autofilters.
 - Charts.
 - Data validation and drop down lists.
-- Worksheet PNG/JPEG images.
+- Conditional formatting.
+- Worksheet PNG/JPEG/GIF images.
+- Cell comments.
+- Support for adding Macros.
 - Memory optimization mode for writing large files.
 - Source code available on [GitHub](https://github.com/jmcnamara/libxlsxwriter).
 - FreeBSD license.
@@ -72,7 +75,6 @@ int main() {
 }
 
 ```
-
 
 
 See the [full documentation](http://libxlsxwriter.github.io) for the getting

@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * packager - A libxlsxwriter library for creating Excel XLSX packager files.
  *
@@ -12,6 +12,9 @@
 #include <stdint.h>
 
 #ifdef USE_SYSTEM_MINIZIP
+#ifdef __GNUC__
+#pragma GCC system_header
+#endif
 #include "minizip/zip.h"
 #else
 #include "third_party/zip.h"
@@ -24,27 +27,33 @@
 #include "app.h"
 #include "core.h"
 #include "custom.h"
+#include "table.h"
 #include "theme.h"
 #include "styles.h"
 #include "format.h"
 #include "content_types.h"
 #include "relationships.h"
+#include "vml.h"
+#include "comment.h"
+#include "metadata.h"
 
 #define LXW_ZIP_BUFFER_SIZE (16384)
 
 /* If zip returns a ZIP_XXX error then errno is set and we can trap that in
  * workbook.c. Otherwise return a default libxlsxwriter error. */
-#define RETURN_ON_ZIP_ERROR(err, default_err)   \
-    if (err == ZIP_ERRNO)                       \
-        return LXW_ERROR_ZIP_FILE_OPERATION;    \
-    else if (err == ZIP_PARAMERROR)             \
-        return LXW_ERROR_ZIP_PARAMETER_ERROR;   \
-    else if (err == ZIP_BADZIPFILE)             \
-        return LXW_ERROR_ZIP_BAD_ZIP_FILE;      \
-    else if (err == ZIP_INTERNALERROR)          \
-        return LXW_ERROR_ZIP_INTERNAL_ERROR;    \
-    else                                        \
-        return default_err;
+#define RETURN_ON_ZIP_ERROR(err, default_err)       \
+    do {                                            \
+        if (err == ZIP_ERRNO)                       \
+            return LXW_ERROR_ZIP_FILE_OPERATION;    \
+        else if (err == ZIP_PARAMERROR)             \
+            return LXW_ERROR_ZIP_PARAMETER_ERROR;   \
+        else if (err == ZIP_BADZIPFILE)             \
+            return LXW_ERROR_ZIP_BAD_ZIP_FILE;      \
+        else if (err == ZIP_INTERNALERROR)          \
+            return LXW_ERROR_ZIP_INTERNAL_ERROR;    \
+        else                                        \
+            return default_err;                     \
+    } while (0)
 
 /*
  * Struct to represent a packager.
@@ -55,11 +64,13 @@ typedef struct lxw_packager {
     lxw_workbook *workbook;
 
     size_t buffer_size;
+    size_t output_buffer_size;
     zipFile zipfile;
     zip_fileinfo zipfile_info;
-    char *filename;
-    char *buffer;
-    char *tmpdir;
+    const char *filename;
+    const char *buffer;
+    char *output_buffer;
+    const char *tmpdir;
     uint8_t use_zip64;
 
 } lxw_packager;
@@ -71,7 +82,7 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-lxw_packager *lxw_packager_new(const char *filename, char *tmpdir,
+lxw_packager *lxw_packager_new(const char *filename, const char *tmpdir,
                                uint8_t use_zip64);
 void lxw_packager_free(lxw_packager *packager);
 lxw_error lxw_create_package(lxw_packager *self);

@@ -1,7 +1,7 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  * chartsheet - A libxlsxwriter library for creating Excel XLSX chartsheet files.
  *
@@ -77,13 +77,13 @@ typedef struct lxw_chartsheet {
     lxw_worksheet *worksheet;
     lxw_chart *chart;
 
-    struct lxw_protection protection;
+    struct lxw_protection_obj protection;
     uint8_t is_protected;
 
-    char *name;
-    char *quoted_name;
-    char *tmpdir;
-    uint32_t index;
+    const char *name;
+    const char *quoted_name;
+    const char *tmpdir;
+    uint16_t index;
     uint8_t active;
     uint8_t selected;
     uint8_t hidden;
@@ -143,7 +143,7 @@ lxw_error chartsheet_set_chart(lxw_chartsheet *chartsheet, lxw_chart *chart);
 /* Not currently required since scale options aren't useful in a chartsheet. */
 lxw_error chartsheet_set_chart_opt(lxw_chartsheet *chartsheet,
                                    lxw_chart *chart,
-                                   lxw_image_options *user_options);
+                                   lxw_chart_options *user_options);
 
 /**
  * @brief Make a chartsheet the active, i.e., visible chartsheet.

@@ -1,0 +1,52 @@
+name: Test Make build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name:
+      Make
+    strategy:
+      fail-fast: false
+      matrix:
+        cc:         [gcc, clang]
+        make_flags: ["",
+                     "USE_STANDARD_TMPFILE=1",
+                     "USE_SYSTEM_MINIZIP=1",
+                     "USE_DTOA_LIBRARY=1",
+                     "USE_NO_MD5=1",
+                     "USE_OPENSSL_MD5=1",
+                     "USE_MEM_FILE=1"]
+    runs-on: ubuntu-latest
+    env:
+      CC:     ${{ matrix.cc }}
+      CXX:    ${{ matrix.cc }}
+      CFLAGS: '-Werror'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+        sudo apt update
+        sudo apt-get -y install zlib1g-dev
+        sudo apt-get -y install libminizip-dev
+        sudo apt-get -y install libssl-dev
+        sudo apt-get -y install valgrind
+
+    - name: make
+      run: ${{ matrix.make_flags }} make V=1
+
+    - name: test unit
+      run: ${{ matrix.make_flags }} make test_unit V=1
+
+    - name: test functional
+      run: ${{ matrix.make_flags }} make test_functional V=1 -j
+
+    - name: test cpp
+      run: ${{ matrix.make_flags }} make test_cpp V=1
+
+    - name: test examples
+      run: ${{ matrix.make_flags }} make examples V=1

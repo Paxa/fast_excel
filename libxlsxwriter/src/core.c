@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -50,7 +50,7 @@ lxw_core_free(lxw_core *core)
 }
 
 /*
- * Convert a time_t struct to a ISO 8601 style "2010-01-01T00:00:00Z" date.
+ * Convert a time_t to a ISO 8601 style "2010-01-01T00:00:00Z" date.
  */
 static void
 _datetime_to_iso8601_date(time_t *timer, char *str, size_t size)

@@ -1,11 +1,14 @@
 *.a
 *.o
 *.so
+*.so.*
 *.to
 *.lo
 *.la
 *.dylib
 *.dll
+*.gcno
+*.gcda
 test_*
 !test_*.c
 !test_*.cpp
@@ -35,10 +38,12 @@ docs/latex
 _temp.c
 examples/*
 !examples/*.c
-!examples/logo.png
+!examples/*.png
 !examples/Makefile
+!examples/vbaProject.bin
 cov-int
 libxlsxwriter-coverity.tgz
+build
 
 third_party/zlib-1.2.8/configure.log
 third_party/zlib-1.2.8/contrib/minizip/miniunz
@@ -48,3 +53,13 @@ third_party/zlib-1.2.8/examplesh
 third_party/zlib-1.2.8/minigzip
 third_party/zlib-1.2.8/minigzipsh
 third_party/zlib-1.2.8/zlib.pc
+
+cmake
+!cmake/FindMINIZIP.cmake
+!cmake/FindPackage.cmake
+!cmake/i686-toolchain.cmake
+
+.vscode
+
+zig-cache/
+zig-out/

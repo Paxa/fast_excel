@@ -3,7 +3,7 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
@@ -78,8 +78,28 @@ _chart_free_font(lxw_chart_font *font)
     if (!font)
         return;
 
-    free(font->name);
+    free((void *) font->name);
     free(font);
+}
+
+STATIC void
+_chart_free_data_labels(lxw_chart_series *series)
+{
+    uint16_t index;
+
+    for (index = 0; index < series->data_label_count; index++) {
+        lxw_chart_custom_label *data_label = &series->data_labels[index];
+
+        free(data_label->value);
+        _chart_free_range(data_label->range);
+        _chart_free_font(data_label->font);
+        free(data_label->line);
+        free(data_label->fill);
+        free(data_label->pattern);
+    }
+
+    series->data_label_count = 0;
+    free(series->data_labels);
 }
 
 /*
@@ -96,6 +116,10 @@ _chart_series_free(lxw_chart_series *series)
     free(series->fill);
     free(series->pattern);
     free(series->label_num_format);
+    free(series->label_line);
+    free(series->label_fill);
+    free(series->label_pattern);
+
     _chart_free_font(series->label_font);
 
     if (series->marker) {
@@ -109,6 +133,7 @@ _chart_series_free(lxw_chart_series *series)
     _chart_free_range(series->values);
     _chart_free_range(series->title.range);
     _chart_free_points(series);
+    _chart_free_data_labels(series);
 
     if (series->x_error_bars) {
         free(series->x_error_bars->line);
@@ -331,11 +356,6 @@ _chart_convert_font_args(lxw_chart_font *user_font)
     if (font->rotation)
         font->rotation = font->rotation * 60000;
 
-    if (font->color) {
-        font->color = lxw_format_check_color(font->color);
-        font->has_color = LXW_TRUE;
-    }
-
     return font;
 }
 
@@ -359,11 +379,6 @@ _chart_convert_line_args(lxw_chart_line *user_line)
     line->width = user_line->width;
     line->dash_type = user_line->dash_type;
     line->transparency = user_line->transparency;
-
-    if (line->color) {
-        line->color = lxw_format_check_color(line->color);
-        line->has_color = LXW_TRUE;
-    }
 
     if (line->transparency > 100)
         line->transparency = 0;
@@ -389,11 +404,6 @@ _chart_convert_fill_args(lxw_chart_fill *user_fill)
     fill->color = user_fill->color;
     fill->none = user_fill->none;
     fill->transparency = user_fill->transparency;
-
-    if (fill->color) {
-        fill->color = lxw_format_check_color(fill->color);
-        fill->has_color = LXW_TRUE;
-    }
 
     if (fill->transparency > 100)
         fill->transparency = 0;
@@ -430,17 +440,9 @@ _chart_convert_pattern_args(lxw_chart_pattern *user_pattern)
     pattern->bg_color = user_pattern->bg_color;
     pattern->type = user_pattern->type;
 
-    pattern->fg_color = lxw_format_check_color(pattern->fg_color);
-    pattern->has_fg_color = LXW_TRUE;
-
-    if (pattern->bg_color) {
-        pattern->bg_color = lxw_format_check_color(pattern->bg_color);
-        pattern->has_bg_color = LXW_TRUE;
-    }
-    else {
+    if (!pattern->bg_color) {
         /* Default background color in Excel is white, when unspecified. */
         pattern->bg_color = LXW_COLOR_WHITE;
-        pattern->has_bg_color = LXW_TRUE;
     }
 
     return pattern;
@@ -464,7 +466,7 @@ _chart_set_default_marker_type(lxw_chart *self, uint8_t type)
 /*
  * Set an axis number format.
  */
-void
+STATIC void
 _chart_axis_set_default_num_format(lxw_chart_axis *axis, char *num_format)
 {
     if (!num_format)
@@ -857,7 +859,7 @@ _chart_write_a_def_rpr(lxw_chart *self, lxw_chart_font *font)
     LXW_INIT_ATTRIBUTES();
 
     if (font) {
-        has_color = font->color || font->has_color;
+        has_color = !!font->color;
         has_latin = font->name || font->pitch_family || font->charset;
         use_font_default = !(has_color || has_latin || font->baseline == -1);
 
@@ -929,7 +931,7 @@ _chart_write_a_r_pr(lxw_chart *self, lxw_chart_font *font)
     LXW_PUSH_ATTRIBUTES_STR("lang", "en-US");
 
     if (font) {
-        has_color = font->color || font->has_color;
+        has_color = !!font->color;
         has_latin = font->name || font->pitch_family || font->charset;
         use_font_default = !(has_color || has_latin || font->baseline == -1);
 
@@ -1090,12 +1092,14 @@ _chart_write_a_p_pie(lxw_chart *self, lxw_chart_font *font)
  * Write the <a:p> element.
  */
 STATIC void
-_chart_write_a_p_rich(lxw_chart *self, char *name, lxw_chart_font *font)
+_chart_write_a_p_rich(lxw_chart *self, char *name, lxw_chart_font *font,
+                      uint8_t ignore_rich_pr)
 {
     lxw_xml_start_tag(self->file, "a:p", NULL);
 
     /* Write the a:pPr element. */
-    _chart_write_a_p_pr_rich(self, font);
+    if (!ignore_rich_pr)
+        _chart_write_a_p_pr_rich(self, font);
 
     /* Write the a:r element. */
     _chart_write_a_r(self, name, font);
@@ -1127,11 +1131,27 @@ _chart_write_a_body_pr(lxw_chart *self, int32_t rotation,
     if (rotation == 0 && is_horizontal)
         rotation = -5400000;
 
-    if (rotation)
-        LXW_PUSH_ATTRIBUTES_INT("rot", rotation);
-
-    if (is_horizontal)
-        LXW_PUSH_ATTRIBUTES_STR("vert", "horz");
+    if (rotation) {
+        if (rotation == 16200000) {
+            /* 270 deg/stacked angle. */
+            LXW_PUSH_ATTRIBUTES_STR("rot", "0");
+            LXW_PUSH_ATTRIBUTES_STR("vert", "wordArtVert");
+        }
+        else if (rotation == 16260000) {
+            /* 271 deg/East Asian vertical. */
+            LXW_PUSH_ATTRIBUTES_STR("rot", "0");
+            LXW_PUSH_ATTRIBUTES_STR("vert", "eaVert");
+        }
+        else if (rotation == 21600000) {
+            /* 360 deg = 0 for y axis. */
+            LXW_PUSH_ATTRIBUTES_STR("rot", "0");
+            LXW_PUSH_ATTRIBUTES_STR("vert", "horz");
+        }
+        else {
+            LXW_PUSH_ATTRIBUTES_INT("rot", rotation);
+            LXW_PUSH_ATTRIBUTES_STR("vert", "horz");
+        }
+    }
 
     lxw_xml_empty_tag(self->file, "a:bodyPr", &attributes);
 
@@ -1466,8 +1486,8 @@ _chart_write_axis_font(lxw_chart *self, lxw_chart_font *font)
  * Write the <c:rich> element.
  */
 STATIC void
-_chart_write_rich(lxw_chart *self, char *name, uint8_t is_horizontal,
-                  lxw_chart_font *font)
+_chart_write_rich(lxw_chart *self, char *name, lxw_chart_font *font,
+                  uint8_t is_horizontal, uint8_t ignore_rich_pr)
 {
     int32_t rotation = 0;
 
@@ -1483,7 +1503,7 @@ _chart_write_rich(lxw_chart *self, char *name, uint8_t is_horizontal,
     _chart_write_a_lst_style(self);
 
     /* Write the a:p element. */
-    _chart_write_a_p_rich(self, name, font);
+    _chart_write_a_p_rich(self, name, font, ignore_rich_pr);
 
     lxw_xml_end_tag(self->file, "c:rich");
 }
@@ -1499,7 +1519,7 @@ _chart_write_tx_rich(lxw_chart *self, char *name, uint8_t is_horizontal,
     lxw_xml_start_tag(self->file, "c:tx", NULL);
 
     /* Write the c:rich element. */
-    _chart_write_rich(self, name, is_horizontal, font);
+    _chart_write_rich(self, name, font, is_horizontal, LXW_FALSE);
 
     lxw_xml_end_tag(self->file, "c:tx");
 }
@@ -1658,28 +1678,33 @@ _chart_write_a_ln(lxw_chart *self, lxw_chart_line *line)
     /* Convert to internal units. */
     width_int = (uint32_t) (0.5 + (12700.0 * width_flt));
 
-    if (width_int)
+    if (line->width > 0.0)
         LXW_PUSH_ATTRIBUTES_INT("w", width_int);
 
-    lxw_xml_start_tag(self->file, "a:ln", &attributes);
+    if (line->none || line->color || line->dash_type) {
+        lxw_xml_start_tag(self->file, "a:ln", &attributes);
 
-    /* Write the line fill. */
-    if (line->none) {
-        /* Write the a:noFill element. */
-        _chart_write_a_no_fill(self);
-    }
-    else if (line->has_color) {
-        /* Write the a:solidFill element. */
-        _chart_write_a_solid_fill(self, line->color, line->transparency);
-    }
+        /* Write the line fill. */
+        if (line->none) {
+            /* Write the a:noFill element. */
+            _chart_write_a_no_fill(self);
+        }
+        else if (line->color) {
+            /* Write the a:solidFill element. */
+            _chart_write_a_solid_fill(self, line->color, line->transparency);
+        }
 
-    /* Write the line/dash type. */
-    if (line->dash_type) {
-        /* Write the a:prstDash element. */
-        _chart_write_a_prst_dash(self, line->dash_type);
-    }
+        /* Write the line/dash type. */
+        if (line->dash_type) {
+            /* Write the a:prstDash element. */
+            _chart_write_a_prst_dash(self, line->dash_type);
+        }
 
-    lxw_xml_end_tag(self->file, "a:ln");
+        lxw_xml_end_tag(self->file, "a:ln");
+    }
+    else {
+        lxw_xml_empty_tag(self->file, "a:ln", &attributes);
+    }
 
     LXW_FREE_ATTRIBUTES();
 }
@@ -1824,10 +1849,10 @@ _chart_write_a_patt_fill(lxw_chart *self, lxw_chart_pattern *pattern)
 
     lxw_xml_start_tag(self->file, "a:pattFill", &attributes);
 
-    if (pattern->has_fg_color)
+    if (pattern->fg_color)
         _chart_write_a_fg_clr(self, pattern->fg_color);
 
-    if (pattern->has_bg_color)
+    if (pattern->bg_color)
         _chart_write_a_bg_clr(self, pattern->bg_color);
 
     lxw_xml_end_tag(self->file, "a:pattFill");
@@ -2269,6 +2294,141 @@ _chart_write_label_num_fmt(lxw_chart *self, char *format)
 }
 
 /*
+ * Write parts of the <c:dLbl> elements where only formatting is changed.
+ */
+STATIC void
+_chart_write_custom_label_format_only(lxw_chart *self,
+                                      lxw_chart_custom_label *data_label)
+{
+    if (data_label->line || data_label->fill || data_label->pattern) {
+        _chart_write_sp_pr(self, data_label->line, data_label->fill,
+                           data_label->pattern);
+        _chart_write_tx_pr(self, LXW_FALSE, data_label->font);
+    }
+    else if (data_label->font) {
+        lxw_xml_empty_tag(self->file, "c:spPr", NULL);
+        _chart_write_tx_pr(self, LXW_FALSE, data_label->font);
+    }
+}
+
+/*
+ * Write parts of the <c:dLbl> elements for formula custom labels.
+ */
+STATIC void
+_chart_write_custom_label_formula(lxw_chart *self, lxw_chart_series *series,
+                                  lxw_chart_custom_label *data_label)
+{
+    lxw_xml_empty_tag(self->file, "c:layout", NULL);
+    lxw_xml_start_tag(self->file, "c:tx", NULL);
+
+    _chart_write_str_ref(self, data_label->range);
+
+    lxw_xml_end_tag(self->file, "c:tx");
+
+    _chart_write_custom_label_format_only(self, data_label);
+
+    /* Write the c:dLblPos element. */
+    if (series->label_position)
+        _chart_write_d_lbl_pos(self, series->label_position);
+
+    /* Write the c:showVal element. */
+    if (series->show_labels_value)
+        _chart_write_show_val(self);
+
+    /* Write the c:showCatName element. */
+    if (series->show_labels_category)
+        _chart_write_show_cat_name(self);
+
+    /* Write the c:showSerName element. */
+    if (series->show_labels_name)
+        _chart_write_show_ser_name(self);
+
+}
+
+/*
+ * Write parts of the <c:dLbl> elements for string custom labels.
+ */
+STATIC void
+_chart_write_custom_label_str(lxw_chart *self, lxw_chart_series *series,
+                              lxw_chart_custom_label *data_label)
+{
+    uint8_t ignore_rich_pr = LXW_TRUE;
+
+    if (data_label->line || data_label->fill || data_label->pattern)
+        ignore_rich_pr = LXW_FALSE;
+
+    lxw_xml_empty_tag(self->file, "c:layout", NULL);
+    lxw_xml_start_tag(self->file, "c:tx", NULL);
+
+    /* Write the c:rich element. */
+    _chart_write_rich(self, data_label->value, data_label->font,
+                      LXW_FALSE, ignore_rich_pr);
+
+    lxw_xml_end_tag(self->file, "c:tx");
+
+    /* Write the c:spPr element. */
+    _chart_write_sp_pr(self, data_label->line, data_label->fill,
+                       data_label->pattern);
+
+    /* Write the c:dLblPos element. */
+    if (series->label_position)
+        _chart_write_d_lbl_pos(self, series->label_position);
+
+    /* Write the c:showVal element. */
+    if (series->show_labels_value)
+        _chart_write_show_val(self);
+
+    /* Write the c:showCatName element. */
+    if (series->show_labels_category)
+        _chart_write_show_cat_name(self);
+
+    /* Write the c:showSerName element. */
+    if (series->show_labels_name)
+        _chart_write_show_ser_name(self);
+
+}
+
+/*
+ * Write the <c:dLbl> elements for custom labels.
+ */
+STATIC void
+_chart_write_custom_labels(lxw_chart *self, lxw_chart_series *series)
+{
+    uint16_t index = 0;
+
+    for (index = 0; index < series->data_label_count; index++) {
+        lxw_chart_custom_label *data_label = &series->data_labels[index];
+
+        if (!data_label->value && !data_label->range && !data_label->hide
+            && !data_label->font) {
+
+            continue;
+        }
+
+        lxw_xml_start_tag(self->file, "c:dLbl", NULL);
+
+        /* Write the c:idx element. */
+        _chart_write_idx(self, index);
+
+        if (data_label->hide) {
+            /* Write the c:delete element. */
+            _chart_write_delete(self);
+        }
+        else if (data_label->value) {
+            _chart_write_custom_label_str(self, series, data_label);
+        }
+        else if (data_label->range) {
+            _chart_write_custom_label_formula(self, series, data_label);
+        }
+        else if (data_label->font) {
+            _chart_write_custom_label_format_only(self, data_label);
+        }
+
+        lxw_xml_end_tag(self->file, "c:dLbl");
+    }
+}
+
+/*
  * Write the <c:dLbls> element.
  */
 STATIC void
@@ -2279,9 +2439,16 @@ _chart_write_d_lbls(lxw_chart *self, lxw_chart_series *series)
 
     lxw_xml_start_tag(self->file, "c:dLbls", NULL);
 
+    if (series->data_labels)
+        _chart_write_custom_labels(self, series);
+
     /* Write the c:numFmt element. */
     if (series->label_num_format)
         _chart_write_label_num_fmt(self, series->label_num_format);
+
+    /* Write the c:spPr element. */
+    _chart_write_sp_pr(self, series->label_line, series->label_fill,
+                       series->label_pattern);
 
     if (series->label_font)
         _chart_write_tx_pr(self, LXW_FALSE, series->label_font);
@@ -3161,7 +3328,9 @@ _chart_write_crosses(lxw_chart *self, lxw_chart_axis *axis)
 
     LXW_INIT_ATTRIBUTES();
 
-    if (axis->crossing_max)
+    if (axis->crossing_min)
+        LXW_PUSH_ATTRIBUTES_STR("val", "min");
+    else if (axis->crossing_max)
         LXW_PUSH_ATTRIBUTES_STR("val", "max");
     else
         LXW_PUSH_ATTRIBUTES_STR("val", "autoZero");
@@ -3569,7 +3738,7 @@ _chart_write_legend_entry(lxw_chart *self, uint16_t index)
     /* Write the c:idx element. */
     _chart_write_idx(self, self->delete_series[index]);
 
-    /* Write the c:delete element. */
+    /* Write the c:dst_label element. */
     _chart_write_delete(self);
 
     lxw_xml_end_tag(self->file, "c:legendEntry");
@@ -4104,7 +4273,8 @@ _chart_write_cat_axis(lxw_chart *self)
     _chart_write_cross_axis(self, self->axis_id_2);
 
     /* Write the c:crosses element. */
-    if (!self->y_axis->has_crossing || self->y_axis->crossing_max)
+    if (!self->y_axis->has_crossing || self->y_axis->crossing_min
+        || self->y_axis->crossing_max)
         _chart_write_crosses(self, self->y_axis);
     else
         _chart_write_crosses_at(self, self->y_axis);
@@ -4185,7 +4355,8 @@ _chart_write_val_axis(lxw_chart *self)
     _chart_write_cross_axis(self, self->axis_id_1);
 
     /* Write the c:crosses element. */
-    if (!self->x_axis->has_crossing || self->x_axis->crossing_max)
+    if (!self->x_axis->has_crossing || self->x_axis->crossing_min
+        || self->x_axis->crossing_max)
         _chart_write_crosses(self, self->x_axis);
     else
         _chart_write_crosses_at(self, self->x_axis);
@@ -4263,7 +4434,8 @@ _chart_write_cat_val_axis(lxw_chart *self)
     _chart_write_cross_axis(self, self->axis_id_2);
 
     /* Write the c:crosses element. */
-    if (!self->y_axis->has_crossing || self->y_axis->crossing_max)
+    if (!self->y_axis->has_crossing || self->y_axis->crossing_min
+        || self->y_axis->crossing_max)
         _chart_write_crosses(self, self->y_axis);
     else
         _chart_write_crosses_at(self, self->y_axis);
@@ -4497,18 +4669,15 @@ _chart_write_scatter_chart(lxw_chart *self)
 
         /* Add default scatter chart formatting to the series data unless
          * it has already been specified by the user.*/
-        if (self->type == LXW_CHART_SCATTER) {
-            if (!series->line) {
-                lxw_chart_line line = {
-                    0x000000,
-                    LXW_TRUE,
-                    2.25,
-                    LXW_CHART_LINE_DASH_SOLID,
-                    0,
-                    LXW_FALSE
-                };
-                series->line = _chart_convert_line_args(&line);
-            }
+        if (self->type == LXW_CHART_SCATTER && !series->line) {
+            lxw_chart_line line = {
+                0x000000,
+                LXW_TRUE,
+                2.25,
+                LXW_CHART_LINE_DASH_SOLID,
+                0
+            };
+            series->line = _chart_convert_line_args(&line);
         }
 
         /* Write the c:ser element. */
@@ -4797,7 +4966,7 @@ _chart_initialize_doughnut_chart(lxw_chart *self)
  * Initialize a line chart.
  */
 STATIC void
-_chart_initialize_line_chart(lxw_chart *self)
+_chart_initialize_line_chart(lxw_chart *self, uint8_t type)
 {
     self->chart_group = LXW_CHART_LINE;
     _chart_set_default_marker_type(self, LXW_CHART_MARKER_NONE);
@@ -4805,6 +4974,17 @@ _chart_initialize_line_chart(lxw_chart *self)
     self->x_axis->is_category = LXW_TRUE;
     self->y_axis->is_value = LXW_TRUE;
     self->default_label_position = LXW_CHART_LABEL_POSITION_RIGHT;
+
+    if (type == LXW_CHART_LINE_STACKED) {
+        self->grouping = LXW_GROUPING_STACKED;
+        self->subtype = LXW_CHART_SUBTYPE_STACKED;
+    }
+
+    if (type == LXW_CHART_LINE_STACKED_PERCENT) {
+        self->grouping = LXW_GROUPING_PERCENTSTACKED;
+        _chart_axis_set_default_num_format(self->y_axis, "0%");
+        self->subtype = LXW_CHART_SUBTYPE_STACKED;
+    }
 
     /* Initialize the function pointers for this chart type. */
     self->write_chart_type = _chart_write_line_chart;
@@ -4900,7 +5080,9 @@ _chart_initialize(lxw_chart *self, uint8_t type)
             break;
 
         case LXW_CHART_LINE:
-            _chart_initialize_line_chart(self);
+        case LXW_CHART_LINE_STACKED:
+        case LXW_CHART_LINE_STACKED_PERCENT:
+            _chart_initialize_line_chart(self, type);
             break;
 
         case LXW_CHART_PIE:
@@ -4999,7 +5181,7 @@ lxw_chart_add_data_cache(lxw_series_range *range, uint8_t *data,
 }
 
 /*
- * Insert an image into the worksheet.
+ * Add a series to the chart.
  */
 lxw_chart_series *
 chart_add_series(lxw_chart *self, const char *categories, const char *values)
@@ -5306,7 +5488,7 @@ chart_series_set_marker_pattern(lxw_chart_series *series,
 }
 
 /*
- * Store the horizontal page breaks on a worksheet.
+ * Store the points for a chart.
  */
 lxw_error
 chart_series_set_points(lxw_chart_series *series, lxw_chart_point *points[])
@@ -5373,6 +5555,83 @@ chart_series_set_labels_options(lxw_chart_series *series, uint8_t show_name,
     series->show_labels_name = show_name;
     series->show_labels_category = show_category;
     series->show_labels_value = show_value;
+}
+
+/*
+ * Store the custom data_labels for a chart.
+ */
+lxw_error
+chart_series_set_labels_custom(lxw_chart_series *series,
+                               lxw_chart_data_label *data_labels[])
+{
+    uint16_t i = 0;
+    uint16_t data_label_count = 0;
+
+    if (data_labels == NULL)
+        return LXW_ERROR_NULL_PARAMETER_IGNORED;
+
+    while (data_labels[data_label_count])
+        data_label_count++;
+
+    if (data_label_count == 0)
+        return LXW_ERROR_NULL_PARAMETER_IGNORED;
+
+    series->has_labels = LXW_TRUE;
+
+    /* Set the Value label type if no other type is set. */
+    if (!series->show_labels_name && !series->show_labels_category
+        && !series->show_labels_value) {
+        series->show_labels_value = LXW_TRUE;
+    }
+
+    /* Free any existing resource. */
+    _chart_free_data_labels(series);
+
+    series->data_labels = calloc(data_label_count,
+                                 sizeof(lxw_chart_custom_label));
+    RETURN_ON_MEM_ERROR(series->data_labels, LXW_ERROR_MEMORY_MALLOC_FAILED);
+
+    /* Copy the user data into the array of new structs. The struct types
+     * are different since the internal version has more fields. */
+    for (i = 0; i < data_label_count; i++) {
+        lxw_chart_data_label *user_label = data_labels[i];
+        lxw_chart_custom_label *data_label = &series->data_labels[i];
+        const char *src_value = user_label->value;
+
+        data_label->hide = user_label->hide;
+        data_label->font = _chart_convert_font_args(user_label->font);
+        data_label->line = _chart_convert_line_args(user_label->line);
+        data_label->fill = _chart_convert_fill_args(user_label->fill);
+        data_label->pattern =
+            _chart_convert_pattern_args(user_label->pattern);
+
+        if (src_value) {
+            if (*src_value == '=') {
+                /* The value is a formula. Handle like other chart ranges. */
+                data_label->range = calloc(1, sizeof(lxw_series_range));
+                GOTO_LABEL_ON_MEM_ERROR(data_label->range, mem_error);
+
+                data_label->range->formula = lxw_strdup(src_value + 1);
+
+                /* Add the formula to the data cache to allow value to be looked
+                 * up and filled in when the file is closed. */
+                if (_chart_init_data_cache(data_label->range) != LXW_NO_ERROR)
+                    goto mem_error;
+            }
+            else {
+                /* The value is a simple string. */
+                data_label->value = lxw_strdup(src_value);
+            }
+        }
+    }
+
+    series->data_label_count = data_label_count;
+
+    return LXW_NO_ERROR;
+
+mem_error:
+    _chart_free_data_labels(series);
+    return LXW_ERROR_MEMORY_MALLOC_FAILED;
 }
 
 /*
@@ -5457,6 +5716,52 @@ chart_series_set_labels_font(lxw_chart_series *series, lxw_chart_font *font)
     _chart_free_font(series->label_font);
 
     series->label_font = _chart_convert_font_args(font);
+}
+
+/*
+ * Set a line type for a series data labels.
+ */
+void
+chart_series_set_labels_line(lxw_chart_series *series, lxw_chart_line *line)
+{
+    if (!line)
+        return;
+
+    /* Free any previously allocated resource. */
+    free(series->label_line);
+
+    series->label_line = _chart_convert_line_args(line);
+}
+
+/*
+ * Set a fill type for a series data labels.
+ */
+void
+chart_series_set_labels_fill(lxw_chart_series *series, lxw_chart_fill *fill)
+{
+    if (!fill)
+        return;
+
+    /* Free any previously allocated resource. */
+    free(series->label_fill);
+
+    series->label_fill = _chart_convert_fill_args(fill);
+}
+
+/*
+ * Set a pattern type for a series data labels.
+ */
+void
+chart_series_set_labels_pattern(lxw_chart_series *series,
+                                lxw_chart_pattern *pattern)
+{
+    if (!pattern)
+        return;
+
+    /* Free any previously allocated resource. */
+    free(series->label_pattern);
+
+    series->label_pattern = _chart_convert_pattern_args(pattern);
 }
 
 /*
@@ -5847,7 +6152,17 @@ chart_axis_set_crossing(lxw_chart_axis *axis, double value)
 }
 
 /*
- * Set the axis crossing position as the max possible value.
+ * Set the axis crossing position as the minimum possible value.
+ */
+void
+chart_axis_set_crossing_min(lxw_chart_axis *axis)
+{
+    axis->has_crossing = LXW_TRUE;
+    axis->crossing_min = LXW_TRUE;
+}
+
+/*
+ * Set the axis crossing position as the maximum possible value.
  */
 void
 chart_axis_set_crossing_max(lxw_chart_axis *axis)

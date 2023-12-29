@@ -3,13 +3,14 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2019, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
  *
  */
 
 #include "xlsxwriter/xmlwriter.h"
 #include "xlsxwriter/common.h"
 #include "xlsxwriter/drawing.h"
+#include "xlsxwriter/worksheet.h"
 #include "xlsxwriter/utility.h"
 
 #define LXW_OBJ_NAME_LENGTH 14  /* "Picture 65536", or "Chart 65536" */
@@ -54,7 +55,6 @@ lxw_free_drawing_object(lxw_drawing_object *drawing_object)
         return;
 
     free(drawing_object->description);
-    free(drawing_object->url);
     free(drawing_object->tip);
 
     free(drawing_object);
@@ -168,14 +168,12 @@ _drawing_write_row_off(lxw_drawing *self, char *data)
 }
 
 /*
- * Write the <xdr:from> element.
+ * Write the main part of the <xdr:from> and <xdr:to> elements.
  */
 STATIC void
-_drawing_write_from(lxw_drawing *self, lxw_drawing_coords *coords)
+_drawing_write_coords(lxw_drawing *self, lxw_drawing_coords *coords)
 {
     char data[LXW_UINT32_T_LENGTH];
-
-    lxw_xml_start_tag(self->file, "xdr:from", NULL);
 
     lxw_snprintf(data, LXW_UINT32_T_LENGTH, "%u", coords->col);
     _drawing_write_col(self, data);
@@ -190,6 +188,17 @@ _drawing_write_from(lxw_drawing *self, lxw_drawing_coords *coords)
     lxw_snprintf(data, LXW_UINT32_T_LENGTH, "%u",
                  (uint32_t) coords->row_offset);
     _drawing_write_row_off(self, data);
+}
+
+/*
+ * Write the <xdr:from> element.
+ */
+STATIC void
+_drawing_write_from(lxw_drawing *self, lxw_drawing_coords *coords)
+{
+    lxw_xml_start_tag(self->file, "xdr:from", NULL);
+
+    _drawing_write_coords(self, coords);
 
     lxw_xml_end_tag(self->file, "xdr:from");
 }
@@ -200,25 +209,112 @@ _drawing_write_from(lxw_drawing *self, lxw_drawing_coords *coords)
 STATIC void
 _drawing_write_to(lxw_drawing *self, lxw_drawing_coords *coords)
 {
-    char data[LXW_UINT32_T_LENGTH];
-
     lxw_xml_start_tag(self->file, "xdr:to", NULL);
 
-    lxw_snprintf(data, LXW_UINT32_T_LENGTH, "%u", coords->col);
-    _drawing_write_col(self, data);
-
-    lxw_snprintf(data, LXW_UINT32_T_LENGTH, "%u",
-                 (uint32_t) coords->col_offset);
-    _drawing_write_col_off(self, data);
-
-    lxw_snprintf(data, LXW_UINT32_T_LENGTH, "%u", coords->row);
-    _drawing_write_row(self, data);
-
-    lxw_snprintf(data, LXW_UINT32_T_LENGTH, "%u",
-                 (uint32_t) coords->row_offset);
-    _drawing_write_row_off(self, data);
+    _drawing_write_coords(self, coords);
 
     lxw_xml_end_tag(self->file, "xdr:to");
+}
+
+/*
+ * Write the <a:hlinkClick> element.
+ */
+STATIC void
+_drawing_write_a_hlink_click(lxw_drawing *self, uint32_t rel_index, char *tip)
+{
+    struct xml_attribute_list attributes;
+    struct xml_attribute *attribute;
+    char xmlns_r[] = "http://schemas.openxmlformats.org/"
+        "officeDocument/2006/relationships";
+    char r_id[LXW_MAX_ATTRIBUTE_LENGTH];
+
+    lxw_snprintf(r_id, LXW_ATTR_32, "rId%d", rel_index);
+
+    LXW_INIT_ATTRIBUTES();
+    LXW_PUSH_ATTRIBUTES_STR("xmlns:r", xmlns_r);
+    LXW_PUSH_ATTRIBUTES_STR("r:id", r_id);
+
+    if (tip)
+        LXW_PUSH_ATTRIBUTES_STR("tooltip", tip);
+
+    lxw_xml_empty_tag(self->file, "a:hlinkClick", &attributes);
+
+    LXW_FREE_ATTRIBUTES();
+}
+
+/*
+ * Write the <a16:creationId> element.
+ */
+STATIC void
+_drawing_write_a16_creation_id(lxw_drawing *self)
+{
+    struct xml_attribute_list attributes;
+    struct xml_attribute *attribute;
+    char xmlns[] = "http://schemas.microsoft.com/office/drawing/2014/main";
+
+    LXW_INIT_ATTRIBUTES();
+    LXW_PUSH_ATTRIBUTES_STR("xmlns:a16", xmlns);
+    LXW_PUSH_ATTRIBUTES_STR("id", "{00000000-0008-0000-0000-000002000000}");
+
+    lxw_xml_empty_tag(self->file, "a16:creationId", &attributes);
+
+    LXW_FREE_ATTRIBUTES();
+}
+
+/*
+ * Write the <adec:decorative> element.
+ */
+STATIC void
+_workbook_write_adec_decorative(lxw_drawing *self)
+{
+    struct xml_attribute_list attributes;
+    struct xml_attribute *attribute;
+    char xmlns[] =
+        "http://schemas.microsoft.com/office/drawing/2017/decorative";
+
+    LXW_INIT_ATTRIBUTES();
+    LXW_PUSH_ATTRIBUTES_STR("xmlns:adec", xmlns);
+    LXW_PUSH_ATTRIBUTES_STR("val", "1");
+
+    lxw_xml_empty_tag(self->file, "adec:decorative", &attributes);
+
+    LXW_FREE_ATTRIBUTES();
+}
+
+/*
+ * Write the <a:ext> element.
+ */
+STATIC void
+_drawing_write_uri_ext(lxw_drawing *self, char *uri)
+{
+    struct xml_attribute_list attributes;
+    struct xml_attribute *attribute;
+
+    LXW_INIT_ATTRIBUTES();
+    LXW_PUSH_ATTRIBUTES_STR("uri", uri);
+
+    lxw_xml_start_tag(self->file, "a:ext", &attributes);
+
+    LXW_FREE_ATTRIBUTES();
+}
+
+/*
+ * Write the decorative elements.
+ */
+STATIC void
+_workbook_write_decorative(lxw_drawing *self)
+{
+    lxw_xml_start_tag(self->file, "a:extLst", NULL);
+
+    _drawing_write_uri_ext(self, "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}");
+    _drawing_write_a16_creation_id(self);
+    lxw_xml_end_tag(self->file, "a:ext");
+
+    _drawing_write_uri_ext(self, "{C183D7F6-B498-43B3-948B-1728B52AA6E4}");
+    _workbook_write_adec_decorative(self);
+    lxw_xml_end_tag(self->file, "a:ext");
+
+    lxw_xml_end_tag(self->file, "a:extLst");
 }
 
 /*
@@ -239,10 +335,33 @@ _drawing_write_c_nv_pr(lxw_drawing *self, char *object_name, uint32_t index,
     LXW_PUSH_ATTRIBUTES_INT("id", index + 1);
     LXW_PUSH_ATTRIBUTES_STR("name", name);
 
-    if (drawing_object && drawing_object->description)
-        LXW_PUSH_ATTRIBUTES_STR("descr", drawing_object->description);
+    if (drawing_object && drawing_object->description
+        && strlen(drawing_object->description)
+        && !drawing_object->decorative) {
 
-    lxw_xml_empty_tag(self->file, "xdr:cNvPr", &attributes);
+        LXW_PUSH_ATTRIBUTES_STR("descr", drawing_object->description);
+    }
+
+    if (drawing_object
+        && (drawing_object->url_rel_index || drawing_object->decorative)) {
+        lxw_xml_start_tag(self->file, "xdr:cNvPr", &attributes);
+
+        if (drawing_object->url_rel_index) {
+            /* Write the a:hlinkClick element. */
+            _drawing_write_a_hlink_click(self,
+                                         drawing_object->url_rel_index,
+                                         drawing_object->tip);
+        }
+
+        if (drawing_object->decorative) {
+            _workbook_write_decorative(self);
+        }
+
+        lxw_xml_end_tag(self->file, "xdr:cNvPr");
+    }
+    else {
+        lxw_xml_empty_tag(self->file, "xdr:cNvPr", &attributes);
+    }
 
     LXW_FREE_ATTRIBUTES();
 }
@@ -472,7 +591,7 @@ _drawing_write_pic(lxw_drawing *self, uint32_t index,
     _drawing_write_nv_pic_pr(self, index, drawing_object);
 
     /* Write the xdr:blipFill element. */
-    _drawing_write_blip_fill(self, index);
+    _drawing_write_blip_fill(self, drawing_object->rel_index);
 
     /* Write the xdr:spPr element. */
     _drawing_write_sp_pr(self, drawing_object);
@@ -529,12 +648,13 @@ _drawing_write_c_nv_graphic_frame_pr(lxw_drawing *self)
  * Write the <xdr:nvGraphicFramePr> element.
  */
 STATIC void
-_drawing_write_nv_graphic_frame_pr(lxw_drawing *self, uint32_t index)
+_drawing_write_nv_graphic_frame_pr(lxw_drawing *self, uint32_t index,
+                                   lxw_drawing_object *drawing_object)
 {
     lxw_xml_start_tag(self->file, "xdr:nvGraphicFramePr", NULL);
 
     /* Write the xdr:cNvPr element. */
-    _drawing_write_c_nv_pr(self, "Chart", index, NULL);
+    _drawing_write_c_nv_pr(self, "Chart", index, drawing_object);
 
     /* Write the xdr:cNvGraphicFramePr element. */
     _drawing_write_c_nv_graphic_frame_pr(self);
@@ -661,7 +781,9 @@ _drawing_write_a_graphic(lxw_drawing *self, uint32_t index)
  * Write the <xdr:graphicFrame> element.
  */
 STATIC void
-_drawing_write_graphic_frame(lxw_drawing *self, uint32_t index)
+_drawing_write_graphic_frame(lxw_drawing *self, uint32_t index,
+                             uint32_t rel_index,
+                             lxw_drawing_object *drawing_object)
 {
     struct xml_attribute_list attributes;
     struct xml_attribute *attribute;
@@ -672,13 +794,13 @@ _drawing_write_graphic_frame(lxw_drawing *self, uint32_t index)
     lxw_xml_start_tag(self->file, "xdr:graphicFrame", &attributes);
 
     /* Write the xdr:nvGraphicFramePr element. */
-    _drawing_write_nv_graphic_frame_pr(self, index);
+    _drawing_write_nv_graphic_frame_pr(self, index, drawing_object);
 
     /* Write the xdr:xfrm element. */
     _drawing_write_xfrm(self);
 
     /* Write the a:graphic element. */
-    _drawing_write_a_graphic(self, index);
+    _drawing_write_a_graphic(self, rel_index);
 
     lxw_xml_end_tag(self->file, "xdr:graphicFrame");
 
@@ -697,24 +819,22 @@ _drawing_write_two_cell_anchor(lxw_drawing *self, uint32_t index,
 
     LXW_INIT_ATTRIBUTES();
 
-    if (drawing_object->anchor_type == LXW_ANCHOR_TYPE_IMAGE) {
-
-        if (drawing_object->edit_as == LXW_ANCHOR_EDIT_AS_ABSOLUTE)
-            LXW_PUSH_ATTRIBUTES_STR("editAs", "absolute");
-        else if (drawing_object->edit_as != LXW_ANCHOR_EDIT_AS_RELATIVE)
-            LXW_PUSH_ATTRIBUTES_STR("editAs", "oneCell");
-    }
+    if (drawing_object->anchor == LXW_OBJECT_MOVE_DONT_SIZE)
+        LXW_PUSH_ATTRIBUTES_STR("editAs", "oneCell");
+    else if (drawing_object->anchor == LXW_OBJECT_DONT_MOVE_DONT_SIZE)
+        LXW_PUSH_ATTRIBUTES_STR("editAs", "absolute");
 
     lxw_xml_start_tag(self->file, "xdr:twoCellAnchor", &attributes);
 
     _drawing_write_from(self, &drawing_object->from);
     _drawing_write_to(self, &drawing_object->to);
 
-    if (drawing_object->anchor_type == LXW_ANCHOR_TYPE_CHART) {
+    if (drawing_object->type == LXW_DRAWING_CHART) {
         /* Write the xdr:graphicFrame element for charts. */
-        _drawing_write_graphic_frame(self, index);
+        _drawing_write_graphic_frame(self, index, drawing_object->rel_index,
+                                     drawing_object);
     }
-    else if (drawing_object->anchor_type == LXW_ANCHOR_TYPE_IMAGE) {
+    else if (drawing_object->type == LXW_DRAWING_IMAGE) {
         /* Write the xdr:pic element. */
         _drawing_write_pic(self, index, drawing_object);
     }
@@ -772,7 +892,7 @@ _drawing_write_pos(lxw_drawing *self, int32_t x, int32_t y)
  * Write the <xdr:absoluteAnchor> element.
  */
 STATIC void
-_drawing_write_absolute_anchor(lxw_drawing *self)
+_drawing_write_absolute_anchor(lxw_drawing *self, uint32_t frame_index)
 {
     lxw_xml_start_tag(self->file, "xdr:absoluteAnchor", NULL);
 
@@ -791,7 +911,7 @@ _drawing_write_absolute_anchor(lxw_drawing *self)
         _drawing_write_ext(self, 6162675, 6124575);
     }
 
-    _drawing_write_graphic_frame(self, 1);
+    _drawing_write_graphic_frame(self, frame_index, frame_index, NULL);
 
     /* Write the xdr:clientData element. */
     _drawing_write_client_data(self);
@@ -830,7 +950,7 @@ lxw_drawing_assemble_xml_file(lxw_drawing *self)
     }
     else {
         /* Write the xdr:absoluteAnchor element. Mainly for chartsheets. */
-        _drawing_write_absolute_anchor(self);
+        _drawing_write_absolute_anchor(self, 1);
     }
 
     lxw_xml_end_tag(self->file, "xdr:wsDr");

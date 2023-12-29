@@ -32,18 +32,13 @@ CC = gcc
 CFLAGS += -DUSE_FILE32API
 endif
 
-# Fix for modified zconf.h on Gentoo.
-ifneq (,$(findstring gentoo, $(UNAME)))
-CFLAGS += -DOF=_Z_OF
-endif
-
 all: ioapi.o zip.o  ioapi.so zip.so
 
 %.o  : %.c
-	$(Q)$(CC)         -c $(CFLAGS) $<
+	$(Q)$(CC)         -c $(CFLAGS) $(TARGET_ARCH) $<
 
 %.so : %.c
-	$(Q)$(CC) $(FPIC) -c $(CFLAGS) $< -o $@
+	$(Q)$(CC) $(FPIC) -c $(CFLAGS) $(TARGET_ARCH) $< -o $@
 
 clean:
-	$(Q)rm -f *.o *.so
+	$(Q)/bin/rm -f *.o *.so

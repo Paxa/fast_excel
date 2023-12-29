@@ -1,6 +1,348 @@
 /**
 @page changes Changes
 
+
+## 1.1.5 December 30 2022
+
+- Added support for writing a workbook to a memory buffer instead of to a file
+  via the `output_buffer` parameter of @ref workbook_new_opt(). See also
+  @ref output_buffer.c.
+
+- Add support for using in-memory data instead of temporary files on systems where
+ `fmemopen()` and `open_memstream()` are supported. This requires the `USE_MEM_FILE`
+  compilation option.
+
+
+## 1.1.4 October 9 2021
+
+- Added support for Worksheet tables. Tables in Excel are a way of grouping a
+  range of cells into a single entity that has common formatting or that can
+  be referenced from formulas. Tables can have column headers, autofilters,
+  total rows, column formulas and default formatting. See @ref
+  working_with_tables and @ref tables.c.
+
+- Added support for adding a macro button to a worksheet. See @ref macro.c.
+
+## 1.1.3 August 9 2021
+
+- Changed worksheet_filter_column2() parameter name "operator" to "and_or" to
+  avoid a conflict with the C++ reserved keyword.
+
+## 1.1.2 August 8 2021
+
+- Added support for autofilter rules. See @ref working_with_autofilters and
+  @ref autofilter.c.
+
+  Feature request [#254][gh_254].
+
+  [gh_254]: https://github.com/jmcnamara/libxlsxwriter/issues/254
+
+- Added Description/Alt Text and Decorative accessibility options for
+  charts. These options were already available for images.
+
+
+## 1.1.1 July 12 2021
+
+- Added optional third party library to handle sprintf handling of
+  doubles. This is to avoid issues with number formatting in some locales. The
+  optional library is the Milo Yip DTOA implementation. See @ref gsg_dtoa.
+
+  Issue [#272][gh_272].
+
+  [gh_272]: https://github.com/jmcnamara/libxlsxwriter/issues/272
+
+- Added the #LXW_EXPLICIT_FALSE variable to allow the default bold property in
+  chart title fonts to be turned off.
+
+  Issue [#199][gh_199].
+
+  [gh_199]: https://github.com/jmcnamara/libxlsxwriter/issues/199
+
+## 1.1.0 July 9 2021
+
+- Fix for Cocoapod issue where local md5 files conflicted with BoringSSL headers.
+
+  Issue [#342][gh_342].
+
+  [gh_342]: https://github.com/jmcnamara/libxlsxwriter/issues/342
+
+## 1.0.9 July 7 2021
+
+- Added support for Excel 365 dynamic arrays. See
+ `worksheet_write_dynamic_array_formula()` `worksheet_write_dynamic_formula()`
+ and @ref ww_formulas_dynamic_arrays.
+
+
+## 1.0.8 July 3 2021
+
+- Fix for dynamic library soname on Linux.
+
+
+## 1.0.7 July 1 2021
+
+- Added support for writing Unix date/times via the
+  `worksheet_write_unixtime()` function.
+
+- Added support for dynamic library soname version to help packagers and build
+  systems differentiate ABI versions.
+
+
+## 1.0.6 May 28 2021
+
+- Added support for using OpenSSL MD5 functions instead of built in third
+  party library. See @ref gsg_md5.
+
+
+## 1.0.5 May 13 2021
+
+- Added support for worksheet background images via
+  `worksheet_set_background()`.
+
+
+## 1.0.4 May 8 2021
+
+- Added support for GIF image files (and in Excel 365, animated GIF files).
+
+
+## 1.0.3 April 20 2021
+
+- Added some fixes to make the library compile more cleanly as an R library.
+
+
+## 1.0.2 April 15 2021
+
+- Added option to set row heights and column widths in pixels via the
+  `worksheet_set_row_pixels()` and `worksheet_set_column_pixels()` functions.
+
+## 1.0.1 March 30 2021
+
+- Added support for [pkg-config][pkg-config] to Make/Cmake installs. See the
+  @ref gsg_using section of the Getting Started guide.
+  </p>
+
+  [pkg-config]: https://www.freedesktop.org/wiki/Software/pkg-config/
+
+- Added ability to add accessibility options "description" and "decorative" to
+  images via `worksheet_insert_image_opt()` and #lxw_image_options.
+  </p>
+
+- Added the `workbook_read_only_recommended()` function to set the Excel
+  "Read-only Recommended" option that is available when saving a file.
+  </p>
+
+- Fixed issue where pattern formats without colors were given a default black
+  fill color.
+  </p>
+
+- Added option to set a chart crossing to 'min' via
+  `chart_axis_set_crossing_min()` as well as the existing 'max' option. The
+  'min' option isn't available in the Excel interface but can be enabled via
+  VBA.
+  </p>
+
+- Added some additional information on using constant_memory mode with memory
+  mounted /tmp directories. See @ref ww_mem_temp.
+
+  Issue [#306][gh_306].
+
+  [gh_306]: https://github.com/jmcnamara/libxlsxwriter/issues/306
+
+- Added build option to compile libxlsxwriter as a "universal binary" for both
+  Apple silicon and Intel-based Macs, i.e., arm64 and x86_64. See @ref
+  gsg_universal.
+  </p>
+
+- Fixed issue where the limit for header/footer strings was
+  255 bytes instead of 255 characters and as a result UTF8
+  strings were being truncated.
+
+  Issue [#305][gh_305].
+
+  [gh_305]: https://github.com/jmcnamara/libxlsxwriter/issues/305
+
+
+## 1.0.0 September 7 2020
+
+- Added support for worksheet conditional formatting. See
+  `worksheet_conditional_format_range()` and @ref
+  working_with_conditional_formatting.
+
+  Feature request [#32][gh_32] and [#302][gh_302].
+
+  [gh_302]: https://github.com/jmcnamara/libxlsxwriter/issues/302
+  [gh_32]:  https://github.com/jmcnamara/libxlsxwriter/issues/32
+
+- Added performance optimization for search for control characters in strings
+  in `worksheet_write_string()`.
+
+  Issue [#298][gh_298].
+
+  [gh_298]: https://github.com/jmcnamara/libxlsxwriter/issues/298
+
+- Made `lxw_datetime_to_excel_datetime()` a function public.
+  </p>
+
+- There are now over 1000 test cases, including 650 tests that compare the
+  output from libxlsxwriter, byte for byte, against test files created in
+  Excel. This is also the 100th release of libxlsxwriter.
+
+
+## 0.9.9 August 17 2020
+
+- Added support for images in headers and footers. See `worksheet_set_header_opt()`.
+
+- Added `worksheet_ignore_errors()` function to ignore Excel worksheet
+  errors/warnings in user defined ranges.
+
+
+## 0.9.8 August 11 2020
+
+- Added formatting for chart data labels and chart custom data labels. See
+  @ref chart_custom_labels and @ref chart_data_labels.c.
+
+
+## 0.9.7 August 4 2020
+
+- Changed #lxw_chart_data_label field from `.delete` to `.hide` in order to
+  avoid reserved word conflict with C++.
+  Issue [#300][gh_300].
+
+  [gh_300]: https://github.com/jmcnamara/libxlsxwriter/issues/300
+
+
+## 0.9.6 August 3 2020
+
+- Added support for chart custom data labels. See @ref chart_custom_labels and
+  @ref chart_data_labels.c.
+
+- Fix for issue where array formulas weren't included in the output file for
+  certain ranges/conditions. Issue [#735][gh_735].
+
+  [gh_735]: https://github.com/jmcnamara/XlsxWriter/issues/735
+
+
+## 0.9.5 May 31 2020
+
+- Fix for issue where hyperlinks urls and tips were ignored for
+  `worksheet_insert_image_buffer_opt()` images.
+  Issue [#292][gh_292].
+
+  [gh_292]: https://github.com/jmcnamara/libxlsxwriter/issues/292
+
+- Added #LXW_CHART_LINE_STACKED and #LXW_CHART_LINE_STACKED_PERCENT line
+  charts subtypes.
+
+- Removed LXW_ERROR_SHEETNAME_RESERVED warning which was used with the
+  reserved worksheet name "History". However, this is an allowed worksheet
+  name in some Excel variants so the warning has been turned into a
+  documentation note instead.
+
+
+## 0.9.4 January 19 2020
+
+- Added option to specify worksheet "object positioning" for images and charts
+  to define how they move or size with underlying cells. See @ref
+  ww_object_position_options and @ref working_with_object_positioning.
+
+
+## 0.9.3 January 13 2020
+
+- Fix Xcode/Cocoapods build warnings.
+
+
+## 0.9.2 January 13 2020
+
+- Added support for writing cell comments, see @ref working_with_comments.
+
+- Makefile now respects DESTDIR and PREFIX, including when setting rpath on
+  macOS.
+
+- Changed function names in bundled MD5 code to avoid conflicts with OpenSSL.
+
+
+## 0.9.1 December 26 2019
+
+- Fix to missing MD5 linkage in Cocoapod file.
+  Issue [#259][gh_259].
+
+  [gh_259]: https://github.com/jmcnamara/libxlsxwriter/issues/259
+
+
+## 0.9.0 December 26 2019
+
+- Fix to avoid duplicate images being copied to an libxlsxwriter file. Excel
+  uses an optimization where it only stores one copy of a repeated/duplicate
+  image in a workbook. Libxlsxwriter didn't do this which meant that the file
+  size would increase when then was a large number of repeated images. This
+  release fixes that issue and replicates Excel's behavior.
+
+  Note, that this change adds a dependency on the [Openwall MD5] library,
+  which is now included with the libxlsxwriter third party source files. It is
+  possible to compile libxlsxwriter without this library, and thus getting the
+  older behavior, by passing `USE_NO_MD5=1` to make.
+
+
+  [Openwall MD5]: https://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
+
+## 0.8.9 December 16 2019
+
+- Added support for default hyperlink style in `worksheet_write_url()`.
+
+- Added support for hyperlink in images, see `worksheet_insert_image_opt()`.
+
+- Fixed several `worksheet_write_url()` edge cases.
+
+
+## 0.8.8 November 17 2019
+
+- Added option to allow a user defined, or overridden, image description used
+  with `worksheet_insert_image()`. By default it uses the filename as the
+  description.
+  Issue [#238][gh_238].
+
+  [gh_238]: https://github.com/jmcnamara/libxlsxwriter/issues/238
+
+- Added Windows portable version of `fopen` to handle utf8 filenames when
+  working with images.
+  Issue [#238][gh_238].
+
+  [gh_238]: https://github.com/jmcnamara/libxlsxwriter/issues/238
+
+- Added an option to allow chart fonts to be rotation to 270 deg to give a
+  stacked orientation. Also added support for East Asian vertical chart fonts.
+
+- Refactored struct types used in pubic APIs to remove or document hidden
+  fields. @b Note: This change introduces backward incompatible API
+  changes. However, it should minimize any future changes of this nature.
+  See issue [#252][gh_252].
+
+  [gh_252]: https://github.com/jmcnamara/libxlsxwriter/issues/252
+
+
+
+## 0.8.7 June 20 2019
+
+- Added support for adding VBA macros to workbooks. These macros can be
+  extracted from existing xlsm files, created in Excel, and added to new xlsm
+  files. See @ref working_with_macros.
+  Feature request [#29][gh_29].
+
+  [gh_29]: https://github.com/jmcnamara/libxlsxwriter/issues/29
+
+- Added support for ZIP64 extensions when writing very large xlsx files to
+  allow the zip container, or individual XML files within it, to be greater
+  than 4 GB. See @ref workbook_new_opt().
+  Feature request [#228][gh_228].
+
+  [gh_228]: https://github.com/jmcnamara/libxlsxwriter/issues/228
+
+- Added extra validity checks on worksheet names.
+  Issues [#223][gh_223] and [#230][gh_230].
+
+  [gh_223]: https://github.com/jmcnamara/libxlsxwriter/issues/223
+  [gh_230]: https://github.com/jmcnamara/libxlsxwriter/issues/230
+
+
 ## 0.8.6 April 7 2019
 
 - Fixed issue where images that started in hidden rows/columns weren't placed
@@ -95,7 +437,7 @@
   [gh_153]: https://github.com/jmcnamara/libxlsxwriter/issues/153
 
 - Added docs on building an app with Cmake and Microsoft Visual C++ on
-  Windows. See @ref gsg_cmake_app.
+  Windows.
 
 
 ## 0.7.6 January 11 2018
@@ -155,7 +497,7 @@
 
 ## 0.7.0 June 26 2017
 
-- Added support for CMake build system. See @ref gsg_cmake.
+- Added support for CMake build system.
   Thanks to Alex Huszagh.
 
 - Fixed issue where image filehandles weren't closed until the overall file
