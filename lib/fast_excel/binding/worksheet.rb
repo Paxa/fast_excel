@@ -209,7 +209,11 @@ module Libxlsxwriter
     def write_string(row, col, string, format)
       Libxlsxwriter.worksheet_write_string(self, row, col, string, format)
     end
-  
+
+    def write_comment(row, col, string)
+      Libxlsxwriter.worksheet_write_comment(self, row, col, string)
+    end
+
     # @param [Integer] row 
     # @param [Integer] col 
     # @param [String] formula 
@@ -684,29 +688,45 @@ module Libxlsxwriter
     include WorksheetWrappers
     layout :file, :pointer,
            :optimize_tmpfile, :pointer,
+           :optimize_buffer, :pointer,
+           :optimize_buffer_size, :size_t,
            :table, TableRows.ptr,
            :hyperlinks, TableRows.ptr,
+           :comments, TableRows.ptr,
            :array, :pointer,
            :merged_ranges, MergedRanges.ptr,
-           :selections, Selections.ptr,
+           #:selections, Selections.ptr,
            :data_validations, :pointer, # TODO add real definition for lxw_data_validations
+           :conditional_formats, :pointer,
+           :image_props, :pointer,
            :image_data, ImageData.ptr,
            :chart_data, ChartData.ptr,
+           :drawing_rel_ids, :pointer,
+           :vml_drawing_rel_ids, :pointer,
+           :comment_objs, :pointer,
+           :header_image_objs, :pointer,
+           :button_objs, :pointer,
+           :table_objs, :pointer,
+           :table_count, :uint16,
+
            :dim_rowmin, :uint32,
            :dim_rowmax, :uint32,
            :dim_colmin, :uint16,
            :dim_colmax, :uint16,
+
            :sst, Sst.ptr,
            :name, :string,
            :quoted_name, :string,
            :tmpdir, :pointer,
-           :index, :uint32,
-           :active, :uint8,
-           :selected, :uint8,
-           :hidden, :uint8,
+
+           :index, :uint16,
+           :active, :uchar,
+           :selected, :uchar,
+           :hidden, :uchar,
            :active_sheet, :pointer,
            :first_sheet, :pointer,
-           :is_chartsheet, :uint8,
+           :is_chartsheet, :uchar,
+
            :col_options, :pointer,
            :col_options_max, :uint16,
            :col_sizes, :pointer,
@@ -717,6 +737,7 @@ module Libxlsxwriter
            :row_size_changed, :uint8,
            :optimize, :uint8,
            :optimize_row, :pointer,
+
            :fit_height, :uint16,
            :fit_width, :uint16,
            :horizontal_dpi, :uint16,
@@ -726,6 +747,7 @@ module Libxlsxwriter
            :rel_count, :uint16,
            :vertical_dpi, :uint16,
            :zoom, :uint16,
+
            :filter_on,             :uint8,
            :fit_page,              :uint8,
            :hcenter,               :uint8,
@@ -747,8 +769,12 @@ module Libxlsxwriter
            :show_zeros,            :uint8,
            :vcenter,               :uint8,
            :zoom_scale_normal,     :uint8,
+           :black_white,           :uint8,
            :num_validations,       :uint8,
+           :has_dynamic_arrays,    :uint8,
+
            :vba_codename, :pointer,
+           :num_buttons, :uint16,
            :tab_color, :int,
            :margin_left, :double,
            :margin_right, :double,
@@ -756,30 +782,44 @@ module Libxlsxwriter
            :margin_bottom, :double,
            :margin_header, :double,
            :margin_footer, :double,
+
            :default_row_height, :double,
            :default_row_pixels, :uint,
            :default_col_pixels, :uint,
-           :default_row_zeroed, :uchar,
+           :default_row_zeroed, :uint8,
            :default_row_set, :uint8,
+           :outline_row_level, :uint8,
+           :outline_col_level, :uint8,
+
            :header_footer_changed, :uint8,
-           :header, [:char, 255],
-           :footer, [:char, 255],
+           :header, :pointer,
+           :footer, :pointer,
            :repeat_rows, RepeatRows.by_value,
            :repeat_cols, RepeatCols.by_value,
            :print_area, PrintArea.by_value,
            :autofilter, Autofilter.by_value,
+
            :merged_range_count, :uint16,
+           :max_url_length, :uint16,
+
            :hbreaks, :pointer,
            :vbreaks, :pointer,
            :hbreaks_count, :uint16,
            :vbreaks_count, :uint16,
+
+           :drawing_rel_id, :uint,
+           :vml_drawing_rel_id, :uint,
+
            :external_hyperlinks, :pointer,
            :external_drawing_links, :pointer,
            :drawing_links, :pointer,
+           :vml_drawing_links, :pointer,
+           :external_table_links, :pointer,
+
            :panes, Panes.by_value,
-           :protection, Protection.by_value,
-           :drawing, Drawing.ptr,
-           :list_pointers, WorksheetListPointers.by_value
+           :protection, Protection.by_value
+           # :drawing, Drawing.ptr,
+           # :list_pointers, WorksheetListPointers.by_value
   end
 
   # = Fields:
@@ -989,6 +1029,8 @@ module Libxlsxwriter
   # @return [Symbol from _enum_error_] 
   # @scope class
   attach_function :worksheet_write_string, :worksheet_write_string, [Worksheet, :uint32, :ushort, :string, Format], :error
+
+  attach_function :worksheet_write_comment, :worksheet_write_comment, [Worksheet, :uint32, :ushort, :string], :error
 
   # @method worksheet_write_formula(worksheet, row, col, formula, format)
   # @param [Worksheet] worksheet 
@@ -1513,6 +1555,8 @@ module Libxlsxwriter
   # @return [Cell] 
   # @scope class
   attach_function :worksheet_find_cell, :lxw_worksheet_find_cell, [Row, :ushort], Cell
+
+  attach_function :worksheet_add_table, :worksheet_add_table, [Worksheet, :uint, :ushort, :uint, :ushort, :pointer], :error
 
   # = Fields:
   # :rbe_left ::

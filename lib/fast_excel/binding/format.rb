@@ -697,9 +697,14 @@ module Libxlsxwriter
     include FormatWrappers
     layout :file, :pointer,
            :xf_format_indices, :pointer, #HashTable.ptr,
+           :dxf_format_indices, :pointer,
            :num_xf_formats, :pointer,
+           :num_dxf_formats, :pointer,
+
            :xf_index, :int32_t,
            :dxf_index, :int32_t,
+           :xf_id, :int32_t,
+
            :num_format, [:char, 128],
            :font_name, [:char, 128],
            :font_scheme, [:char, 128],
@@ -708,6 +713,7 @@ module Libxlsxwriter
            :has_font, :uchar,
            :has_dxf_font, :uchar,
            :font_size, :double,
+
            :bold, :uchar,
            :italic, :uchar,
            :font_color, :int,
@@ -722,24 +728,32 @@ module Libxlsxwriter
            :font_extend, :uchar,
            :theme, :uchar,
            :hyperlink, :uchar,
+
            :hidden, :uchar,
            :locked, :uchar,
+
            :text_h_align, :uchar,
            :text_wrap, :uchar,
            :text_v_align, :uchar,
            :text_justlast, :uchar,
            :rotation, :short,
+
            :fg_color, :int,
            :bg_color, :int,
+           :dxf_fg_color, :int,
+           :dxf_bg_color, :int,
+
            :pattern, :uchar,
            :has_fill, :uchar,
            :has_dxf_fill, :uchar,
            :fill_index, :int,
            :fill_count, :int,
+
            :border_index, :int,
            :has_border, :uchar,
            :has_dxf_border, :uchar,
            :border_count, :int,
+
            :bottom, :uchar,
            :diag_border, :uchar,
            :diag_type, :uchar,
@@ -751,6 +765,7 @@ module Libxlsxwriter
            :left_color, :int,
            :right_color, :int,
            :top_color, :int,
+
            :indent, :uchar,
            :shrink, :uchar,
            :merge_range, :uchar,
@@ -758,6 +773,8 @@ module Libxlsxwriter
            :just_distrib, :uchar,
            :color_indexed, :uchar,
            :font_only, :uchar,
+
+           :quote_prefix, :uchar,
            :list_pointers, FormatListPointers.by_value
   end
 

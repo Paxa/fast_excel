@@ -1,3 +1,12 @@
+#### Version 0.5.0 
+
+* Support ruby 3.3
+* Sync latest libxlsxwriter
+* Add support for writing cell comments
+* Add more examples
+* Fix compilation of minizip on NixOS (Thanks to @Mange)
+* On close set empty columns to default width (Thanks to @steffansluis)
+
 #### Version 0.4.1 - 13 jan 2023
 
 * Support ruby 3.2

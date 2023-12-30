@@ -36,13 +36,10 @@ module FastExcel
 
     filename = filename.to_s if defined?(Pathname) && filename.is_a?(Pathname)
 
-    workbook = if constant_memory
-      opt = Libxlsxwriter::WorkbookOptions.new
-      opt[:constant_memory] = 1
-      Libxlsxwriter.workbook_new_opt(filename, opt)
-    else
-      Libxlsxwriter.workbook_new(filename)
-    end
+    opt = Libxlsxwriter::WorkbookOptions.new
+    opt[:constant_memory] = constant_memory ? 1 : 0
+    workbook = Libxlsxwriter.workbook_new_opt(filename, opt)
+
     result = Libxlsxwriter::Workbook.new(workbook)
 
     if default_format
@@ -105,23 +102,33 @@ module FastExcel
     time.to_f / XLSX_DATE_DAY + XLSX_DATE_EPOCH_DIFF + offset / XLSX_DATE_DAY
   end
 
-  def self.print_ffi_obj(value)
-    puts "#{value.class}"
+  def self.print_ffi_obj(value, do_print: true, offset: "", deep: false)
+    result = "#{value.class}"
+
     value.members.each do |key|
-      field_val = if value[key].is_a?(FFI::Pointer) && value[key].null? || value[key].nil?
+      fval = value[key]
+      field_val = if fval.is_a?(FFI::Pointer) && fval.null? || fval.nil?
         "nil"
-      elsif value[key].is_a?(FFI::StructLayout::CharArray)
-        value[key].to_str.inspect
-      elsif value[key].is_a?(String)
-        value[key].inspect
-      elsif value[key].is_a?(Symbol)
-        value[key].inspect
+      elsif fval.is_a?(FFI::StructLayout::CharArray)
+        fval.to_str.inspect
+      elsif fval.is_a?(String)
+        fval.inspect
+      elsif fval.is_a?(Symbol)
+        fval.inspect
+      elsif fval.is_a?(FFI::Struct) && deep
+        print_ffi_obj(fval, do_print: false, offset: offset + "    ", deep: deep)
       else
-        value[key]
+        fval
       end
-      puts "* #{key}: #{field_val}"
+
+      result += "\n#{offset}* #{key}: #{field_val}"
     end
-    nil
+
+    if do_print
+      puts result
+    else
+      return result
+    end
   end
 
 

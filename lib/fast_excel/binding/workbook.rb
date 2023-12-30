@@ -7,7 +7,9 @@ module Libxlsxwriter
   class WorkbookOptions < FFI::Struct
     layout :constant_memory, :uchar,
            :tmpdir, :string,
-           :use_zip64, :uchar
+           :use_zip64, :uchar,
+           :output_buffer, :pointer,
+           :output_buffer_size, :pointer
   end
 
   # = Fields:
@@ -174,6 +176,9 @@ module Libxlsxwriter
            :chartsheets, :pointer,
            :worksheet_names, WorksheetNames.ptr,
            :chartsheet_names, :pointer,
+           :image_md5s, :pointer,
+           :header_image_md5s, :pointer,
+           :background_md5s, :pointer,
            :charts, Charts.ptr,
            :ordered_charts, Charts.ptr,
            :formats, Formats.ptr,
@@ -181,26 +186,43 @@ module Libxlsxwriter
            :sst, Sst.ptr,
            :properties, DocProperties.ptr,
            :custom_properties, CustomProperties.ptr,
-           :filename, :pointer,
+           :filename, :string,
            :options, WorkbookOptions.by_value,
-           :num_sheets, :uint16,
-           :num_worksheets, :uint16,
-           :num_chartsheets, :uint16,
-           :first_sheet, :uint16,
-           :active_sheet, :uint16,
-           :num_xf_formats, :uint16,
+
+           :num_sheets,       :uint16,
+           :num_worksheets,   :uint16,
+           :num_chartsheets,  :uint16,
+           :first_sheet,      :uint16,
+           :active_sheet,     :uint16,
+           :num_xf_formats,   :uint16,
+           :num_dxf_formats,  :uint16,
            :num_format_count, :uint16,
-           :drawing_count, :uint16,
-           :font_count, :uint16,
-           :border_count, :uint16,
-           :fill_count, :uint16,
-           :optimize, :uchar,
-           :has_png, :uchar,
+           :drawing_count,    :uint16,
+           :comment_count,    :uint16,
+
+           :font_count,     :uint16,
+           :border_count,   :uint16,
+           :fill_count,     :uint16,
+           :optimize,       :uchar,
+           :max_url_length, :uint16,
+           :read_only,      :uchar,
+
+           :has_png,  :uchar,
            :has_jpeg, :uchar,
-           :has_bmp, :uchar,
+           :has_bmp,  :uchar,
+           :has_gif, :uchar,
+           :has_vml, :uchar,
+           :has_comments, :uchar,
+           :has_metadata, :uchar,
+
            :used_xf_formats, HashTable.ptr,
-           :vba_project, :pointer,
-           :vba_codename, :pointer
+           :used_dxf_formats, HashTable.ptr,
+
+           :vba_project, :string,
+           :vba_project_signature, :string,
+           :vba_codename, :string,
+
+           :default_url_format, :pointer
   end
 
   attach_function :workbook_default_format, :workbook_default_format, [Workbook], Format

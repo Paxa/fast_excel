@@ -22,6 +22,8 @@ worksheet.set_column(2, 2, 20, date_format)
 
 worksheet.write_row(0, ["message", "price", "date", "complete"], bold)
 
+worksheet.write_comment(2, 2, "Comment to field")
+
 for i in 1..1000
   worksheet.write_row(i, ["Hello", (rand * 10_000_000).round(2), Time.now, i % 2 == 0])
 

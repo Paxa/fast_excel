@@ -9,7 +9,7 @@ describe "FastExcel default_format" do
       bold: true
     })
 
-    #FastExcel.print_ffi_obj(workbook.default_format)
+    # FastExcel.print_ffi_obj(workbook.default_format)
 
     assert_equal("ArialFoo", workbook.default_format.font_family)
     assert_equal(17, workbook.default_format.font_size)
