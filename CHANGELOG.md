@@ -1,4 +1,4 @@
-#### Version 0.5.0 
+#### Version 0.5.0 - 02 jan 2024
 
 * Support ruby 3.3
 * Sync latest libxlsxwriter
