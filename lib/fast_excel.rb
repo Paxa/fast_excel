@@ -543,7 +543,7 @@ module FastExcel
     end
 
     def enable_filters!(start_col: 0, end_col:)
-      autofilter(start_col, 0, @last_row_number, end_col)
+      autofilter(0, start_col, @last_row_number, end_col)
     end
 
     def close
