@@ -6,7 +6,7 @@ codeToTestRatio:
     - '**/*.rb'
     - '!test/**/*.rb'
   test:
-    - 'spec/**/*_test.rb'
+    - 'test/**/*_test.rb'
 testExecutionTime:
   if: true
 diff:
