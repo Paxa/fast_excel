@@ -16,4 +16,5 @@ Gem::Specification.new do |s|
   s.extensions = ["extconf.rb"]
 
   s.add_runtime_dependency "ffi", ["> 1.9", "< 2"]
+  s.add_runtime_dependency "base64", [">= 0.2", "< 2"]
 end
