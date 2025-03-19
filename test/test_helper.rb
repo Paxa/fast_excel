@@ -1,12 +1,15 @@
+require "simplecov"
+
+SimpleCov.start do
+  add_filter 'test'
+end
+
 require 'bundler/setup'
 require 'minitest/autorun'
 require "minitest/reporters"
 require 'pp'
-
-##Encoding.default_external = Encoding::UTF_8
-##Encoding.default_internal = Encoding::UTF_8
-
 require 'date'
+
 
 Minitest::Reporters.use!(
   Minitest::Reporters::DefaultReporter.new(color: true)

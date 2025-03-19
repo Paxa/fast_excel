@@ -20,3 +20,4 @@ ext/fast_excel/Makefile
 ext/fast_excel/text_width_ext.bundle
 Gemfile.lock
 lib/libxlsxwriter.dylib
+coverage/

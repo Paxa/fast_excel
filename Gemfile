@@ -6,12 +6,12 @@ gem 'rake'
 
 gem 'roo'
 
+gem 'simplecov', require: false
 gem 'minitest'
 gem 'minitest-reporters'
 
-
 group :benchmarks do
-  gem 'axlsx', git: 'https://github.com/randym/axlsx.git'
+  gem 'caxlsx', git: 'https://github.com/caxlsx/caxlsx'
   gem 'write_xlsx'
   gem 'xlsxtream'
   gem 'benchmark-ips'

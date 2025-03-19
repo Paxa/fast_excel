@@ -1,0 +1,24 @@
+coverage:
+  paths:
+    - coverage/.resultset.json
+codeToTestRatio:
+  code:
+    - '**/*.rb'
+    - '!test/**/*.rb'
+  test:
+    - 'spec/**/*_test.rb'
+testExecutionTime:
+  if: true
+diff:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+comment:
+  if: is_pull_request
+  deletePrevious: true
+report:
+  if: is_default_branch
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+timeout: 5min
+summary:
+  if: true
