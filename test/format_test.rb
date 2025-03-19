@@ -112,7 +112,11 @@ describe "FastExcel::FormatExt colors" do
       @format.font_color = {aaa: 1}
     end
 
-    assert_equal(error.message, "Can not use Hash ({:aaa=>1}) for color value, expected String or Hex Number")
+    if error.message =~ /=>/
+      assert_equal(error.message, "Can not use Hash ({:aaa=>1}) for color value, expected String or Hex Number")
+    else
+      assert_equal(error.message, "Can not use Hash ({aaa: 1}) for color value, expected String or Hex Number")
+    end
   end
 
   it "should raise for unexpected color" do

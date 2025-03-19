@@ -5,6 +5,8 @@ gemspec
 gem 'rake'
 
 gem 'roo'
+gem 'csv'
+gem 'bigdecimal'
 
 gem 'simplecov', require: false
 gem 'minitest'
