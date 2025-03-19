@@ -1,9 +1,6 @@
 require_relative './fast_excel/binding'
 require 'set'
 
-# not used for now
-#require_relative '../ext/fast_excel/text_width_ext'
-
 module FastExcel
 
   class Formula
