@@ -292,8 +292,8 @@ module FastExcel
         return EXTRA_COLORS[value.to_sym]
       elsif COLOR_ENUM.find(value.to_sym)
         return COLOR_ENUM.find(value.to_sym)
-      elsif COLOR_ENUM.find("color_#{value.to_sym}")
-        return COLOR_ENUM.find("color_#{value.to_sym}")
+      elsif COLOR_ENUM.find("color_#{value}".to_sym)
+        return COLOR_ENUM.find("color_#{value}".to_sym)
       elsif value =~ /^#?(0x)?([\da-f]){6}$/i
         value = value.sub('#', '') if value.start_with?('#')
         return value.start_with?('0x') ? value.to_i(16) : "0x#{value}".to_i(16)
