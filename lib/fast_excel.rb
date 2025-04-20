@@ -331,8 +331,8 @@ module FastExcel
       res
     end
 
-    def pretty_print(pp)
-      pp fields_hash
+    def pretty_print(pp_obj)
+      fields_hash.pretty_print(pp_obj)
     end
   end
 
