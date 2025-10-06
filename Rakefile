@@ -2,7 +2,7 @@ desc "Sync github.com:Paxa/libxlsxwriter to ./libxlsxwriter"
 task :sync do
   require 'fileutils'
   FileUtils.rm_rf("./libxlsxwriter")
-  system("git clone --depth 10 git@github.com:Paxa/libxlsxwriter.git")
+  system("git clone --depth 10 git@github.com:jmcnamara/libxlsxwriter.git")
   Dir.chdir("./libxlsxwriter") do
     system("git show --pretty='format:%cd %h' --date=iso --quiet > version.txt")
     FileUtils.rm_rf("./.git")

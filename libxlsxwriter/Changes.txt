@@ -1,6 +1,176 @@
 /**
 @page changes Changes
 
+## Information for Packagers
+
+- This is serial version 1.2.3. This is not a semver version number.
+
+- This is shared object library version `libxlsxwriter.so.10`. This should be
+  updated automatically via `make` and `cmake` as part of the build process.
+  This version contains ABI changes since the previous release.
+
+- Please report any downstream patches back upstream to help improve the overall
+  build process.
+
+
+## 1.2.3 Jun 30 2025
+
+- Added support for handling dates in the Excel 1904 epoch. See
+  `workbook_use_1904_epoch()`.
+
+  Feature request [#483][gh_483].
+
+  [gh_483]: https://github.com/jmcnamara/libxlsxwriter/issues/483
+
+- Fixed undefined behavior bugs in string indexing.
+
+  Issue [#482][gh_482].
+
+  [gh_482]: https://github.com/jmcnamara/libxlsxwriter/issues/482
+
+
+## 1.2.2 March 29 2025
+
+- Added support for manually positioning chart elements such as the
+  chart axis labels, the chart legend, the chart plot area and the chart title.
+  See @ref chart_layout for more details.
+
+  Feature request [#477][gh_477].
+
+  [gh_477]: https://github.com/jmcnamara/libxlsxwriter/issues/477
+
+
+## 1.2.1 February 26 2025
+
+- Added the `workbook_set_size()` function to set the size of the window when
+  the file is opened. This is generally only useful on macOS since Microsoft
+  Windows uses the window size from the last time an Excel file was
+  opened/saved. Feature request [#472][gh_472].
+
+  [gh_472]: https://github.com/jmcnamara/libxlsxwriter/issues/472
+
+- Improved the cmake build support for using the `minizip` library.
+  Pull request [#471][gh_471].
+
+  [gh_471]: https://github.com/jmcnamara/libxlsxwriter/issues/471
+
+- Fix buffer overflow in Table formula expansion.
+
+### Packagers:
+
+- This is serial version 1.2.1. This is not a semver version.
+
+- This is shared object library version `libxlsxwriter.so.8`. This should be
+  updated automatically via `make` and `cmake` as part of the build process.
+
+- This version tries to improve the overall `cmake` build process when using
+  minizip via the `-DUSE_SYSTEM_MINIZIP=ON` configuration option.
+
+- Please report any downstream patches back upstream to help improve the overall
+  build process.
+
+
+## 1.2.0 January 11 2025
+
+- Added `format_set_font_family()` and `format_set_font_charset()` format
+  functions to support Middle Eastern and Asian fonts.
+  Feature request [#468][gh_468].
+
+  [gh_468]: https://github.com/jmcnamara/libxlsxwriter/issues/468
+
+
+## 1.1.9 October 24 2024
+
+ - Fix minor pointer/value error in `lxw_name_to_row()` and `lxw_name_to_col()`
+   utility functions. Issue [#459][gh_459].
+
+   [gh_459]: https://github.com/jmcnamara/libxlsxwriter/issues/459
+
+
+## 1.1.8 July 31 2024
+
+- Added support for embedding images into worksheets with
+  `worksheet_embed_image()`.
+
+  This can be useful if you are building up a spreadsheet of products with a
+  column of images for each product. Embedded images move with the cell so they
+  can be used in worksheet tables or data ranges that will be sorted or
+  filtered.
+
+  This functionality is the equivalent of Excel's menu option to insert an image
+  using the option to "Place in Cell" which is available in Excel 365 versions
+  from 2023 onwards.
+
+- Fixed various issues:
+
+  - [Failure on 32bit architectures #441](https://github.com/jmcnamara/libxlsxwriter/issues/441)
+  - [workbook_validate_sheet_name buffer-overflow #442](https://github.com/jmcnamara/libxlsxwriter/issues/442)
+  - [workbook_add_worksheet does not return a reasonable worksheet #443](https://github.com/jmcnamara/libxlsxwriter/issues/443)
+  - [workbook_define_name stack-buffer-underflow #444](https://github.com/jmcnamara/libxlsxwriter/issues/444)
+  - [workbook_close stack-buffer-overflow #445](https://github.com/jmcnamara/libxlsxwriter/issues/445)
+  - [_store_array_formula heap-buffer-overflow #446](https://github.com/jmcnamara/libxlsxwriter/issues/446)
+  - [worksheet_set_selection stack-buffer-overflow #447](https://github.com/jmcnamara/libxlsxwriter/issues/447)
+
+
+- Note this version is tagged as `v1.1.8` instead of `RELEASE_1.1.8` for better
+  interoperability with Xcode.
+
+
+## 1.1.7 April 5 2024
+
+- Bump `.so` version to 6. This was missed in the previous release.
+
+
+## 1.1.6 April 4 2024
+
+- Updated vendored version of minizip to v 1.3.0 to include upstream fixes.
+
+  Feature request [#419][gh_419].
+
+  [gh_419]: https://github.com/jmcnamara/libxlsxwriter/issues/419
+
+- Added `quote_prefix` format property.
+
+  Feature request [#385][gh_385].
+
+  [gh_385]: https://github.com/jmcnamara/libxlsxwriter/issues/385
+
+- Added support for signed VBA projects.
+  </p>
+
+- Fix worksheet password hashing algorithm for long passwords. Replace/fix
+  the worksheet protection password algorithm so that is works correctly
+  for strings over 24 chars.
+  </p>
+
+- Fix cmake minizip version check.
+
+  Feature request [#405][gh_405].
+
+  [gh_405]: https://github.com/jmcnamara/libxlsxwriter/issues/405
+
+- Fix for buffer overflow with utf-8 strings in data validation.
+
+  Feature request [#394][gh_394].
+
+  [gh_394]: https://github.com/jmcnamara/libxlsxwriter/issues/394
+
+- Fix for range in text type conditional format.
+
+  Feature request [#395][gh_395].
+
+  [gh_395]: https://github.com/jmcnamara/libxlsxwriter/issues/395
+
+- Fix 32bit multiply with overflow issue for images.
+
+  Fix multiply with overflow issue when image locations in the worksheet
+  were greater than the u32 max value.
+
+- Added Swift package manager support.
+  </p>
+
+- Added support for building Zig library.
+  </p>
 
 ## 1.1.5 December 30 2022
 

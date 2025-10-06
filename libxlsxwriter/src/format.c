@@ -3,7 +3,8 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
  *
  */
 
@@ -360,7 +361,6 @@ format_set_font_size(lxw_format *self, double size)
 
     if (size >= LXW_MIN_FONT_SIZE && size <= LXW_MAX_FONT_SIZE)
         self->font_size = size;
-    if (size < LXW_MIN_FONT_SIZE) self->font_size = 0;
 }
 
 /*
@@ -546,6 +546,12 @@ format_set_text_justlast(lxw_format *self)
 void
 format_set_pattern(lxw_format *self, uint8_t value)
 {
+    if (value > LXW_PATTERN_GRAY_0625) {
+        LXW_WARN_FORMAT1("format_set_pattern(): invalid pattern value: %d",
+                         value);
+        return;
+    }
+
     self->pattern = value;
 }
 
@@ -689,6 +695,12 @@ format_set_diag_color(lxw_format *self, lxw_color_t color)
 void
 format_set_diag_border(lxw_format *self, uint8_t style)
 {
+    if (style > LXW_BORDER_SLANT_DASH_DOT) {
+        LXW_WARN_FORMAT1("format_set_diag_border(): invalid border style: %d",
+                         style);
+        return;
+    }
+
     self->diag_border = style;
 }
 
@@ -707,6 +719,13 @@ format_set_num_format_index(lxw_format *self, uint8_t value)
 void
 format_set_valign(lxw_format *self, uint8_t value)
 {
+    if (value > LXW_ALIGN_VERTICAL_DISTRIBUTED) {
+        LXW_WARN_FORMAT1
+            ("format_set_valign(): invalid vertical alignment value: %d",
+             value);
+        return;
+    }
+
     self->text_v_align = value;
 }
 

@@ -3,7 +3,8 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
  *
  */
 
@@ -242,4 +243,27 @@ lxw_add_worksheet_relationship(lxw_relationships *self, const char *type,
                                const char *target, const char *target_mode)
 {
     _add_relationship(self, LXW_SCHEMA_DOCUMENT, type, target, target_mode);
+}
+
+/*
+ * Add a richValue relationship to sheet .rels xml files.
+ */
+void
+lxw_add_rich_value_relationship(lxw_relationships *self)
+{
+    _add_relationship(self,
+                      "http://schemas.microsoft.com/office/2022/10/relationships/",
+                      "richValueRel", "richData/richValueRel.xml", NULL);
+    _add_relationship(self,
+                      "http://schemas.microsoft.com/office/2017/06/relationships/",
+                      "rdRichValue", "richData/rdrichvalue.xml", NULL);
+    _add_relationship(self,
+                      "http://schemas.microsoft.com/office/2017/06/relationships/",
+                      "rdRichValueStructure",
+                      "richData/rdrichvaluestructure.xml", NULL);
+    _add_relationship(self,
+                      "http://schemas.microsoft.com/office/2017/06/relationships/",
+                      "rdRichValueTypes", "richData/rdRichValueTypes.xml",
+                      NULL);
+
 }

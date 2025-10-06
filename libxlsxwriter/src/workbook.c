@@ -3,7 +3,8 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
  *
  */
 
@@ -230,12 +231,30 @@ lxw_workbook_free(lxw_workbook *workbook)
         free(workbook->image_md5s);
     }
 
+    if (workbook->embedded_image_md5s) {
+        for (image_md5 =
+             RB_MIN(lxw_image_md5s, workbook->embedded_image_md5s); image_md5;
+             image_md5 = next_image_md5) {
+
+            next_image_md5 =
+                RB_NEXT(lxw_image_md5s, workbook->embedded_image_md5s,
+                        image_md5);
+            RB_REMOVE(lxw_image_md5s, workbook->embedded_image_md5s,
+                      image_md5);
+            free(image_md5->md5);
+            free(image_md5);
+        }
+
+        free(workbook->embedded_image_md5s);
+    }
+
     if (workbook->header_image_md5s) {
         for (image_md5 = RB_MIN(lxw_image_md5s, workbook->header_image_md5s);
              image_md5; image_md5 = next_image_md5) {
 
             next_image_md5 =
-                RB_NEXT(lxw_image_md5s, workbook->image_md5, image_md5);
+                RB_NEXT(lxw_image_md5s, workbook->header_image_md5s,
+                        image_md5);
             RB_REMOVE(lxw_image_md5s, workbook->header_image_md5s, image_md5);
             free(image_md5->md5);
             free(image_md5);
@@ -249,7 +268,7 @@ lxw_workbook_free(lxw_workbook *workbook)
              image_md5; image_md5 = next_image_md5) {
 
             next_image_md5 =
-                RB_NEXT(lxw_image_md5s, workbook->image_md5, image_md5);
+                RB_NEXT(lxw_image_md5s, workbook->background_md5s, image_md5);
             RB_REMOVE(lxw_image_md5s, workbook->background_md5s, image_md5);
             free(image_md5->md5);
             free(image_md5);
@@ -677,6 +696,9 @@ _store_defined_name(lxw_workbook *self, const char *name,
     if (!name || !formula)
         return LXW_ERROR_NULL_PARAMETER_IGNORED;
 
+    if (lxw_str_is_empty(name) || lxw_str_is_empty(formula))
+        return LXW_ERROR_PARAMETER_IS_EMPTY;
+
     if (lxw_utf8_strlen(name) > LXW_DEFINED_NAME_LENGTH ||
         lxw_utf8_strlen(formula) > LXW_DEFINED_NAME_LENGTH) {
         return LXW_ERROR_128_STRING_LENGTH_EXCEEDED;
@@ -709,11 +731,16 @@ _store_defined_name(lxw_workbook *self, const char *name,
         tmp_str++;
         worksheet_name = name_copy;
 
+        if (lxw_str_is_empty(tmp_str) || lxw_str_is_empty(worksheet_name))
+            goto mem_error;
+
         /* Remove any worksheet quoting. */
         if (worksheet_name[0] == '\'')
             worksheet_name++;
-        if (worksheet_name[strlen(worksheet_name) - 1] == '\'')
+        if (strlen(worksheet_name) > 0
+            && worksheet_name[strlen(worksheet_name) - 1] == '\'') {
             worksheet_name[strlen(worksheet_name) - 1] = '\0';
+        }
 
         /* Search for worksheet name to get the equivalent worksheet index. */
         STAILQ_FOREACH(sheet, self->sheets, list_pointers) {
@@ -932,16 +959,28 @@ _populate_range_dimensions(lxw_workbook *self, lxw_series_range *range)
         return;
     }
     else {
+        /* Check for empty string. */
+        if (lxw_str_is_empty(tmp_str)) {
+            range->ignore_cache = LXW_TRUE;
+            return;
+        }
+
         /* Split the formulas into sheetname and row-col data. */
         *tmp_str = '\0';
         tmp_str++;
         sheetname = formula;
 
+        if (lxw_str_is_empty(tmp_str) || lxw_str_is_empty(sheetname)) {
+            range->ignore_cache = LXW_TRUE;
+            return;
+        }
+
         /* Remove any worksheet quoting. */
         if (sheetname[0] == '\'')
             sheetname++;
-        if (sheetname[strlen(sheetname) - 1] == '\'')
+        if (strlen(sheetname) > 0 && sheetname[strlen(sheetname) - 1] == '\'') {
             sheetname[strlen(sheetname) - 1] = '\0';
+        }
 
         /* Check that the sheetname exists. */
         if (!workbook_get_worksheet_by_name(self, sheetname)) {
@@ -1064,12 +1103,55 @@ _prepare_drawings(lxw_workbook *self)
         }
 
         if (STAILQ_EMPTY(worksheet->image_props)
+            && STAILQ_EMPTY(worksheet->embedded_image_props)
             && STAILQ_EMPTY(worksheet->chart_data)
             && !worksheet->has_header_vml && !worksheet->has_background_image) {
             continue;
         }
 
         drawing_id++;
+
+        /* Prepare embedded worksheet images. */
+        STAILQ_FOREACH(object_props, worksheet->embedded_image_props,
+                       list_pointers) {
+
+            _store_image_type(self, object_props->image_type);
+
+            /* Check for images with alt-text. */
+            if (object_props->description)
+                self->has_embedded_image_descriptions = LXW_TRUE;
+
+            /* Check for duplicate images and only store the first instance. */
+            if (object_props->md5) {
+                tmp_image_md5.md5 = object_props->md5;
+                found_duplicate_image = RB_FIND(lxw_image_md5s,
+                                                self->embedded_image_md5s,
+                                                &tmp_image_md5);
+            }
+
+            if (found_duplicate_image) {
+                ref_id = found_duplicate_image->id;
+                object_props->is_duplicate = LXW_TRUE;
+            }
+            else {
+                image_ref_id++;
+                ref_id = image_ref_id;
+                self->num_embedded_images++;
+
+#ifndef USE_NO_MD5
+                new_image_md5 = calloc(1, sizeof(lxw_image_md5));
+#endif
+                if (new_image_md5 && object_props->md5) {
+                    new_image_md5->id = ref_id;
+                    new_image_md5->md5 = lxw_strdup(object_props->md5);
+
+                    RB_INSERT(lxw_image_md5s, self->embedded_image_md5s,
+                              new_image_md5);
+                }
+            }
+
+            worksheet_set_error_cell(worksheet, object_props, ref_id);
+        }
 
         /* Prepare background images. */
         if (worksheet->has_background_image) {
@@ -1532,6 +1614,9 @@ _write_workbook_pr(lxw_workbook *self)
     if (self->vba_codename)
         LXW_PUSH_ATTRIBUTES_STR("codeName", self->vba_codename);
 
+    if (self->use_1904_epoch)
+        LXW_PUSH_ATTRIBUTES_STR("date1904", "1");
+
     LXW_PUSH_ATTRIBUTES_STR("defaultThemeVersion", "124226");
 
     lxw_xml_empty_tag(self->file, "workbookPr", &attributes);
@@ -1551,8 +1636,8 @@ _write_workbook_view(lxw_workbook *self)
     LXW_INIT_ATTRIBUTES();
     LXW_PUSH_ATTRIBUTES_STR("xWindow", "240");
     LXW_PUSH_ATTRIBUTES_STR("yWindow", "15");
-    LXW_PUSH_ATTRIBUTES_STR("windowWidth", "16095");
-    LXW_PUSH_ATTRIBUTES_STR("windowHeight", "9660");
+    LXW_PUSH_ATTRIBUTES_INT("windowWidth", self->window_width);
+    LXW_PUSH_ATTRIBUTES_INT("windowHeight", self->window_height);
 
     if (self->first_sheet)
         LXW_PUSH_ATTRIBUTES_INT("firstSheet", self->first_sheet);
@@ -1812,6 +1897,11 @@ workbook_new_opt(const char *filename, lxw_workbook_options *options)
     GOTO_LABEL_ON_MEM_ERROR(workbook->image_md5s, mem_error);
     RB_INIT(workbook->image_md5s);
 
+    /* Add the embedded image MD5 tree. */
+    workbook->embedded_image_md5s = calloc(1, sizeof(struct lxw_image_md5s));
+    GOTO_LABEL_ON_MEM_ERROR(workbook->embedded_image_md5s, mem_error);
+    RB_INIT(workbook->embedded_image_md5s);
+
     /* Add the header image MD5 tree. */
     workbook->header_image_md5s = calloc(1, sizeof(struct lxw_image_md5s));
     GOTO_LABEL_ON_MEM_ERROR(workbook->header_image_md5s, mem_error);
@@ -1886,6 +1976,8 @@ workbook_new_opt(const char *filename, lxw_workbook_options *options)
     }
 
     workbook->max_url_length = 2079;
+    workbook->window_width = 16095;
+    workbook->window_height = 9660;
 
     return workbook;
 
@@ -1905,7 +1997,8 @@ workbook_add_worksheet(lxw_workbook *self, const char *sheetname)
     lxw_worksheet *worksheet = NULL;
     lxw_worksheet_name *worksheet_name = NULL;
     lxw_error error;
-    lxw_worksheet_init_data init_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    lxw_worksheet_init_data init_data =
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     char *new_name = NULL;
 
     if (sheetname) {
@@ -1946,6 +2039,7 @@ workbook_add_worksheet(lxw_workbook *self, const char *sheetname)
     init_data.tmpdir = self->options.tmpdir;
     init_data.default_url_format = self->default_url_format;
     init_data.max_url_length = self->max_url_length;
+    init_data.use_1904_epoch = self->use_1904_epoch;
 
     /* Create a new worksheet object. */
     worksheet = lxw_worksheet_new(&init_data);
@@ -1989,7 +2083,8 @@ workbook_add_chartsheet(lxw_workbook *self, const char *sheetname)
     lxw_chartsheet *chartsheet = NULL;
     lxw_chartsheet_name *chartsheet_name = NULL;
     lxw_error error;
-    lxw_worksheet_init_data init_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    lxw_worksheet_init_data init_data =
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     char *new_name = NULL;
 
     if (sheetname) {
@@ -2071,6 +2166,12 @@ workbook_add_chart(lxw_workbook *self, uint8_t type)
 {
     lxw_chart *chart;
 
+    if (type == LXW_CHART_NONE || type > LXW_CHART_RADAR_FILLED) {
+        LXW_WARN_FORMAT1("workbook_add_chart(): invalid chart type: %d",
+                         type);
+        return NULL;
+    }
+
     /* Create a new chart object. */
     chart = lxw_chart_new(type);
 
@@ -2090,15 +2191,6 @@ workbook_add_format(lxw_workbook *self)
     lxw_format *format = lxw_format_new();
     RETURN_ON_MEM_ERROR(format, NULL);
 
-    if (!STAILQ_EMPTY(self->formats)) {
-        memcpy(format, STAILQ_FIRST(self->formats), sizeof(lxw_format));
-        format->xf_format_indices = NULL;
-        format->num_xf_formats = NULL;
-        format->list_pointers.stqe_next = NULL;
-        format->xf_index = LXW_PROPERTY_UNSET;
-        format->dxf_index = LXW_PROPERTY_UNSET;
-    }
-
     format->xf_format_indices = self->used_xf_formats;
     format->dxf_format_indices = self->used_dxf_formats;
     format->num_xf_formats = &self->num_xf_formats;
@@ -2107,16 +2199,6 @@ workbook_add_format(lxw_workbook *self)
 
     return format;
 }
-
-/*
- * Returns default format for workbook.
- */
-lxw_format *
-workbook_default_format(lxw_workbook *self)
-{
-    return STAILQ_FIRST(self->formats);
-}
-
 
 /*
  * Call finalization code and close file.
@@ -2154,8 +2236,16 @@ workbook_close(lxw_workbook *self)
         if (worksheet->index == self->active_sheet)
             worksheet->active = LXW_TRUE;
 
-        if (worksheet->has_dynamic_arrays)
+        if (worksheet->has_dynamic_functions) {
             self->has_metadata = LXW_TRUE;
+            self->has_dynamic_functions = LXW_TRUE;
+
+        }
+
+        if (!STAILQ_EMPTY(worksheet->embedded_image_props)) {
+            self->has_metadata = LXW_TRUE;
+            self->has_embedded_images = LXW_TRUE;
+        }
     }
 
     /* Set workbook and worksheet VBA codenames if a macro has been added. */
@@ -2375,6 +2465,12 @@ workbook_set_custom_property_string(lxw_workbook *self, const char *name,
         return LXW_ERROR_NULL_PARAMETER_IGNORED;
     }
 
+    if (lxw_str_is_empty(name)) {
+        LXW_WARN_FORMAT("workbook_set_custom_property_string(): "
+                        "parameter 'name' cannot be an empty string.");
+        return LXW_ERROR_PARAMETER_IS_EMPTY;
+    }
+
     if (!value) {
         LXW_WARN_FORMAT("workbook_set_custom_property_string(): "
                         "parameter 'value' cannot be NULL.");
@@ -2422,6 +2518,12 @@ workbook_set_custom_property_number(lxw_workbook *self, const char *name,
         return LXW_ERROR_NULL_PARAMETER_IGNORED;
     }
 
+    if (lxw_str_is_empty(name)) {
+        LXW_WARN_FORMAT("workbook_set_custom_property_number(): parameter "
+                        "'name' cannot be an empty string.");
+        return LXW_ERROR_PARAMETER_IS_EMPTY;
+    }
+
     if (lxw_utf8_strlen(name) > 255) {
         LXW_WARN_FORMAT("workbook_set_custom_property_number(): parameter "
                         "'name' exceeds Excel length limit of 255.");
@@ -2455,6 +2557,12 @@ workbook_set_custom_property_integer(lxw_workbook *self, const char *name,
         LXW_WARN_FORMAT("workbook_set_custom_property_integer(): parameter "
                         "'name' cannot be NULL.");
         return LXW_ERROR_NULL_PARAMETER_IGNORED;
+    }
+
+    if (lxw_str_is_empty(name)) {
+        LXW_WARN_FORMAT("workbook_set_custom_property_integer(): parameter "
+                        "'name' cannot be an empty string.");
+        return LXW_ERROR_PARAMETER_IS_EMPTY;
     }
 
     if (strlen(name) > 255) {
@@ -2492,6 +2600,12 @@ workbook_set_custom_property_boolean(lxw_workbook *self, const char *name,
         return LXW_ERROR_NULL_PARAMETER_IGNORED;
     }
 
+    if (lxw_str_is_empty(name)) {
+        LXW_WARN_FORMAT("workbook_set_custom_property_boolean(): parameter "
+                        "'name' cannot be an empty string.");
+        return LXW_ERROR_PARAMETER_IS_EMPTY;
+    }
+
     if (lxw_utf8_strlen(name) > 255) {
         LXW_WARN_FORMAT("workbook_set_custom_property_boolean(): parameter "
                         "'name' exceeds Excel length limit of 255.");
@@ -2525,6 +2639,12 @@ workbook_set_custom_property_datetime(lxw_workbook *self, const char *name,
         LXW_WARN_FORMAT("workbook_set_custom_property_datetime(): parameter "
                         "'name' cannot be NULL.");
         return LXW_ERROR_NULL_PARAMETER_IGNORED;
+    }
+
+    if (lxw_str_is_empty(name)) {
+        LXW_WARN_FORMAT("workbook_set_custom_property_datetime(): parameter "
+                        "'name' cannot be an empty string.");
+        return LXW_ERROR_PARAMETER_IS_EMPTY;
     }
 
     if (lxw_utf8_strlen(name) > 255) {
@@ -2625,6 +2745,13 @@ workbook_unset_default_url_format(lxw_workbook *self)
 lxw_error
 workbook_validate_sheet_name(lxw_workbook *self, const char *sheetname)
 {
+    if (sheetname == NULL)
+        return LXW_ERROR_NULL_PARAMETER_IGNORED;
+
+    /* Check for empty worksheet name. */
+    if (lxw_str_is_empty(sheetname))
+        return LXW_ERROR_PARAMETER_IS_EMPTY;
+
     /* Check the UTF-8 length of the worksheet name. */
     if (lxw_utf8_strlen(sheetname) > LXW_SHEETNAME_MAX)
         return LXW_ERROR_SHEETNAME_LENGTH_EXCEEDED;
@@ -2723,6 +2850,12 @@ workbook_set_vba_name(lxw_workbook *self, const char *name)
         return LXW_ERROR_NULL_PARAMETER_IGNORED;
     }
 
+    if (lxw_str_is_empty(name)) {
+        LXW_WARN_FORMAT("workbook_set_vba_name(): parameter "
+                        "'name' cannot be an empty string.");
+        return LXW_ERROR_PARAMETER_IS_EMPTY;
+    }
+
     self->vba_codename = lxw_strdup(name);
 
     return LXW_NO_ERROR;
@@ -2735,4 +2868,28 @@ void
 workbook_read_only_recommended(lxw_workbook *self)
 {
     self->read_only = 2;
+}
+
+/*
+ * Use the 1904 epoch for dates in the workbook.
+ */
+void
+workbook_use_1904_epoch(lxw_workbook *self)
+{
+    self->use_1904_epoch = LXW_TRUE;
+}
+
+/*
+ * Set the size of a workbook window.
+ */
+void
+workbook_set_size(lxw_workbook *workbook, uint16_t width, uint16_t height)
+{
+    /* Convert the width/height to twips at 96 dpi. */
+    if (width)
+        workbook->window_width = width * 1440 / 96;
+
+    if (height)
+        workbook->window_height = height * 1440 / 96;
+
 }

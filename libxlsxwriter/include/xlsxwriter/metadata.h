@@ -1,7 +1,8 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
  *
  * metadata - A libxlsxwriter library for creating Excel XLSX metadata files.
  *
@@ -19,6 +20,9 @@
 typedef struct lxw_metadata {
 
     FILE *file;
+    uint8_t has_dynamic_functions;
+    uint8_t has_embedded_images;
+    uint32_t num_embedded_images;
 
 } lxw_metadata;
 

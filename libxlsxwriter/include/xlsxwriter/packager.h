@@ -1,7 +1,8 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
  *
  * packager - A libxlsxwriter library for creating Excel XLSX packager files.
  *
@@ -36,6 +37,10 @@
 #include "vml.h"
 #include "comment.h"
 #include "metadata.h"
+#include "rich_value.h"
+#include "rich_value_rel.h"
+#include "rich_value_types.h"
+#include "rich_value_structure.h"
 
 #define LXW_ZIP_BUFFER_SIZE (16384)
 

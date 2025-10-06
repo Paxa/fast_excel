@@ -1,9 +1,9 @@
 Pod::Spec.new do |s|
   s.name                  = "libxlsxwriter"
-  s.version               = "1.1.5"
+  s.version               = "1.2.3"
   s.summary               = "Libxlsxwriter: A C library for creating Excel XLSX files."
-  s.ios.deployment_target = "8.0"
-  s.osx.deployment_target = "10.8"
+  s.ios.deployment_target = "12.0"
+  s.osx.deployment_target = "10.13"
 
   s.description           = <<-DESC
                             Libxlsxwriter is a C library that can be used to write text, numbers, formulas and hyperlinks to multiple worksheets in an Excel 2007+ XLSX file.
@@ -16,12 +16,12 @@ Pod::Spec.new do |s|
                             * Defined names.
                             * Autofilters.
                             * Charts.
-                            * Data validation and drop down lists.
+                            * Data validation and dropdown lists.
                             * Conditional formatting.
                             * Worksheet PNG/JPEG/GIF images.
                             * Cell comments.
                             * Support for adding Macros.
-                            * Memory optimisation mode for writing large files.
+                            * Memory optimization mode for writing large files.
                             * Source code available on [GitHub](https://github.com/jmcnamara/libxlsxwriter).
                             * FreeBSD license.
                             * ANSI C.
@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
   s.license               = "FreeBSD"
   s.author                = { "John McNamara" => "jmcnamara@cpan.org" }
 
-  s.source                = { :git => "https://github.com/jmcnamara/libxlsxwriter.git", :tag => "RELEASE_" + s.version.to_s }
+  s.source                = { :git => "https://github.com/jmcnamara/libxlsxwriter.git", :tag => "v" + s.version.to_s }
   s.source_files          = "src/*.c", "third_party/**/{zip.c,ioapi.c,tmpfileplus.c,md5.c}", "include/**/*.h"
   s.preserve_paths        = [ 'third_party/**/*.h' ]
   s.header_dir            = "xlsxwriter"

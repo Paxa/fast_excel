@@ -1,7 +1,8 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
  *
  * xmlwriter - A libxlsxwriter library for creating Excel XLSX
  *             XML files.
@@ -55,7 +56,7 @@ STAILQ_HEAD(xml_attribute_list, xml_attribute);
 /* Create a new attribute struct to add to a xml_attribute_list. */
 struct xml_attribute *lxw_new_attribute_str(const char *key,
                                             const char *value);
-struct xml_attribute *lxw_new_attribute_int(const char *key, uint64_t value);
+struct xml_attribute *lxw_new_attribute_int(const char *key, int32_t value);
 struct xml_attribute *lxw_new_attribute_dbl(const char *key, double value);
 
 /* Macro to initialize the xml_attribute_list pointers. */
@@ -98,7 +99,7 @@ struct xml_attribute *lxw_new_attribute_dbl(const char *key, double value);
  *
  * @param xmlfile A FILE pointer to the output XML file.
  */
-void lxw_xml_declaration(FILE * xmlfile);
+void lxw_xml_declaration(FILE *xmlfile);
 
 /**
  * Write an XML start tag with optional attributes.
@@ -107,7 +108,7 @@ void lxw_xml_declaration(FILE * xmlfile);
  * @param tag        The XML tag to write.
  * @param attributes An optional list of attributes to add to the tag.
  */
-void lxw_xml_start_tag(FILE * xmlfile,
+void lxw_xml_start_tag(FILE *xmlfile,
                        const char *tag,
                        struct xml_attribute_list *attributes);
 
@@ -119,7 +120,7 @@ void lxw_xml_start_tag(FILE * xmlfile,
  * @param tag        The XML tag to write.
  * @param attributes An optional list of attributes to add to the tag.
  */
-void lxw_xml_start_tag_unencoded(FILE * xmlfile,
+void lxw_xml_start_tag_unencoded(FILE *xmlfile,
                                  const char *tag,
                                  struct xml_attribute_list *attributes);
 
@@ -129,7 +130,7 @@ void lxw_xml_start_tag_unencoded(FILE * xmlfile,
  * @param xmlfile    A FILE pointer to the output XML file.
  * @param tag        The XML tag to write.
  */
-void lxw_xml_end_tag(FILE * xmlfile, const char *tag);
+void lxw_xml_end_tag(FILE *xmlfile, const char *tag);
 
 /**
  * Write an XML empty tag with optional attributes.
@@ -138,7 +139,7 @@ void lxw_xml_end_tag(FILE * xmlfile, const char *tag);
  * @param tag        The XML tag to write.
  * @param attributes An optional list of attributes to add to the tag.
  */
-void lxw_xml_empty_tag(FILE * xmlfile,
+void lxw_xml_empty_tag(FILE *xmlfile,
                        const char *tag,
                        struct xml_attribute_list *attributes);
 
@@ -150,7 +151,7 @@ void lxw_xml_empty_tag(FILE * xmlfile,
  * @param tag        The XML tag to write.
  * @param attributes An optional list of attributes to add to the tag.
  */
-void lxw_xml_empty_tag_unencoded(FILE * xmlfile,
+void lxw_xml_empty_tag_unencoded(FILE *xmlfile,
                                  const char *tag,
                                  struct xml_attribute_list *attributes);
 
@@ -162,12 +163,12 @@ void lxw_xml_empty_tag_unencoded(FILE * xmlfile,
  * @param data       The data section of the XML element.
  * @param attributes An optional list of attributes to add to the tag.
  */
-void lxw_xml_data_element(FILE * xmlfile,
+void lxw_xml_data_element(FILE *xmlfile,
                           const char *tag,
                           const char *data,
                           struct xml_attribute_list *attributes);
 
-void lxw_xml_rich_si_element(FILE * xmlfile, const char *string);
+void lxw_xml_rich_si_element(FILE *xmlfile, const char *string);
 
 uint8_t lxw_has_control_characters(const char *string);
 char *lxw_escape_control_characters(const char *string);

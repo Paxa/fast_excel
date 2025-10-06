@@ -6,78 +6,81 @@ module Libxlsxwriter
   extend FFI::Library
 
   LIB_FILENAME = "libxlsxwriter.#{FFI::Platform::LIBSUFFIX}".freeze
+  CUSTOM_LIB_FILENAME = "libfast_excel_ext.#{FFI::Platform::LIBSUFFIX}".freeze
 
-  libs = [File.expand_path("../../#{LIB_FILENAME}", __FILE__)]
-  libs.unshift(File.join(Gem.loaded_specs['fast_excel'].extension_dir, LIB_FILENAME)) if Gem.loaded_specs['fast_excel']
+  # Always load from ./lib directory (not system-wide)
+  lib_dir = File.join(File.dirname(__FILE__), '..')
+  libs = [File.join(lib_dir, LIB_FILENAME)]
+  custom_libs = [File.join(lib_dir, CUSTOM_LIB_FILENAME)]
 
-  ffi_lib(libs)
+  ffi_lib(*(libs + custom_libs))
 
   def self.attach_function(name, *_)
     begin; super; rescue FFI::NotFoundError => e
       (class << self; self; end).class_eval { define_method(name) { |*_| raise e } }
     end
   end
-  
+
   def qmd_trace_elem(elem)
-    
+
   end
-  
+
   def qmd_trace_head(head)
-    
+
   end
-  
+
   def qmd_savelink(name, link)
-    
+
   end
-  
+
   def trashit(x)
-    
+
   end
-  
+
   def qmd_list_check_head(head, field)
-    
+
   end
-  
+
   def qmd_list_check_next(elm, field)
-    
+
   end
-  
+
   def qmd_list_check_prev(elm, field)
-    
+
   end
-  
+
   def qmd_tailq_check_head(head, field)
-    
+
   end
-  
+
   def qmd_tailq_check_tail(head, headname)
-    
+
   end
-  
+
   def qmd_tailq_check_next(elm, field)
-    
+
   end
-  
+
   def qmd_tailq_check_prev(elm, field)
-    
+
   end
-  
+
   SPLAY_NEGINF = -1
-  
+
   SPLAY_INF = 1
-  
+
   RB_BLACK = 0
-  
+
   RB_RED = 1
-  
+
   def rb_prototype(name, type, field, cmp)
     rb_prototype_internal(name, type, field, cmp, )
   end
-  
+
   def rb_generate(name, type, field, cmp)
     rb_generate_internal(name, type, field, cmp, )
   end
-  
+
   def rb_generate_internal(name, type, field, cmp, attr)
     rb_generate_insert_color(name, type, field, attr)
     rb_generate_remove_color(name, type, field, attr)
@@ -89,35 +92,35 @@ module Libxlsxwriter
     rb_generate_prev(name, type, field, attr)
     rb_generate_minmax(name, type, field, attr)
   end
-  
+
   RB_NEGINF = -1
-  
+
   RB_INF = 1
-  
+
   SHEETNAME_MAX = 31
-  
+
   MAX_COL_NAME_LENGTH = "$XFD".length
-  
+
   MAX_ROW_NAME_LENGTH = "$1048576".length
-  
+
   MAX_CELL_NAME_LENGTH = "$XFWD$1048576".length
-  
+
   DATETIME_LENGTH = "2016-12-12T23:00:00Z".length
-  
+
   EPOCH_1900 = 0
-  
+
   EPOCH_1904 = 1
-  
+
   UINT32_T_LENGTH = "4294967296".length
-  
+
   FILENAME_LENGTH = 128
-  
+
   IGNORE = 1
-  
+
   SCHEMA_MS = "http://schemas.microsoft.com/office/2006/relationships"
-  
+
   SCHEMA_ROOT = "http://schemas.openxmlformats.org"
-  
+
 
   PORTRAIT = 1
   LANDSCAPE = 0
@@ -125,141 +128,141 @@ module Libxlsxwriter
   def error(message)
     fprintf(STDERR, "[ERROR][%s:%d]: \"message\"\n", FILE, LINE)
   end
-  
+
   def mem_error()
     error("Memory allocation failed.")
   end
-  
+
   def warn(message)
     fprintf(STDERR, "[WARNING]: \"message\"\n")
   end
-  
+
   def warn_format(message)
     fprintf(STDERR, "[WARNING]: \"message\"\n")
   end
-  
+
   def warn_format1(message, var)
     fprintf(STDERR, "[WARNING]: \"message\"\n", var)
   end
-  
+
   def warn_format2(message, var1, var2)
     fprintf(STDERR, "[WARNING]: \"message\"\n", var1, var2)
   end
-  
+
   FORMAT_FIELD_LEN = 128
-  
+
   DEFAULT_FONT_NAME = "Calibri"
-  
+
   DEFAULT_FONT_FAMILY = 2
-  
+
   DEFAULT_FONT_THEME = 1
-  
+
   PROPERTY_UNSET = -1
-  
+
   COLOR_UNSET = -1
-  
+
   COLOR_MASK = 0xFFFFFF
-  
+
   MIN_FONT_SIZE = 1
-  
+
   MAX_FONT_SIZE = 409
-  
+
   CHART_NUM_FORMAT_LEN = 128
-  
+
   CHART_DEFAULT_GAP = 501
-  
+
   def cell(cell)
     return name_to_row(cell), name_to_col(cell)
   end
-  
+
   def cols(cols)
     return name_to_col(cols), name_to_col_2(cols)
   end
-  
+
   def range(range)
     return name_to_row(range), name_to_col(range), name_to_row_2(range), name_to_col_2(range)
   end
-  
+
   ROW_MAX = 1048576
-  
+
   COL_MAX = 16384
-  
+
   COL_META_MAX = 128
-  
+
   HEADER_FOOTER_MAX = 255
-  
+
   MAX_NUMBER_URLS = 65530
-  
+
   PANE_NAME_LENGTH = 12
-  
+
   BREAKS_MAX = 1023
-  
+
   DEFINED_NAME_LENGTH = 128
-  
+
   APP_PACKAGE = "application/vnd.openxmlformats-package."
-  
+
   APP_DOCUMENT = "application/vnd.openxmlformats-officedocument."
-  
+
   MAXU32 = 0xffffffff
-  
+
   ZLIB_FILEFUNC_SEEK_CUR = 1
-  
+
   ZLIB_FILEFUNC_SEEK_END = 2
-  
+
   ZLIB_FILEFUNC_SEEK_SET = 0
-  
+
   ZLIB_FILEFUNC_MODE_READ = 1
-  
+
   ZLIB_FILEFUNC_MODE_WRITE = 2
-  
+
   ZLIB_FILEFUNC_MODE_READWRITEFILTER = 3
-  
+
   ZLIB_FILEFUNC_MODE_EXISTING = 4
-  
+
   ZLIB_FILEFUNC_MODE_CREATE = 8
-  
+
   Z_BZIP2ED = 12
-  
+
   ZIP_OK = 0
-  
+
   ZIP_EOF = 0
-  
+
   def zip_errno(_Z_ERRNO)
-    
+
   end
-  
+
   ZIP_PARAMERROR = (-102)
-  
+
   ZIP_BADZIPFILE = (-103)
-  
+
   ZIP_INTERNALERROR = (-104)
-  
+
   DEF_MEM_LEVEL = 8
-  
+
   APPEND_STATUS_CREATE = 0
-  
+
   APPEND_STATUS_CREATEAFTER = 1
-  
+
   APPEND_STATUS_ADDINZIP = 2
-  
+
   ZIP_BUFFER_SIZE = 16384
-  
+
   TMPFILE_KEEP = 1
-  
+
   MAX_ATTRIBUTE_LENGTH = 256
-  
+
   ATTR_32 = 32
-  
+
   VERSION = "0.6.9"
-  
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:boolean).</em>
-  # 
+  #
   # === Options:
   # :false_ ::
   #   False value.
   # :true_ ::
   #   True value.
-  # 
+  #
   # @method _enum_boolean_
   # @return [Symbol]
   # @scope class
@@ -267,9 +270,9 @@ module Libxlsxwriter
     :false_, 0,
     :true_, 1
   ]
-  
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:error).</em>
-  # 
+  #
   # === Options:
   # :no_error ::
   #   No error.
@@ -310,8 +313,8 @@ module Libxlsxwriter
   # :error_image_dimensions ::
   #   Couldn't read image dimensions or DPI.
   # :max_errno ::
-  #   
-  # 
+  #
+  #
   # @method _enum_error_
   # @return [Symbol]
   # @scope class
@@ -359,13 +362,13 @@ module Libxlsxwriter
   # :sec ::
   #   (Float) Seconds  : 0 - 59.999
   module DatetimeWrappers
-    # @param [Integer] date_1904 
-    # @return [Float] 
+    # @param [Integer] date_1904
+    # @return [Float]
     def to_excel_date(date_1904)
       Libxlsxwriter.datetime_to_excel_date(self, date_1904)
     end
   end
-  
+
   class Datetime < FFI::Struct
     include DatetimeWrappers
     layout :year, :int,
@@ -375,23 +378,23 @@ module Libxlsxwriter
            :min, :int,
            :sec, :double
   end
-  
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:custom_property_types).</em>
-  # 
+  #
   # === Options:
   # :none ::
-  #   
+  #
   # :string ::
-  #   
+  #
   # :double ::
-  #   
+  #
   # :integer ::
-  #   
+  #
   # :boolean ::
-  #   
+  #
   # :datetime ::
-  #   
-  # 
+  #
+  #
   # @method _enum_custom_property_types_
   # @return [Symbol]
   # @scope class
@@ -403,68 +406,68 @@ module Libxlsxwriter
     :boolean, 4,
     :datetime, 5
   ]
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*Format)) 
+  #   (FFI::Pointer(*Format))
   # :stqh_last ::
-  #   (FFI::Pointer(**Format)) 
+  #   (FFI::Pointer(**Format))
   class Formats < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*Tuple)) 
+  #   (FFI::Pointer(*Tuple))
   # :stqh_last ::
-  #   (FFI::Pointer(**Tuple)) 
+  #   (FFI::Pointer(**Tuple))
   class Tuples < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*CustomProperty)) 
+  #   (FFI::Pointer(*CustomProperty))
   # :stqh_last ::
-  #   (FFI::Pointer(**CustomProperty)) 
+  #   (FFI::Pointer(**CustomProperty))
   class CustomProperties < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*Tuple)) 
+  #   (FFI::Pointer(*Tuple))
   class TupleListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :key ::
-  #   (String) 
+  #   (String)
   # :value ::
-  #   (String) 
+  #   (String)
   # :list_pointers ::
-  #   (TupleListPointers) 
+  #   (TupleListPointers)
   class Tuple < FFI::Struct
     layout :key, :string,
            :value, :string,
            :list_pointers, TupleListPointers.by_value
   end
-  
+
   # = Fields:
   # :string ::
-  #   (String) 
+  #   (String)
   # :number ::
-  #   (Float) 
+  #   (Float)
   # :integer ::
-  #   (Integer) 
+  #   (Integer)
   # :boolean ::
-  #   (Integer) 
+  #   (Integer)
   # :datetime ::
-  #   (Datetime) 
+  #   (Datetime)
   class CustomPropertyU < FFI::Union
     layout :string, :string,
            :number, :double,
@@ -472,109 +475,109 @@ module Libxlsxwriter
            :boolean, :uchar,
            :datetime, Datetime.by_value
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*CustomProperty)) 
+  #   (FFI::Pointer(*CustomProperty))
   class CustomPropertyListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :type ::
-  #   (Symbol from _enum_custom_property_types_) 
+  #   (Symbol from _enum_custom_property_types_)
   # :name ::
-  #   (String) 
+  #   (String)
   # :u ::
-  #   (CustomPropertyU) 
+  #   (CustomPropertyU)
   # :list_pointers ::
-  #   (CustomPropertyListPointers) 
+  #   (CustomPropertyListPointers)
   class CustomProperty < FFI::Struct
     layout :type, :custom_property_types,
            :name, :string,
            :u, CustomPropertyU.by_value,
            :list_pointers, CustomPropertyListPointers.by_value
   end
-  
+
   # = Fields:
   # :rbh_root ::
-  #   (FFI::Pointer(*SstElement)) 
+  #   (FFI::Pointer(*SstElement))
   class SstRbTree < FFI::Struct
     layout :rbh_root, :pointer
   end
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*SstElement)) 
+  #   (FFI::Pointer(*SstElement))
   # :stqh_last ::
-  #   (FFI::Pointer(**SstElement)) 
+  #   (FFI::Pointer(**SstElement))
   class SstOrderList < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*SstElement)) 
+  #   (FFI::Pointer(*SstElement))
   class SstElementSstOrderPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :rbe_left ::
-  #   (FFI::Pointer(*SstElement)) 
+  #   (FFI::Pointer(*SstElement))
   # :rbe_right ::
-  #   (FFI::Pointer(*SstElement)) 
+  #   (FFI::Pointer(*SstElement))
   # :rbe_parent ::
-  #   (FFI::Pointer(*SstElement)) 
+  #   (FFI::Pointer(*SstElement))
   # :rbe_color ::
-  #   (Integer) 
+  #   (Integer)
   class SstElementSstTreePointers < FFI::Struct
     layout :rbe_left, :pointer,
            :rbe_right, :pointer,
            :rbe_parent, :pointer,
            :rbe_color, :int
   end
-  
+
   # = Fields:
   # :index ::
-  #   (Integer) 
+  #   (Integer)
   # :string ::
-  #   (String) 
+  #   (String)
   # :sst_order_pointers ::
-  #   (SstElementSstOrderPointers) 
+  #   (SstElementSstOrderPointers)
   # :sst_tree_pointers ::
-  #   (SstElementSstTreePointers) 
+  #   (SstElementSstTreePointers)
   class SstElement < FFI::Struct
     layout :index, :uint,
            :string, :string,
            :sst_order_pointers, SstElementSstOrderPointers.by_value,
            :sst_tree_pointers, SstElementSstTreePointers.by_value
   end
-  
+
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :string_count ::
-  #   (Integer) 
+  #   (Integer)
   # :unique_count ::
-  #   (Integer) 
+  #   (Integer)
   # :order_list ::
-  #   (SstOrderList) 
+  #   (SstOrderList)
   # :rb_tree ::
-  #   (SstRbTree) 
+  #   (SstRbTree)
   module SstWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.sst_free(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.sst_assemble_xml_file(self)
     end
   end
-  
+
   class Sst < FFI::Struct
     include SstWrappers
     layout :file, :pointer,
@@ -583,63 +586,63 @@ module Libxlsxwriter
            :order_list, SstOrderList,
            :rb_tree, SstRbTree
   end
-  
+
   # @method sst_new()
-  # @return [Sst] 
+  # @return [Sst]
   # @scope class
   attach_function :sst_new, :lxw_sst_new, [], Sst
-  
+
   # @method sst_free(sst)
-  # @param [Sst] sst 
-  # @return [nil] 
+  # @param [Sst] sst
+  # @return [nil]
   # @scope class
   attach_function :sst_free, :lxw_sst_free, [Sst], :void
-  
+
   # @method get_sst_index(sst, string)
-  # @param [Sst] sst 
-  # @param [String] string 
-  # @return [SstElement] 
+  # @param [Sst] sst
+  # @param [String] string
+  # @return [SstElement]
   # @scope class
   attach_function :get_sst_index, :lxw_get_sst_index, [Sst, :string], SstElement
-  
+
   # @method sst_assemble_xml_file(self_)
-  # @param [Sst] self_ 
-  # @return [nil] 
+  # @param [Sst] self_
+  # @return [nil]
   # @scope class
   attach_function :sst_assemble_xml_file, :lxw_sst_assemble_xml_file, [Sst], :void
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*HashElement)) 
+  #   (FFI::Pointer(*HashElement))
   # :stqh_last ::
-  #   (FFI::Pointer(**HashElement)) 
+  #   (FFI::Pointer(**HashElement))
   class HashOrderList < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :slh_first ::
-  #   (FFI::Pointer(*HashElement)) 
+  #   (FFI::Pointer(*HashElement))
   class HashBucketList < FFI::Struct
     layout :slh_first, :pointer
   end
-  
+
   # = Fields:
   # :num_buckets ::
-  #   (Integer) 
+  #   (Integer)
   # :used_buckets ::
-  #   (Integer) 
+  #   (Integer)
   # :unique_count ::
-  #   (Integer) 
+  #   (Integer)
   # :free_key ::
-  #   (Integer) 
+  #   (Integer)
   # :free_value ::
-  #   (Integer) 
+  #   (Integer)
   # :order_list ::
-  #   (HashOrderList) 
+  #   (HashOrderList)
   # :buckets ::
-  #   (FFI::Pointer(**HashBucketList)) 
+  #   (FFI::Pointer(**HashBucketList))
   class HashTable < FFI::Struct
     layout :num_buckets, :uint,
            :used_buckets, :uint,
@@ -649,92 +652,92 @@ module Libxlsxwriter
            :order_list, HashOrderList,
            :buckets, :pointer
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*HashElement)) 
+  #   (FFI::Pointer(*HashElement))
   class HashElementHashOrderPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :sle_next ::
-  #   (FFI::Pointer(*HashElement)) 
+  #   (FFI::Pointer(*HashElement))
   class HashElementHashListPointers < FFI::Struct
     layout :sle_next, :pointer
   end
-  
+
   # = Fields:
   # :key ::
-  #   (FFI::Pointer(*Void)) 
+  #   (FFI::Pointer(*Void))
   # :value ::
-  #   (FFI::Pointer(*Void)) 
+  #   (FFI::Pointer(*Void))
   # :hash_order_pointers ::
-  #   (HashElementHashOrderPointers) 
+  #   (HashElementHashOrderPointers)
   # :hash_list_pointers ::
-  #   (HashElementHashListPointers) 
+  #   (HashElementHashListPointers)
   class HashElement < FFI::Struct
     layout :key, :pointer,
            :value, :pointer,
            :hash_order_pointers, HashElementHashOrderPointers.by_value,
            :hash_list_pointers, HashElementHashListPointers.by_value
   end
-  
+
   # @method hash_key_exists(hash, key, key_len)
-  # @param [HashTable] hash 
-  # @param [FFI::Pointer(*Void)] key 
-  # @param [Integer] key_len 
-  # @return [HashElement] 
+  # @param [HashTable] hash
+  # @param [FFI::Pointer(*Void)] key
+  # @param [Integer] key_len
+  # @return [HashElement]
   # @scope class
   attach_function :hash_key_exists, :lxw_hash_key_exists, [HashTable, :pointer, :ulong], HashElement
-  
+
   # @method insert_hash_element(hash, key, value, key_len)
-  # @param [HashTable] hash 
-  # @param [FFI::Pointer(*Void)] key 
-  # @param [FFI::Pointer(*Void)] value 
-  # @param [Integer] key_len 
-  # @return [HashElement] 
+  # @param [HashTable] hash
+  # @param [FFI::Pointer(*Void)] key
+  # @param [FFI::Pointer(*Void)] value
+  # @param [Integer] key_len
+  # @return [HashElement]
   # @scope class
   attach_function :insert_hash_element, :lxw_insert_hash_element, [HashTable, :pointer, :pointer, :ulong], HashElement
-  
+
   # @method hash_new(num_buckets, free_key, free_value)
-  # @param [Integer] num_buckets 
-  # @param [Integer] free_key 
-  # @param [Integer] free_value 
-  # @return [HashTable] 
+  # @param [Integer] num_buckets
+  # @param [Integer] free_key
+  # @param [Integer] free_value
+  # @return [HashTable]
   # @scope class
   attach_function :hash_new, :lxw_hash_new, [:uint, :uchar, :uchar], HashTable
-  
+
   # @method hash_free(hash)
-  # @param [HashTable] hash 
-  # @return [nil] 
+  # @param [HashTable] hash
+  # @return [nil]
   # @scope class
   attach_function :hash_free, :lxw_hash_free, [HashTable], :void
-  
+
   require_relative 'binding/chart'
 
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*DrawingObject)) 
+  #   (FFI::Pointer(*DrawingObject))
   # :stqh_last ::
-  #   (FFI::Pointer(**DrawingObject)) 
+  #   (FFI::Pointer(**DrawingObject))
   class DrawingObjects < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:drawing_types).</em>
-  # 
+  #
   # === Options:
   # :none ::
-  #   
+  #
   # :image ::
-  #   
+  #
   # :chart ::
-  #   
+  #
   # :shape ::
-  #   
-  # 
+  #
+  #
   # @method _enum_drawing_types_
   # @return [Symbol]
   # @scope class
@@ -744,17 +747,17 @@ module Libxlsxwriter
     :chart, 2,
     :shape, 3
   ]
-  
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:anchor_types).</em>
-  # 
+  #
   # === Options:
   # :type_none ::
-  #   
+  #
   # :type_image ::
-  #   
+  #
   # :type_chart ::
-  #   
-  # 
+  #
+  #
   # @method _enum_anchor_types_
   # @return [Symbol]
   # @scope class
@@ -763,19 +766,19 @@ module Libxlsxwriter
     :type_image, 1,
     :type_chart, 2
   ]
-  
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:anchor_edit_types).</em>
-  # 
+  #
   # === Options:
   # :as_none ::
-  #   
+  #
   # :as_relative ::
-  #   
+  #
   # :as_one_cell ::
-  #   
+  #
   # :as_absolute ::
-  #   
-  # 
+  #
+  #
   # @method _enum_anchor_edit_types_
   # @return [Symbol]
   # @scope class
@@ -785,19 +788,19 @@ module Libxlsxwriter
     :as_one_cell, 2,
     :as_absolute, 3
   ]
-  
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:image_types).</em>
-  # 
+  #
   # === Options:
   # :unknown ::
-  #   
+  #
   # :png ::
-  #   
+  #
   # :jpeg ::
-  #   
+  #
   # :bmp ::
-  #   
-  # 
+  #
+  #
   # @method _enum_image_types_
   # @return [Symbol]
   # @scope class
@@ -807,57 +810,57 @@ module Libxlsxwriter
     :jpeg, 2,
     :bmp, 3
   ]
-  
+
   # = Fields:
   # :col ::
-  #   (Integer) 
+  #   (Integer)
   # :row ::
-  #   (Integer) 
+  #   (Integer)
   # :col_offset ::
-  #   (Float) 
+  #   (Float)
   # :row_offset ::
-  #   (Float) 
+  #   (Float)
   class DrawingCoords < FFI::Struct
     layout :col, :uint,
            :row, :uint,
            :col_offset, :double,
            :row_offset, :double
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*DrawingObject)) 
+  #   (FFI::Pointer(*DrawingObject))
   class DrawingObjectListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :anchor_type ::
-  #   (Integer) 
+  #   (Integer)
   # :edit_as ::
-  #   (Integer) 
+  #   (Integer)
   # :from ::
-  #   (DrawingCoords) 
+  #   (DrawingCoords)
   # :to ::
-  #   (DrawingCoords) 
+  #   (DrawingCoords)
   # :col_absolute ::
-  #   (Integer) 
+  #   (Integer)
   # :row_absolute ::
-  #   (Integer) 
+  #   (Integer)
   # :width ::
-  #   (Integer) 
+  #   (Integer)
   # :height ::
-  #   (Integer) 
+  #   (Integer)
   # :shape ::
-  #   (Integer) 
+  #   (Integer)
   # :description ::
-  #   (String) 
+  #   (String)
   # :url ::
-  #   (String) 
+  #   (String)
   # :tip ::
-  #   (String) 
+  #   (String)
   # :list_pointers ::
-  #   (DrawingObjectListPointers) 
+  #   (DrawingObjectListPointers)
   class DrawingObject < FFI::Struct
     layout :anchor_type, :uchar,
            :edit_as, :uchar,
@@ -873,26 +876,26 @@ module Libxlsxwriter
            :tip, :string,
            :list_pointers, DrawingObjectListPointers.by_value
   end
-  
+
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :embedded ::
-  #   (Integer) 
+  #   (Integer)
   # :drawing_objects ::
-  #   (DrawingObjects) 
+  #   (DrawingObjects)
   module DrawingWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.drawing_free(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.drawing_assemble_xml_file(self)
     end
   end
-  
+
   class Drawing < FFI::Struct
     include DrawingWrappers
     layout :file, :pointer,
@@ -900,163 +903,163 @@ module Libxlsxwriter
            :orientation, :uchar,
            :drawing_objects, DrawingObjects
   end
-  
+
   # @method drawing_new()
-  # @return [Drawing] 
+  # @return [Drawing]
   # @scope class
   attach_function :drawing_new, :lxw_drawing_new, [], Drawing
-  
+
   # @method drawing_free(drawing)
-  # @param [Drawing] drawing 
-  # @return [nil] 
+  # @param [Drawing] drawing
+  # @return [nil]
   # @scope class
   attach_function :drawing_free, :lxw_drawing_free, [Drawing], :void
-  
+
   # @method drawing_assemble_xml_file(self_)
-  # @param [Drawing] self_ 
-  # @return [nil] 
+  # @param [Drawing] self_
+  # @return [nil]
   # @scope class
   attach_function :drawing_assemble_xml_file, :lxw_drawing_assemble_xml_file, [Drawing], :void
-  
+
   # @method free_drawing_object(drawing_object)
-  # @param [DrawingObject] drawing_object 
-  # @return [nil] 
+  # @param [DrawingObject] drawing_object
+  # @return [nil]
   # @scope class
   attach_function :free_drawing_object, :lxw_free_drawing_object, [DrawingObject], :void
-  
+
   # @method add_drawing_object(drawing, drawing_object)
-  # @param [Drawing] drawing 
-  # @param [DrawingObject] drawing_object 
-  # @return [nil] 
+  # @param [Drawing] drawing
+  # @param [DrawingObject] drawing_object
+  # @return [nil]
   # @scope class
   attach_function :add_drawing_object, :lxw_add_drawing_object, [Drawing, DrawingObject], :void
-  
+
   # @method strerror(error_num)
-  # @param [Symbol from _enum_error_] error_num 
-  # @return [String] 
+  # @param [Symbol from _enum_error_] error_num
+  # @return [String]
   # @scope class
   attach_function :strerror, :lxw_strerror, [:error], :string
-  
+
   # @method quote_sheetname(str)
-  # @param [String] str 
-  # @return [String] 
+  # @param [String] str
+  # @return [String]
   # @scope class
   attach_function :quote_sheetname, :lxw_quote_sheetname, [:string], :string
-  
+
   # @method col_to_name(col_name, col_num, absolute)
-  # @param [String] col_name 
-  # @param [Integer] col_num 
-  # @param [Integer] absolute 
-  # @return [nil] 
+  # @param [String] col_name
+  # @param [Integer] col_num
+  # @param [Integer] absolute
+  # @return [nil]
   # @scope class
   attach_function :col_to_name, :lxw_col_to_name, [:string, :ushort, :uchar], :void
-  
+
   # @method rowcol_to_cell(cell_name, row, col)
-  # @param [String] cell_name 
-  # @param [Integer] row 
-  # @param [Integer] col 
-  # @return [nil] 
+  # @param [String] cell_name
+  # @param [Integer] row
+  # @param [Integer] col
+  # @return [nil]
   # @scope class
   attach_function :rowcol_to_cell, :lxw_rowcol_to_cell, [:string, :uint, :ushort], :void
-  
+
   # @method rowcol_to_cell_abs(cell_name, row, col, abs_row, abs_col)
-  # @param [String] cell_name 
-  # @param [Integer] row 
-  # @param [Integer] col 
-  # @param [Integer] abs_row 
-  # @param [Integer] abs_col 
-  # @return [nil] 
+  # @param [String] cell_name
+  # @param [Integer] row
+  # @param [Integer] col
+  # @param [Integer] abs_row
+  # @param [Integer] abs_col
+  # @return [nil]
   # @scope class
   attach_function :rowcol_to_cell_abs, :lxw_rowcol_to_cell_abs, [:string, :uint, :ushort, :uchar, :uchar], :void
-  
+
   # @method rowcol_to_range(range, first_row, first_col, last_row, last_col)
-  # @param [String] range 
-  # @param [Integer] first_row 
-  # @param [Integer] first_col 
-  # @param [Integer] last_row 
-  # @param [Integer] last_col 
-  # @return [nil] 
+  # @param [String] range
+  # @param [Integer] first_row
+  # @param [Integer] first_col
+  # @param [Integer] last_row
+  # @param [Integer] last_col
+  # @return [nil]
   # @scope class
   attach_function :rowcol_to_range, :lxw_rowcol_to_range, [:string, :uint, :ushort, :uint, :ushort], :void
-  
+
   # @method rowcol_to_range_abs(range, first_row, first_col, last_row, last_col)
-  # @param [String] range 
-  # @param [Integer] first_row 
-  # @param [Integer] first_col 
-  # @param [Integer] last_row 
-  # @param [Integer] last_col 
-  # @return [nil] 
+  # @param [String] range
+  # @param [Integer] first_row
+  # @param [Integer] first_col
+  # @param [Integer] last_row
+  # @param [Integer] last_col
+  # @return [nil]
   # @scope class
   attach_function :rowcol_to_range_abs, :lxw_rowcol_to_range_abs, [:string, :uint, :ushort, :uint, :ushort], :void
-  
+
   # @method rowcol_to_formula_abs(formula, sheetname, first_row, first_col, last_row, last_col)
-  # @param [String] formula 
-  # @param [String] sheetname 
-  # @param [Integer] first_row 
-  # @param [Integer] first_col 
-  # @param [Integer] last_row 
-  # @param [Integer] last_col 
-  # @return [nil] 
+  # @param [String] formula
+  # @param [String] sheetname
+  # @param [Integer] first_row
+  # @param [Integer] first_col
+  # @param [Integer] last_row
+  # @param [Integer] last_col
+  # @return [nil]
   # @scope class
   attach_function :rowcol_to_formula_abs, :lxw_rowcol_to_formula_abs, [:string, :string, :uint, :ushort, :uint, :ushort], :void
-  
+
   # @method name_to_row(row_str)
-  # @param [String] row_str 
-  # @return [Integer] 
+  # @param [String] row_str
+  # @return [Integer]
   # @scope class
   attach_function :name_to_row, :lxw_name_to_row, [:string], :uint
-  
+
   # @method name_to_col(col_str)
-  # @param [String] col_str 
-  # @return [Integer] 
+  # @param [String] col_str
+  # @return [Integer]
   # @scope class
   attach_function :name_to_col, :lxw_name_to_col, [:string], :ushort
-  
+
   # @method name_to_row_2(row_str)
-  # @param [String] row_str 
-  # @return [Integer] 
+  # @param [String] row_str
+  # @return [Integer]
   # @scope class
   attach_function :name_to_row_2, :lxw_name_to_row_2, [:string], :uint
-  
+
   # @method name_to_col_2(col_str)
-  # @param [String] col_str 
-  # @return [Integer] 
+  # @param [String] col_str
+  # @return [Integer]
   # @scope class
   attach_function :name_to_col_2, :lxw_name_to_col_2, [:string], :ushort
-  
+
   # @method datetime_to_excel_date(datetime, date_1904)
-  # @param [Datetime] datetime 
-  # @param [Integer] date_1904 
-  # @return [Float] 
+  # @param [Datetime] datetime
+  # @param [Integer] date_1904
+  # @return [Float]
   # @scope class
   attach_function :datetime_to_excel_date, :lxw_datetime_to_excel_date, [Datetime, :uchar], :double
-  
+
   # @method strdup(str)
-  # @param [String] str 
-  # @return [String] 
+  # @param [String] str
+  # @return [String]
   # @scope class
   attach_function :strdup, :lxw_strdup, [:string], :string
-  
+
   # @method utf8_strlen(str)
-  # @param [String] str 
-  # @return [Integer] 
+  # @param [String] str
+  # @return [Integer]
   # @scope class
   attach_function :utf8_strlen, :lxw_utf8_strlen, [:string], :ulong
-  
+
   # @method str_tolower(str)
-  # @param [String] str 
-  # @return [nil] 
+  # @param [String] str
+  # @return [nil]
   # @scope class
   attach_function :str_tolower, :lxw_str_tolower, [:string], :void
-  
+
   # @method tmpfile(tmpdir)
-  # @param [String] tmpdir 
-  # @return [FFI::Pointer(*FILE)] 
+  # @param [String] tmpdir
+  # @return [FFI::Pointer(*FILE)]
   # @scope class
   attach_function :tmpfile, :lxw_tmpfile, [:string], :pointer
-  
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:gridlines).</em>
-  # 
+  #
   # === Options:
   # :hide_all ::
   #   Hide screen and print gridlines.
@@ -1066,7 +1069,7 @@ module Libxlsxwriter
   #   Show print gridlines.
   # :show_all ::
   #   Show screen and print gridlines.
-  # 
+  #
   # @method _enum_gridlines_
   # @return [Symbol]
   # @scope class
@@ -1076,20 +1079,20 @@ module Libxlsxwriter
     :show_print, 2,
     :show_all, 3
   ]
-  
-  
+
+
   # <em>This entry is only for documentation and no real method. The FFI::Enum can be accessed via #enum_type(:pane_types).</em>
-  # 
+  #
   # === Options:
   # :no_panes ::
-  #   
+  #
   # :freeze_panes ::
-  #   
+  #
   # :split_panes ::
-  #   
+  #
   # :freeze_split_panes ::
-  #   
-  # 
+  #
+  #
   # @method _enum_pane_types_
   # @return [Symbol]
   # @scope class
@@ -1102,51 +1105,51 @@ module Libxlsxwriter
 
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*MergedRange)) 
+  #   (FFI::Pointer(*MergedRange))
   # :stqh_last ::
-  #   (FFI::Pointer(**MergedRange)) 
+  #   (FFI::Pointer(**MergedRange))
   class MergedRanges < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*Selection)) 
+  #   (FFI::Pointer(*Selection))
   # :stqh_last ::
-  #   (FFI::Pointer(**Selection)) 
+  #   (FFI::Pointer(**Selection))
   class Selections < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*ImageOptions)) 
+  #   (FFI::Pointer(*ImageOptions))
   # :stqh_last ::
-  #   (FFI::Pointer(**ImageOptions)) 
+  #   (FFI::Pointer(**ImageOptions))
   class ImageData < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*ImageOptions)) 
+  #   (FFI::Pointer(*ImageOptions))
   # :stqh_last ::
-  #   (FFI::Pointer(**ImageOptions)) 
+  #   (FFI::Pointer(**ImageOptions))
   class ChartData < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :hidden ::
   #   (Integer) Hide the row/column
   # :level ::
-  #   (Integer) 
+  #   (Integer)
   # :collapsed ::
-  #   (Integer) 
+  #   (Integer)
   class RowColOptions < FFI::Struct
     layout :hidden, :uchar,
            :level, :uchar,
@@ -1155,22 +1158,22 @@ module Libxlsxwriter
 
   require_relative 'binding/format'
 
-  # 
+  #
   # = Fields:
   # :firstcol ::
-  #   (Integer) 
+  #   (Integer)
   # :lastcol ::
-  #   (Integer) 
+  #   (Integer)
   # :width ::
-  #   (Float) 
+  #   (Float)
   # :format ::
-  #   (Format) 
+  #   (Format)
   # :hidden ::
-  #   (Integer) 
+  #   (Integer)
   # :level ::
-  #   (Integer) 
+  #   (Integer)
   # :collapsed ::
-  #   (Integer) 
+  #   (Integer)
   class ColOptions < FFI::Struct
     layout :firstcol, :ushort,
            :lastcol, :ushort,
@@ -1180,25 +1183,25 @@ module Libxlsxwriter
            :level, :uchar,
            :collapsed, :uchar
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*MergedRange)) 
+  #   (FFI::Pointer(*MergedRange))
   class MergedRangeListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :first_row ::
-  #   (Integer) 
+  #   (Integer)
   # :last_row ::
-  #   (Integer) 
+  #   (Integer)
   # :first_col ::
-  #   (Integer) 
+  #   (Integer)
   # :last_col ::
-  #   (Integer) 
+  #   (Integer)
   # :list_pointers ::
-  #   (MergedRangeListPointers) 
+  #   (MergedRangeListPointers)
   class MergedRange < FFI::Struct
     layout :first_row, :uint,
            :last_row, :uint,
@@ -1206,44 +1209,44 @@ module Libxlsxwriter
            :last_col, :ushort,
            :list_pointers, MergedRangeListPointers.by_value
   end
-  
+
   # = Fields:
   # :in_use ::
-  #   (Integer) 
+  #   (Integer)
   # :first_row ::
-  #   (Integer) 
+  #   (Integer)
   # :last_row ::
-  #   (Integer) 
+  #   (Integer)
   class RepeatRows < FFI::Struct
     layout :in_use, :uchar,
            :first_row, :uint,
            :last_row, :uint
   end
-  
+
   # = Fields:
   # :in_use ::
-  #   (Integer) 
+  #   (Integer)
   # :first_col ::
-  #   (Integer) 
+  #   (Integer)
   # :last_col ::
-  #   (Integer) 
+  #   (Integer)
   class RepeatCols < FFI::Struct
     layout :in_use, :uchar,
            :first_col, :ushort,
            :last_col, :ushort
   end
-  
+
   # = Fields:
   # :in_use ::
-  #   (Integer) 
+  #   (Integer)
   # :first_row ::
-  #   (Integer) 
+  #   (Integer)
   # :last_row ::
-  #   (Integer) 
+  #   (Integer)
   # :first_col ::
-  #   (Integer) 
+  #   (Integer)
   # :last_col ::
-  #   (Integer) 
+  #   (Integer)
   class PrintArea < FFI::Struct
     layout :in_use, :uchar,
            :first_row, :uint,
@@ -1251,18 +1254,18 @@ module Libxlsxwriter
            :first_col, :ushort,
            :last_col, :ushort
   end
-  
+
   # = Fields:
   # :in_use ::
-  #   (Integer) 
+  #   (Integer)
   # :first_row ::
-  #   (Integer) 
+  #   (Integer)
   # :last_row ::
-  #   (Integer) 
+  #   (Integer)
   # :first_col ::
-  #   (Integer) 
+  #   (Integer)
   # :last_col ::
-  #   (Integer) 
+  #   (Integer)
   class Autofilter < FFI::Struct
     layout :in_use, :uchar,
            :first_row, :uint,
@@ -1270,22 +1273,22 @@ module Libxlsxwriter
            :first_col, :ushort,
            :last_col, :ushort
   end
-  
+
   # = Fields:
   # :type ::
-  #   (Integer) 
+  #   (Integer)
   # :first_row ::
-  #   (Integer) 
+  #   (Integer)
   # :first_col ::
-  #   (Integer) 
+  #   (Integer)
   # :top_row ::
-  #   (Integer) 
+  #   (Integer)
   # :left_col ::
-  #   (Integer) 
+  #   (Integer)
   # :x_split ::
-  #   (Float) 
+  #   (Float)
   # :y_split ::
-  #   (Float) 
+  #   (Float)
   class Panes < FFI::Struct
     layout :type, :uchar,
            :first_row, :uint,
@@ -1295,37 +1298,37 @@ module Libxlsxwriter
            :x_split, :double,
            :y_split, :double
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*Selection)) 
+  #   (FFI::Pointer(*Selection))
   class SelectionListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :pane ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :active_cell ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :sqref ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :list_pointers ::
-  #   (SelectionListPointers) 
+  #   (SelectionListPointers)
   class Selection < FFI::Struct
     layout :pane, [:char, 12],
            :active_cell, [:char, 28],
            :sqref, [:char, 28],
            :list_pointers, SelectionListPointers.by_value
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*ImageOptions)) 
+  #   (FFI::Pointer(*ImageOptions))
   class ImageOptionsListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :x_offset ::
   #   (Integer) Offset from the left of the cell in pixels.
@@ -1336,37 +1339,37 @@ module Libxlsxwriter
   # :y_scale ::
   #   (Float) Y scale of the image as a decimal.
   # :row ::
-  #   (Integer) 
+  #   (Integer)
   # :col ::
-  #   (Integer) 
+  #   (Integer)
   # :filename ::
-  #   (String) 
+  #   (String)
   # :url ::
-  #   (String) 
+  #   (String)
   # :tip ::
-  #   (String) 
+  #   (String)
   # :anchor ::
-  #   (Integer) 
+  #   (Integer)
   # :stream ::
   #   (FFI::Pointer(*FILE)) Internal metadata.
   # :image_type ::
-  #   (Integer) 
+  #   (Integer)
   # :width ::
-  #   (Float) 
+  #   (Float)
   # :height ::
-  #   (Float) 
+  #   (Float)
   # :short_name ::
-  #   (String) 
+  #   (String)
   # :extension ::
-  #   (String) 
+  #   (String)
   # :x_dpi ::
-  #   (Float) 
+  #   (Float)
   # :y_dpi ::
-  #   (Float) 
+  #   (Float)
   # :chart ::
-  #   (Chart) 
+  #   (Chart)
   # :list_pointers ::
-  #   (ImageOptionsListPointers) 
+  #   (ImageOptionsListPointers)
   class ImageOptions < FFI::Struct
     layout :x_offset, :int,
            :y_offset, :int,
@@ -1389,14 +1392,14 @@ module Libxlsxwriter
            :chart, Chart,
            :list_pointers, ImageOptionsListPointers.by_value
   end
-  
+
   # = Fields:
   # :margin ::
   #   (Float) Header or footer margin in inches. Excel default is 0.3.
   class HeaderFooterOptions < FFI::Struct
     layout :margin, :double
   end
-  
+
   # = Fields:
   # :no_select_locked_cells ::
   #   (Integer) Turn off selection of locked cells. This in on in Excel by default.
@@ -1429,13 +1432,13 @@ module Libxlsxwriter
   # :objects ::
   #   (Integer) Protect drawing objects.
   # :no_sheet ::
-  #   (Integer) 
+  #   (Integer)
   # :content ::
-  #   (Integer) 
+  #   (Integer)
   # :is_configured ::
-  #   (Integer) 
+  #   (Integer)
   # :hash ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   class Protection < FFI::Struct
     layout :no_select_locked_cells, :uchar,
            :no_select_unlocked_cells, :uchar,
@@ -1460,22 +1463,22 @@ module Libxlsxwriter
 
   require_relative 'binding/worksheet'
 
-  # 
+  #
   # = Fields:
   # :stqh_first ::
-  #   (Chart) 
+  #   (Chart)
   # :stqh_last ::
-  #   (FFI::Pointer(**Chart)) 
+  #   (FFI::Pointer(**Chart))
   class Charts < FFI::Struct
     layout :stqh_first, Chart,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :tqh_first ::
-  #   (FFI::Pointer(*DefinedName)) 
+  #   (FFI::Pointer(*DefinedName))
   # :tqh_last ::
-  #   (FFI::Pointer(**DefinedName)) 
+  #   (FFI::Pointer(**DefinedName))
   class DefinedNames < FFI::Struct
     layout :tqh_first, :pointer,
            :tqh_last, :pointer
@@ -1483,31 +1486,31 @@ module Libxlsxwriter
 
   # = Fields:
   # :tqe_next ::
-  #   (FFI::Pointer(*DefinedName)) 
+  #   (FFI::Pointer(*DefinedName))
   # :tqe_prev ::
-  #   (FFI::Pointer(**DefinedName)) 
+  #   (FFI::Pointer(**DefinedName))
   class DefinedNameListPointers < FFI::Struct
     layout :tqe_next, :pointer,
            :tqe_prev, :pointer
   end
-  
+
   # = Fields:
   # :index ::
-  #   (Integer) 
+  #   (Integer)
   # :hidden ::
-  #   (Integer) 
+  #   (Integer)
   # :name ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :app_name ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :formula ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :normalised_name ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :normalised_sheetname ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :list_pointers ::
-  #   (DefinedNameListPointers) 
+  #   (DefinedNameListPointers)
   class DefinedName < FFI::Struct
     layout :index, :short,
            :hidden, :uchar,
@@ -1518,7 +1521,7 @@ module Libxlsxwriter
            :normalised_sheetname, [:char, 128],
            :list_pointers, DefinedNameListPointers.by_value
   end
-  
+
   # = Fields:
   # :title ::
   #   (String) The title of the Excel Document.
@@ -1541,7 +1544,7 @@ module Libxlsxwriter
   # :hyperlink_base ::
   #   (String) The hyperlink base url of the Excel Document.
   # :created ::
-  #   (Integer) 
+  #   (Integer)
   class DocProperties < FFI::Struct
     layout :title, :string,
            :subject, :string,
@@ -1556,102 +1559,102 @@ module Libxlsxwriter
            :created, :long
   end
 
-  # 
+  #
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*HeadingPair)) 
+  #   (FFI::Pointer(*HeadingPair))
   # :stqh_last ::
-  #   (FFI::Pointer(**HeadingPair)) 
+  #   (FFI::Pointer(**HeadingPair))
   class HeadingPairs < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*PartName)) 
+  #   (FFI::Pointer(*PartName))
   # :stqh_last ::
-  #   (FFI::Pointer(**PartName)) 
+  #   (FFI::Pointer(**PartName))
   class PartNames < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*HeadingPair)) 
+  #   (FFI::Pointer(*HeadingPair))
   class HeadingPairListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :key ::
-  #   (String) 
+  #   (String)
   # :value ::
-  #   (String) 
+  #   (String)
   # :list_pointers ::
-  #   (HeadingPairListPointers) 
+  #   (HeadingPairListPointers)
   class HeadingPair < FFI::Struct
     layout :key, :string,
            :value, :string,
            :list_pointers, HeadingPairListPointers.by_value
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*PartName)) 
+  #   (FFI::Pointer(*PartName))
   class PartNameListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :name ::
-  #   (String) 
+  #   (String)
   # :list_pointers ::
-  #   (PartNameListPointers) 
+  #   (PartNameListPointers)
   class PartName < FFI::Struct
     layout :name, :string,
            :list_pointers, PartNameListPointers.by_value
   end
-  
+
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :heading_pairs ::
-  #   (HeadingPairs) 
+  #   (HeadingPairs)
   # :part_names ::
-  #   (PartNames) 
+  #   (PartNames)
   # :properties ::
-  #   (DocProperties) 
+  #   (DocProperties)
   # :num_heading_pairs ::
-  #   (Integer) 
+  #   (Integer)
   # :num_part_names ::
-  #   (Integer) 
+  #   (Integer)
   module AppWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.app_free(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.app_assemble_xml_file(self)
     end
-    
-    # @param [String] name 
-    # @return [nil] 
+
+    # @param [String] name
+    # @return [nil]
     def add_part_name(name)
       Libxlsxwriter.app_add_part_name(self, name)
     end
-    
-    # @param [String] key 
-    # @param [String] value 
-    # @return [nil] 
+
+    # @param [String] key
+    # @param [String] value
+    # @return [nil]
     def add_heading_pair(key, value)
       Libxlsxwriter.app_add_heading_pair(self, key, value)
     end
   end
-  
+
   class App < FFI::Struct
     include AppWrappers
     layout :file, :pointer,
@@ -1661,310 +1664,310 @@ module Libxlsxwriter
            :num_heading_pairs, :uint,
            :num_part_names, :uint
   end
-  
+
   # @method app_new()
-  # @return [App] 
+  # @return [App]
   # @scope class
   attach_function :app_new, :lxw_app_new, [], App
-  
+
   # @method app_free(app)
-  # @param [App] app 
-  # @return [nil] 
+  # @param [App] app
+  # @return [nil]
   # @scope class
   attach_function :app_free, :lxw_app_free, [App], :void
-  
+
   # @method app_assemble_xml_file(self_)
-  # @param [App] self_ 
-  # @return [nil] 
+  # @param [App] self_
+  # @return [nil]
   # @scope class
   attach_function :app_assemble_xml_file, :lxw_app_assemble_xml_file, [App], :void
-  
+
   # @method app_add_part_name(self_, name)
-  # @param [App] self_ 
-  # @param [String] name 
-  # @return [nil] 
+  # @param [App] self_
+  # @param [String] name
+  # @return [nil]
   # @scope class
   attach_function :app_add_part_name, :lxw_app_add_part_name, [App, :string], :void
-  
+
   # @method app_add_heading_pair(self_, key, value)
-  # @param [App] self_ 
-  # @param [String] key 
-  # @param [String] value 
-  # @return [nil] 
+  # @param [App] self_
+  # @param [String] key
+  # @param [String] value
+  # @return [nil]
   # @scope class
   attach_function :app_add_heading_pair, :lxw_app_add_heading_pair, [App, :string, :string], :void
-  
+
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :default_types ::
-  #   (Tuples) 
+  #   (Tuples)
   # :overrides ::
-  #   (Tuples) 
+  #   (Tuples)
   module ContentTypesWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.content_types_free(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.content_types_assemble_xml_file(self)
     end
   end
-  
+
   class ContentTypes < FFI::Struct
     include ContentTypesWrappers
     layout :file, :pointer,
            :default_types, Tuples,
            :overrides, Tuples
   end
-  
+
   # @method content_types_new()
-  # @return [ContentTypes] 
+  # @return [ContentTypes]
   # @scope class
   attach_function :content_types_new, :lxw_content_types_new, [], ContentTypes
-  
+
   # @method content_types_free(content_types)
-  # @param [ContentTypes] content_types 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @return [nil]
   # @scope class
   attach_function :content_types_free, :lxw_content_types_free, [ContentTypes], :void
-  
+
   # @method content_types_assemble_xml_file(content_types)
-  # @param [ContentTypes] content_types 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @return [nil]
   # @scope class
   attach_function :content_types_assemble_xml_file, :lxw_content_types_assemble_xml_file, [ContentTypes], :void
-  
+
   # @method ct_add_default(content_types, key, value)
-  # @param [ContentTypes] content_types 
-  # @param [String] key 
-  # @param [String] value 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @param [String] key
+  # @param [String] value
+  # @return [nil]
   # @scope class
   attach_function :ct_add_default, :lxw_ct_add_default, [ContentTypes, :string, :string], :void
-  
+
   # @method ct_add_override(content_types, key, value)
-  # @param [ContentTypes] content_types 
-  # @param [String] key 
-  # @param [String] value 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @param [String] key
+  # @param [String] value
+  # @return [nil]
   # @scope class
   attach_function :ct_add_override, :lxw_ct_add_override, [ContentTypes, :string, :string], :void
-  
+
   # @method ct_add_worksheet_name(content_types, name)
-  # @param [ContentTypes] content_types 
-  # @param [String] name 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @param [String] name
+  # @return [nil]
   # @scope class
   attach_function :ct_add_worksheet_name, :lxw_ct_add_worksheet_name, [ContentTypes, :string], :void
-  
+
   # @method ct_add_chart_name(content_types, name)
-  # @param [ContentTypes] content_types 
-  # @param [String] name 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @param [String] name
+  # @return [nil]
   # @scope class
   attach_function :ct_add_chart_name, :lxw_ct_add_chart_name, [ContentTypes, :string], :void
-  
+
   # @method ct_add_drawing_name(content_types, name)
-  # @param [ContentTypes] content_types 
-  # @param [String] name 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @param [String] name
+  # @return [nil]
   # @scope class
   attach_function :ct_add_drawing_name, :lxw_ct_add_drawing_name, [ContentTypes, :string], :void
-  
+
   # @method ct_add_shared_strings(content_types)
-  # @param [ContentTypes] content_types 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @return [nil]
   # @scope class
   attach_function :ct_add_shared_strings, :lxw_ct_add_shared_strings, [ContentTypes], :void
-  
+
   # @method ct_add_calc_chain(content_types)
-  # @param [ContentTypes] content_types 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @return [nil]
   # @scope class
   attach_function :ct_add_calc_chain, :lxw_ct_add_calc_chain, [ContentTypes], :void
-  
+
   # @method ct_add_custom_properties(content_types)
-  # @param [ContentTypes] content_types 
-  # @return [nil] 
+  # @param [ContentTypes] content_types
+  # @return [nil]
   # @scope class
   attach_function :ct_add_custom_properties, :lxw_ct_add_custom_properties, [ContentTypes], :void
-  
+
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :properties ::
-  #   (DocProperties) 
+  #   (DocProperties)
   module CoreWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.core_free(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.core_assemble_xml_file(self)
     end
   end
-  
+
   class Core < FFI::Struct
     include CoreWrappers
     layout :file, :pointer,
            :properties, DocProperties
   end
-  
+
   # @method core_new()
-  # @return [Core] 
+  # @return [Core]
   # @scope class
   attach_function :core_new, :lxw_core_new, [], Core
-  
+
   # @method core_free(core)
-  # @param [Core] core 
-  # @return [nil] 
+  # @param [Core] core
+  # @return [nil]
   # @scope class
   attach_function :core_free, :lxw_core_free, [Core], :void
-  
+
   # @method core_assemble_xml_file(self_)
-  # @param [Core] self_ 
-  # @return [nil] 
+  # @param [Core] self_
+  # @return [nil]
   # @scope class
   attach_function :core_assemble_xml_file, :lxw_core_assemble_xml_file, [Core], :void
-  
+
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :custom_properties ::
-  #   (CustomProperties) 
+  #   (CustomProperties)
   # :pid ::
-  #   (Integer) 
+  #   (Integer)
   module CustomWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.custom_free(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.custom_assemble_xml_file(self)
     end
   end
-  
+
   class Custom < FFI::Struct
     include CustomWrappers
     layout :file, :pointer,
            :custom_properties, CustomProperties,
            :pid, :uint
   end
-  
+
   # @method custom_new()
-  # @return [Custom] 
+  # @return [Custom]
   # @scope class
   attach_function :custom_new, :lxw_custom_new, [], Custom
-  
+
   # @method custom_free(custom)
-  # @param [Custom] custom 
-  # @return [nil] 
+  # @param [Custom] custom
+  # @return [nil]
   # @scope class
   attach_function :custom_free, :lxw_custom_free, [Custom], :void
-  
+
   # @method custom_assemble_xml_file(self_)
-  # @param [Custom] self_ 
-  # @return [nil] 
+  # @param [Custom] self_
+  # @return [nil]
   # @scope class
   attach_function :custom_assemble_xml_file, :lxw_custom_assemble_xml_file, [Custom], :void
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_open_file_func_(voidpf, opaque, filename, mode)
-  # @param [FFI::Pointer(Voidpf)] voidpf 
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [String] filename 
-  # @param [Integer] mode 
-  # @return [FFI::Pointer(Voidpf)] 
+  # @param [FFI::Pointer(Voidpf)] voidpf
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [String] filename
+  # @param [Integer] mode
+  # @return [FFI::Pointer(Voidpf)]
   # @scope class
   callback :open_file_func, [:pointer, :pointer, :string, :int], :pointer
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_read_file_func_(u_long, opaque, stream, buf, size)
-  # @param [Integer] u_long 
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(Voidpf)] stream 
-  # @param [FFI::Pointer(*Void)] buf 
-  # @param [Integer] size 
-  # @return [Integer] 
+  # @param [Integer] u_long
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(Voidpf)] stream
+  # @param [FFI::Pointer(*Void)] buf
+  # @param [Integer] size
+  # @return [Integer]
   # @scope class
   callback :read_file_func, [:ulong, :pointer, :pointer, :pointer, :ulong], :ulong
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_write_file_func_(u_long, opaque, stream, buf, size)
-  # @param [Integer] u_long 
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(Voidpf)] stream 
-  # @param [FFI::Pointer(*Void)] buf 
-  # @param [Integer] size 
-  # @return [Integer] 
+  # @param [Integer] u_long
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(Voidpf)] stream
+  # @param [FFI::Pointer(*Void)] buf
+  # @param [Integer] size
+  # @return [Integer]
   # @scope class
   callback :write_file_func, [:ulong, :pointer, :pointer, :pointer, :ulong], :ulong
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_close_file_func_(opaque, stream)
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(Voidpf)] stream 
-  # @return [FFI::Pointer(Voidpf)] 
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(Voidpf)] stream
+  # @return [FFI::Pointer(Voidpf)]
   # @scope class
   callback :close_file_func, [:pointer, :pointer], :pointer
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_testerror_file_func_(opaque, stream)
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(Voidpf)] stream 
-  # @return [FFI::Pointer(Voidpf)] 
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(Voidpf)] stream
+  # @return [FFI::Pointer(Voidpf)]
   # @scope class
   callback :testerror_file_func, [:pointer, :pointer], :pointer
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_tell_file_func_(opaque, stream)
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(Voidpf)] stream 
-  # @return [FFI::Pointer(Voidpf)] 
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(Voidpf)] stream
+  # @return [FFI::Pointer(Voidpf)]
   # @scope class
   callback :tell_file_func, [:pointer, :pointer], :pointer
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_seek_file_func_(opaque, stream, offset, origin)
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(Voidpf)] stream 
-  # @param [Integer] offset 
-  # @param [Integer] origin 
-  # @return [FFI::Pointer(Voidpf)] 
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(Voidpf)] stream
+  # @param [Integer] offset
+  # @param [Integer] origin
+  # @return [FFI::Pointer(Voidpf)]
   # @scope class
   callback :seek_file_func, [:pointer, :pointer, :ulong, :int], :pointer
-  
+
   # = Fields:
   # :zopen_file ::
-  #   (Proc(_callback_open_file_func_)) 
+  #   (Proc(_callback_open_file_func_))
   # :zread_file ::
-  #   (Proc(_callback_read_file_func_)) 
+  #   (Proc(_callback_read_file_func_))
   # :zwrite_file ::
-  #   (Proc(_callback_write_file_func_)) 
+  #   (Proc(_callback_write_file_func_))
   # :ztell_file ::
-  #   (Proc(_callback_tell_file_func_)) 
+  #   (Proc(_callback_tell_file_func_))
   # :zseek_file ::
-  #   (Proc(_callback_seek_file_func_)) 
+  #   (Proc(_callback_seek_file_func_))
   # :zclose_file ::
-  #   (Proc(_callback_close_file_func_)) 
+  #   (Proc(_callback_close_file_func_))
   # :zerror_file ::
-  #   (Proc(_callback_testerror_file_func_)) 
+  #   (Proc(_callback_testerror_file_func_))
   # :opaque ::
-  #   (FFI::Pointer(Voidpf)) 
+  #   (FFI::Pointer(Voidpf))
   class ZlibFilefuncDefS < FFI::Struct
     layout :zopen_file, :open_file_func,
            :zread_file, :read_file_func,
@@ -1975,56 +1978,56 @@ module Libxlsxwriter
            :zerror_file, :testerror_file_func,
            :opaque, :pointer
   end
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_tell64_file_func_(zpos64_t, opaque, stream)
-  # @param [Integer] zpos64_t 
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(Voidpf)] stream 
-  # @return [Integer] 
+  # @param [Integer] zpos64_t
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(Voidpf)] stream
+  # @return [Integer]
   # @scope class
   callback :tell64_file_func, [:ulong_long, :pointer, :pointer], :ulong_long
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_seek64_file_func_(opaque, stream, offset, origin)
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(Voidpf)] stream 
-  # @param [Integer] offset 
-  # @param [Integer] origin 
-  # @return [FFI::Pointer(Voidpf)] 
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(Voidpf)] stream
+  # @param [Integer] offset
+  # @param [Integer] origin
+  # @return [FFI::Pointer(Voidpf)]
   # @scope class
   callback :seek64_file_func, [:pointer, :pointer, :ulong_long, :int], :pointer
-  
+
   # <em>This entry is only for documentation and no real method.</em>
-  # 
+  #
   # @method _callback_open64_file_func_(voidpf, opaque, filename, mode)
-  # @param [FFI::Pointer(Voidpf)] voidpf 
-  # @param [FFI::Pointer(Voidpf)] opaque 
-  # @param [FFI::Pointer(*Void)] filename 
-  # @param [Integer] mode 
-  # @return [FFI::Pointer(Voidpf)] 
+  # @param [FFI::Pointer(Voidpf)] voidpf
+  # @param [FFI::Pointer(Voidpf)] opaque
+  # @param [FFI::Pointer(*Void)] filename
+  # @param [Integer] mode
+  # @return [FFI::Pointer(Voidpf)]
   # @scope class
   callback :open64_file_func, [:pointer, :pointer, :pointer, :int], :pointer
-  
+
   # = Fields:
   # :zopen64_file ::
-  #   (Proc(_callback_open64_file_func_)) 
+  #   (Proc(_callback_open64_file_func_))
   # :zread_file ::
-  #   (Proc(_callback_read_file_func_)) 
+  #   (Proc(_callback_read_file_func_))
   # :zwrite_file ::
-  #   (Proc(_callback_write_file_func_)) 
+  #   (Proc(_callback_write_file_func_))
   # :ztell64_file ::
-  #   (Proc(_callback_tell64_file_func_)) 
+  #   (Proc(_callback_tell64_file_func_))
   # :zseek64_file ::
-  #   (Proc(_callback_seek64_file_func_)) 
+  #   (Proc(_callback_seek64_file_func_))
   # :zclose_file ::
-  #   (Proc(_callback_close_file_func_)) 
+  #   (Proc(_callback_close_file_func_))
   # :zerror_file ::
-  #   (Proc(_callback_testerror_file_func_)) 
+  #   (Proc(_callback_testerror_file_func_))
   # :opaque ::
-  #   (FFI::Pointer(Voidpf)) 
+  #   (FFI::Pointer(Voidpf))
   class ZlibFilefunc64DefS < FFI::Struct
     layout :zopen64_file, :open64_file_func,
            :zread_file, :read_file_func,
@@ -2035,66 +2038,66 @@ module Libxlsxwriter
            :zerror_file, :testerror_file_func,
            :opaque, :pointer
   end
-  
+
   # @method fill_fopen64_filefunc(pzlib_filefunc_def)
-  # @param [ZlibFilefunc64DefS] pzlib_filefunc_def 
-  # @return [nil] 
+  # @param [ZlibFilefunc64DefS] pzlib_filefunc_def
+  # @return [nil]
   # @scope class
   attach_function :fill_fopen64_filefunc, :fill_fopen64_filefunc, [ZlibFilefunc64DefS], :void
-  
+
   # @method fill_fopen_filefunc(pzlib_filefunc_def)
-  # @param [ZlibFilefuncDefS] pzlib_filefunc_def 
-  # @return [nil] 
+  # @param [ZlibFilefuncDefS] pzlib_filefunc_def
+  # @return [nil]
   # @scope class
   attach_function :fill_fopen_filefunc, :fill_fopen_filefunc, [ZlibFilefuncDefS], :void
-  
+
   # = Fields:
   # :zfile_func64 ::
-  #   (ZlibFilefunc64DefS) 
+  #   (ZlibFilefunc64DefS)
   # :zopen32_file ::
-  #   (Proc(_callback_open_file_func_)) 
+  #   (Proc(_callback_open_file_func_))
   # :ztell32_file ::
-  #   (Proc(_callback_tell_file_func_)) 
+  #   (Proc(_callback_tell_file_func_))
   # :zseek32_file ::
-  #   (Proc(_callback_seek_file_func_)) 
+  #   (Proc(_callback_seek_file_func_))
   class ZlibFilefunc6432DefS < FFI::Struct
     layout :zfile_func64, ZlibFilefunc64DefS.by_value,
            :zopen32_file, :open_file_func,
            :ztell32_file, :tell_file_func,
            :zseek32_file, :seek_file_func
   end
-  
+
   # @method call_zopen64(pfilefunc, filename, mode)
-  # @param [ZlibFilefunc6432DefS] pfilefunc 
-  # @param [FFI::Pointer(*Void)] filename 
-  # @param [Integer] mode 
-  # @return [FFI::Pointer(Voidpf)] 
+  # @param [ZlibFilefunc6432DefS] pfilefunc
+  # @param [FFI::Pointer(*Void)] filename
+  # @param [Integer] mode
+  # @return [FFI::Pointer(Voidpf)]
   # @scope class
   attach_function :call_zopen64, :call_zopen64, [ZlibFilefunc6432DefS, :pointer, :int], :pointer
-  
+
   # @method call_zseek64(pfilefunc, filestream, offset, origin)
-  # @param [ZlibFilefunc6432DefS] pfilefunc 
-  # @param [FFI::Pointer(Voidpf)] filestream 
-  # @param [Integer] offset 
-  # @param [Integer] origin 
-  # @return [Integer] 
+  # @param [ZlibFilefunc6432DefS] pfilefunc
+  # @param [FFI::Pointer(Voidpf)] filestream
+  # @param [Integer] offset
+  # @param [Integer] origin
+  # @return [Integer]
   # @scope class
   attach_function :call_zseek64, :call_zseek64, [ZlibFilefunc6432DefS, :pointer, :ulong_long, :int], :long
-  
+
   # @method call_ztell64(pfilefunc, filestream)
-  # @param [ZlibFilefunc6432DefS] pfilefunc 
-  # @param [FFI::Pointer(Voidpf)] filestream 
-  # @return [Integer] 
+  # @param [ZlibFilefunc6432DefS] pfilefunc
+  # @param [FFI::Pointer(Voidpf)] filestream
+  # @return [Integer]
   # @scope class
   attach_function :call_ztell64, :call_ztell64, [ZlibFilefunc6432DefS, :pointer], :ulong_long
-  
+
   # @method fill_zlib_filefunc64_32_def_from_filefunc32(p_filefunc64_32, p_filefunc32)
-  # @param [ZlibFilefunc6432DefS] p_filefunc64_32 
-  # @param [ZlibFilefuncDefS] p_filefunc32 
-  # @return [nil] 
+  # @param [ZlibFilefunc6432DefS] p_filefunc64_32
+  # @param [ZlibFilefuncDefS] p_filefunc32
+  # @return [nil]
   # @scope class
   attach_function :fill_zlib_filefunc64_32_def_from_filefunc32, :fill_zlib_filefunc64_32_def_from_filefunc32, [ZlibFilefunc6432DefS, ZlibFilefuncDefS], :void
-  
+
   # = Fields:
   # :tm_sec ::
   #   (Integer) seconds after the minute - (0,59)
@@ -2116,12 +2119,12 @@ module Libxlsxwriter
            :tm_mon, :uint,
            :tm_year, :uint
   end
-  
+
   # = Fields:
   # :tmz_date ::
-  #   (TmZipS) date in understandable format          
+  #   (TmZipS) date in understandable format
   # :dos_date ::
-  #   (Integer) if dos_date == 0, tmu_date is used     
+  #   (Integer) if dos_date == 0, tmu_date is used
   # :internal_fa ::
   #   (Integer) internal file attributes        2 bytes
   # :external_fa ::
@@ -2132,317 +2135,317 @@ module Libxlsxwriter
            :internal_fa, :ulong,
            :external_fa, :ulong
   end
-  
+
   # @method zip_open(pathname, append)
-  # @param [String] pathname 
-  # @param [Integer] append 
-  # @return [FFI::Pointer(ZipFile)] 
+  # @param [String] pathname
+  # @param [Integer] append
+  # @return [FFI::Pointer(ZipFile)]
   # @scope class
   attach_function :zip_open, :zipOpen, [:string, :int], :pointer
-  
+
   # @method zip_open64(pathname, append)
-  # @param [FFI::Pointer(*Void)] pathname 
-  # @param [Integer] append 
-  # @return [FFI::Pointer(ZipFile)] 
+  # @param [FFI::Pointer(*Void)] pathname
+  # @param [Integer] append
+  # @return [FFI::Pointer(ZipFile)]
   # @scope class
   attach_function :zip_open64, :zipOpen64, [:pointer, :int], :pointer
-  
+
   # @method zip_open2(pathname, append, globalcomment, pzlib_filefunc_def)
-  # @param [String] pathname 
-  # @param [Integer] append 
-  # @param [FFI::Pointer(*Zipcharpc)] globalcomment 
-  # @param [ZlibFilefuncDefS] pzlib_filefunc_def 
-  # @return [FFI::Pointer(ZipFile)] 
+  # @param [String] pathname
+  # @param [Integer] append
+  # @param [FFI::Pointer(*Zipcharpc)] globalcomment
+  # @param [ZlibFilefuncDefS] pzlib_filefunc_def
+  # @return [FFI::Pointer(ZipFile)]
   # @scope class
   attach_function :zip_open2, :zipOpen2, [:string, :int, :pointer, ZlibFilefuncDefS], :pointer
-  
+
   # @method zip_open2_64(pathname, append, globalcomment, pzlib_filefunc_def)
-  # @param [FFI::Pointer(*Void)] pathname 
-  # @param [Integer] append 
-  # @param [FFI::Pointer(*Zipcharpc)] globalcomment 
-  # @param [ZlibFilefunc64DefS] pzlib_filefunc_def 
-  # @return [FFI::Pointer(ZipFile)] 
+  # @param [FFI::Pointer(*Void)] pathname
+  # @param [Integer] append
+  # @param [FFI::Pointer(*Zipcharpc)] globalcomment
+  # @param [ZlibFilefunc64DefS] pzlib_filefunc_def
+  # @return [FFI::Pointer(ZipFile)]
   # @scope class
   attach_function :zip_open2_64, :zipOpen2_64, [:pointer, :int, :pointer, ZlibFilefunc64DefS], :pointer
-  
+
   # @method zip_open_new_file_in_zip(file, filename, zipfi, extrafield_local, size_extrafield_local, extrafield_global, size_extrafield_global, comment, method, level)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] filename 
-  # @param [ZipFileinfo] zipfi 
-  # @param [FFI::Pointer(*Void)] extrafield_local 
-  # @param [Integer] size_extrafield_local 
-  # @param [FFI::Pointer(*Void)] extrafield_global 
-  # @param [Integer] size_extrafield_global 
-  # @param [String] comment 
-  # @param [Integer] method 
-  # @param [Integer] level 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] filename
+  # @param [ZipFileinfo] zipfi
+  # @param [FFI::Pointer(*Void)] extrafield_local
+  # @param [Integer] size_extrafield_local
+  # @param [FFI::Pointer(*Void)] extrafield_global
+  # @param [Integer] size_extrafield_global
+  # @param [String] comment
+  # @param [Integer] method
+  # @param [Integer] level
+  # @return [Integer]
   # @scope class
   attach_function :zip_open_new_file_in_zip, :zipOpenNewFileInZip, [:pointer, :string, ZipFileinfo, :pointer, :uint, :pointer, :uint, :string, :int, :int], :int
-  
+
   # @method zip_open_new_file_in_zip64(file, filename, zipfi, extrafield_local, size_extrafield_local, extrafield_global, size_extrafield_global, comment, method, level, zip64)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] filename 
-  # @param [ZipFileinfo] zipfi 
-  # @param [FFI::Pointer(*Void)] extrafield_local 
-  # @param [Integer] size_extrafield_local 
-  # @param [FFI::Pointer(*Void)] extrafield_global 
-  # @param [Integer] size_extrafield_global 
-  # @param [String] comment 
-  # @param [Integer] method 
-  # @param [Integer] level 
-  # @param [Integer] zip64 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] filename
+  # @param [ZipFileinfo] zipfi
+  # @param [FFI::Pointer(*Void)] extrafield_local
+  # @param [Integer] size_extrafield_local
+  # @param [FFI::Pointer(*Void)] extrafield_global
+  # @param [Integer] size_extrafield_global
+  # @param [String] comment
+  # @param [Integer] method
+  # @param [Integer] level
+  # @param [Integer] zip64
+  # @return [Integer]
   # @scope class
   attach_function :zip_open_new_file_in_zip64, :zipOpenNewFileInZip64, [:pointer, :string, ZipFileinfo, :pointer, :uint, :pointer, :uint, :string, :int, :int, :int], :int
-  
+
   # @method zip_open_new_file_in_zip2(file, filename, zipfi, extrafield_local, size_extrafield_local, extrafield_global, size_extrafield_global, comment, method, level, raw)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] filename 
-  # @param [ZipFileinfo] zipfi 
-  # @param [FFI::Pointer(*Void)] extrafield_local 
-  # @param [Integer] size_extrafield_local 
-  # @param [FFI::Pointer(*Void)] extrafield_global 
-  # @param [Integer] size_extrafield_global 
-  # @param [String] comment 
-  # @param [Integer] method 
-  # @param [Integer] level 
-  # @param [Integer] raw 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] filename
+  # @param [ZipFileinfo] zipfi
+  # @param [FFI::Pointer(*Void)] extrafield_local
+  # @param [Integer] size_extrafield_local
+  # @param [FFI::Pointer(*Void)] extrafield_global
+  # @param [Integer] size_extrafield_global
+  # @param [String] comment
+  # @param [Integer] method
+  # @param [Integer] level
+  # @param [Integer] raw
+  # @return [Integer]
   # @scope class
   attach_function :zip_open_new_file_in_zip2, :zipOpenNewFileInZip2, [:pointer, :string, ZipFileinfo, :pointer, :uint, :pointer, :uint, :string, :int, :int, :int], :int
-  
+
   # @method zip_open_new_file_in_zip2_64(file, filename, zipfi, extrafield_local, size_extrafield_local, extrafield_global, size_extrafield_global, comment, method, level, raw, zip64)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] filename 
-  # @param [ZipFileinfo] zipfi 
-  # @param [FFI::Pointer(*Void)] extrafield_local 
-  # @param [Integer] size_extrafield_local 
-  # @param [FFI::Pointer(*Void)] extrafield_global 
-  # @param [Integer] size_extrafield_global 
-  # @param [String] comment 
-  # @param [Integer] method 
-  # @param [Integer] level 
-  # @param [Integer] raw 
-  # @param [Integer] zip64 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] filename
+  # @param [ZipFileinfo] zipfi
+  # @param [FFI::Pointer(*Void)] extrafield_local
+  # @param [Integer] size_extrafield_local
+  # @param [FFI::Pointer(*Void)] extrafield_global
+  # @param [Integer] size_extrafield_global
+  # @param [String] comment
+  # @param [Integer] method
+  # @param [Integer] level
+  # @param [Integer] raw
+  # @param [Integer] zip64
+  # @return [Integer]
   # @scope class
   attach_function :zip_open_new_file_in_zip2_64, :zipOpenNewFileInZip2_64, [:pointer, :string, ZipFileinfo, :pointer, :uint, :pointer, :uint, :string, :int, :int, :int, :int], :int
-  
+
   # @method zip_open_new_file_in_zip3(file, filename, zipfi, extrafield_local, size_extrafield_local, extrafield_global, size_extrafield_global, comment, method, level, raw, window_bits, mem_level, strategy, password, crc_for_crypting)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] filename 
-  # @param [ZipFileinfo] zipfi 
-  # @param [FFI::Pointer(*Void)] extrafield_local 
-  # @param [Integer] size_extrafield_local 
-  # @param [FFI::Pointer(*Void)] extrafield_global 
-  # @param [Integer] size_extrafield_global 
-  # @param [String] comment 
-  # @param [Integer] method 
-  # @param [Integer] level 
-  # @param [Integer] raw 
-  # @param [Integer] window_bits 
-  # @param [Integer] mem_level 
-  # @param [Integer] strategy 
-  # @param [String] password 
-  # @param [Integer] crc_for_crypting 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] filename
+  # @param [ZipFileinfo] zipfi
+  # @param [FFI::Pointer(*Void)] extrafield_local
+  # @param [Integer] size_extrafield_local
+  # @param [FFI::Pointer(*Void)] extrafield_global
+  # @param [Integer] size_extrafield_global
+  # @param [String] comment
+  # @param [Integer] method
+  # @param [Integer] level
+  # @param [Integer] raw
+  # @param [Integer] window_bits
+  # @param [Integer] mem_level
+  # @param [Integer] strategy
+  # @param [String] password
+  # @param [Integer] crc_for_crypting
+  # @return [Integer]
   # @scope class
   attach_function :zip_open_new_file_in_zip3, :zipOpenNewFileInZip3, [:pointer, :string, ZipFileinfo, :pointer, :uint, :pointer, :uint, :string, :int, :int, :int, :int, :int, :int, :string, :ulong], :int
-  
+
   # @method zip_open_new_file_in_zip3_64(file, filename, zipfi, extrafield_local, size_extrafield_local, extrafield_global, size_extrafield_global, comment, method, level, raw, window_bits, mem_level, strategy, password, crc_for_crypting, zip64)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] filename 
-  # @param [ZipFileinfo] zipfi 
-  # @param [FFI::Pointer(*Void)] extrafield_local 
-  # @param [Integer] size_extrafield_local 
-  # @param [FFI::Pointer(*Void)] extrafield_global 
-  # @param [Integer] size_extrafield_global 
-  # @param [String] comment 
-  # @param [Integer] method 
-  # @param [Integer] level 
-  # @param [Integer] raw 
-  # @param [Integer] window_bits 
-  # @param [Integer] mem_level 
-  # @param [Integer] strategy 
-  # @param [String] password 
-  # @param [Integer] crc_for_crypting 
-  # @param [Integer] zip64 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] filename
+  # @param [ZipFileinfo] zipfi
+  # @param [FFI::Pointer(*Void)] extrafield_local
+  # @param [Integer] size_extrafield_local
+  # @param [FFI::Pointer(*Void)] extrafield_global
+  # @param [Integer] size_extrafield_global
+  # @param [String] comment
+  # @param [Integer] method
+  # @param [Integer] level
+  # @param [Integer] raw
+  # @param [Integer] window_bits
+  # @param [Integer] mem_level
+  # @param [Integer] strategy
+  # @param [String] password
+  # @param [Integer] crc_for_crypting
+  # @param [Integer] zip64
+  # @return [Integer]
   # @scope class
   attach_function :zip_open_new_file_in_zip3_64, :zipOpenNewFileInZip3_64, [:pointer, :string, ZipFileinfo, :pointer, :uint, :pointer, :uint, :string, :int, :int, :int, :int, :int, :int, :string, :ulong, :int], :int
-  
+
   # @method zip_open_new_file_in_zip4(file, filename, zipfi, extrafield_local, size_extrafield_local, extrafield_global, size_extrafield_global, comment, method, level, raw, window_bits, mem_level, strategy, password, crc_for_crypting, version_made_by, flag_base)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] filename 
-  # @param [ZipFileinfo] zipfi 
-  # @param [FFI::Pointer(*Void)] extrafield_local 
-  # @param [Integer] size_extrafield_local 
-  # @param [FFI::Pointer(*Void)] extrafield_global 
-  # @param [Integer] size_extrafield_global 
-  # @param [String] comment 
-  # @param [Integer] method 
-  # @param [Integer] level 
-  # @param [Integer] raw 
-  # @param [Integer] window_bits 
-  # @param [Integer] mem_level 
-  # @param [Integer] strategy 
-  # @param [String] password 
-  # @param [Integer] crc_for_crypting 
-  # @param [Integer] version_made_by 
-  # @param [Integer] flag_base 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] filename
+  # @param [ZipFileinfo] zipfi
+  # @param [FFI::Pointer(*Void)] extrafield_local
+  # @param [Integer] size_extrafield_local
+  # @param [FFI::Pointer(*Void)] extrafield_global
+  # @param [Integer] size_extrafield_global
+  # @param [String] comment
+  # @param [Integer] method
+  # @param [Integer] level
+  # @param [Integer] raw
+  # @param [Integer] window_bits
+  # @param [Integer] mem_level
+  # @param [Integer] strategy
+  # @param [String] password
+  # @param [Integer] crc_for_crypting
+  # @param [Integer] version_made_by
+  # @param [Integer] flag_base
+  # @return [Integer]
   # @scope class
   attach_function :zip_open_new_file_in_zip4, :zipOpenNewFileInZip4, [:pointer, :string, ZipFileinfo, :pointer, :uint, :pointer, :uint, :string, :int, :int, :int, :int, :int, :int, :string, :ulong, :ulong, :ulong], :int
-  
+
   # @method zip_open_new_file_in_zip4_64(file, filename, zipfi, extrafield_local, size_extrafield_local, extrafield_global, size_extrafield_global, comment, method, level, raw, window_bits, mem_level, strategy, password, crc_for_crypting, version_made_by, flag_base, zip64)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] filename 
-  # @param [ZipFileinfo] zipfi 
-  # @param [FFI::Pointer(*Void)] extrafield_local 
-  # @param [Integer] size_extrafield_local 
-  # @param [FFI::Pointer(*Void)] extrafield_global 
-  # @param [Integer] size_extrafield_global 
-  # @param [String] comment 
-  # @param [Integer] method 
-  # @param [Integer] level 
-  # @param [Integer] raw 
-  # @param [Integer] window_bits 
-  # @param [Integer] mem_level 
-  # @param [Integer] strategy 
-  # @param [String] password 
-  # @param [Integer] crc_for_crypting 
-  # @param [Integer] version_made_by 
-  # @param [Integer] flag_base 
-  # @param [Integer] zip64 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] filename
+  # @param [ZipFileinfo] zipfi
+  # @param [FFI::Pointer(*Void)] extrafield_local
+  # @param [Integer] size_extrafield_local
+  # @param [FFI::Pointer(*Void)] extrafield_global
+  # @param [Integer] size_extrafield_global
+  # @param [String] comment
+  # @param [Integer] method
+  # @param [Integer] level
+  # @param [Integer] raw
+  # @param [Integer] window_bits
+  # @param [Integer] mem_level
+  # @param [Integer] strategy
+  # @param [String] password
+  # @param [Integer] crc_for_crypting
+  # @param [Integer] version_made_by
+  # @param [Integer] flag_base
+  # @param [Integer] zip64
+  # @return [Integer]
   # @scope class
   attach_function :zip_open_new_file_in_zip4_64, :zipOpenNewFileInZip4_64, [:pointer, :string, ZipFileinfo, :pointer, :uint, :pointer, :uint, :string, :int, :int, :int, :int, :int, :int, :string, :ulong, :ulong, :ulong, :int], :int
-  
+
   # @method zip_write_in_file_in_zip(file, buf, len)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [FFI::Pointer(*Void)] buf 
-  # @param [Integer] len 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [FFI::Pointer(*Void)] buf
+  # @param [Integer] len
+  # @return [Integer]
   # @scope class
   attach_function :zip_write_in_file_in_zip, :zipWriteInFileInZip, [:pointer, :pointer, :uint], :int
-  
+
   # @method zip_close_file_in_zip(file)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @return [Integer]
   # @scope class
   attach_function :zip_close_file_in_zip, :zipCloseFileInZip, [:pointer], :int
-  
+
   # @method zip_close_file_in_zip_raw(file, uncompressed_size, crc32)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [Integer] uncompressed_size 
-  # @param [Integer] crc32 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [Integer] uncompressed_size
+  # @param [Integer] crc32
+  # @return [Integer]
   # @scope class
   attach_function :zip_close_file_in_zip_raw, :zipCloseFileInZipRaw, [:pointer, :ulong, :ulong], :int
-  
+
   # @method zip_close_file_in_zip_raw64(file, uncompressed_size, crc32)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [Integer] uncompressed_size 
-  # @param [Integer] crc32 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [Integer] uncompressed_size
+  # @param [Integer] crc32
+  # @return [Integer]
   # @scope class
   attach_function :zip_close_file_in_zip_raw64, :zipCloseFileInZipRaw64, [:pointer, :ulong_long, :ulong], :int
-  
+
   # @method zip_close(file, global_comment)
-  # @param [FFI::Pointer(ZipFile)] file 
-  # @param [String] global_comment 
-  # @return [Integer] 
+  # @param [FFI::Pointer(ZipFile)] file
+  # @param [String] global_comment
+  # @return [Integer]
   # @scope class
   attach_function :zip_close, :zipClose, [:pointer, :string], :int
-  
+
   # @method zip_remove_extra_info_block(p_data, data_len, s_header)
-  # @param [String] p_data 
-  # @param [FFI::Pointer(*Int)] data_len 
-  # @param [Integer] s_header 
-  # @return [Integer] 
+  # @param [String] p_data
+  # @param [FFI::Pointer(*Int)] data_len
+  # @param [Integer] s_header
+  # @return [Integer]
   # @scope class
   attach_function :zip_remove_extra_info_block, :zipRemoveExtraInfoBlock, [:string, :pointer, :short], :int
-  
+
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   module ThemeWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.theme_free(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def xml_declaration()
       Libxlsxwriter.theme_xml_declaration(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.theme_assemble_xml_file(self)
     end
   end
-  
+
   class Theme < FFI::Struct
     include ThemeWrappers
     layout :file, :pointer
   end
-  
+
   # @method theme_new()
-  # @return [Theme] 
+  # @return [Theme]
   # @scope class
   attach_function :theme_new, :lxw_theme_new, [], Theme
-  
+
   # @method theme_free(theme)
-  # @param [Theme] theme 
-  # @return [nil] 
+  # @param [Theme] theme
+  # @return [nil]
   # @scope class
   attach_function :theme_free, :lxw_theme_free, [Theme], :void
-  
+
   # @method theme_xml_declaration(self_)
-  # @param [Theme] self_ 
-  # @return [nil] 
+  # @param [Theme] self_
+  # @return [nil]
   # @scope class
   attach_function :theme_xml_declaration, :lxw_theme_xml_declaration, [Theme], :void
-  
+
   # @method theme_assemble_xml_file(self_)
-  # @param [Theme] self_ 
-  # @return [nil] 
+  # @param [Theme] self_
+  # @return [nil]
   # @scope class
   attach_function :theme_assemble_xml_file, :lxw_theme_assemble_xml_file, [Theme], :void
-  
+
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :font_count ::
-  #   (Integer) 
+  #   (Integer)
   # :xf_count ::
-  #   (Integer) 
+  #   (Integer)
   # :dxf_count ::
-  #   (Integer) 
+  #   (Integer)
   # :num_format_count ::
-  #   (Integer) 
+  #   (Integer)
   # :border_count ::
-  #   (Integer) 
+  #   (Integer)
   # :fill_count ::
-  #   (Integer) 
+  #   (Integer)
   # :xf_formats ::
-  #   (Formats) 
+  #   (Formats)
   # :dxf_formats ::
-  #   (Formats) 
+  #   (Formats)
   module StylesWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.styles_free(self)
     end
-    
-    # @return [nil] 
+
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.styles_assemble_xml_file(self)
     end
   end
-  
+
   class Styles < FFI::Struct
     include StylesWrappers
     layout :file, :pointer,
@@ -2455,158 +2458,158 @@ module Libxlsxwriter
            :xf_formats, Formats,
            :dxf_formats, Formats
   end
-  
+
   # @method styles_new()
-  # @return [Styles] 
+  # @return [Styles]
   # @scope class
   attach_function :styles_new, :lxw_styles_new, [], Styles
-  
+
   # @method styles_free(styles)
-  # @param [Styles] styles 
-  # @return [nil] 
+  # @param [Styles] styles
+  # @return [nil]
   # @scope class
   attach_function :styles_free, :lxw_styles_free, [Styles], :void
-  
+
   # @method styles_assemble_xml_file(self_)
-  # @param [Styles] self_ 
-  # @return [nil] 
+  # @param [Styles] self_
+  # @return [nil]
   # @scope class
   attach_function :styles_assemble_xml_file, :lxw_styles_assemble_xml_file, [Styles], :void
-  
+
   # = Fields:
   # :stqh_first ::
-  #   (FFI::Pointer(*RelTuple)) 
+  #   (FFI::Pointer(*RelTuple))
   # :stqh_last ::
-  #   (FFI::Pointer(**RelTuple)) 
+  #   (FFI::Pointer(**RelTuple))
   class RelTuples < FFI::Struct
     layout :stqh_first, :pointer,
            :stqh_last, :pointer
   end
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*RelTuple)) 
+  #   (FFI::Pointer(*RelTuple))
   class RelTupleListPointers < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :type ::
-  #   (String) 
+  #   (String)
   # :target ::
-  #   (String) 
+  #   (String)
   # :target_mode ::
-  #   (String) 
+  #   (String)
   # :list_pointers ::
-  #   (RelTupleListPointers) 
+  #   (RelTupleListPointers)
   class RelTuple < FFI::Struct
     layout :type, :string,
            :target, :string,
            :target_mode, :string,
            :list_pointers, RelTupleListPointers.by_value
   end
-  
+
   # Struct to represent a relationships.
-  # 
+  #
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :rel_id ::
-  #   (Integer) 
+  #   (Integer)
   # :relationships ::
-  #   (RelTuples) 
+  #   (RelTuples)
   module RelationshipsWrappers
-    # @return [nil] 
+    # @return [nil]
     def assemble_xml_file()
       Libxlsxwriter.relationships_assemble_xml_file(self)
     end
   end
-  
+
   class Relationships < FFI::Struct
     include RelationshipsWrappers
     layout :file, :pointer,
            :rel_id, :uint,
            :relationships, RelTuples
   end
-  
+
   # *INDENT-ON*
-  # 
+  #
   # @method relationships_new()
-  # @return [Relationships] 
+  # @return [Relationships]
   # @scope class
   attach_function :relationships_new, :lxw_relationships_new, [], Relationships
-  
+
   # @method free_relationships(relationships)
-  # @param [Relationships] relationships 
-  # @return [nil] 
+  # @param [Relationships] relationships
+  # @return [nil]
   # @scope class
   attach_function :free_relationships, :lxw_free_relationships, [Relationships], :void
-  
+
   # @method relationships_assemble_xml_file(self_)
-  # @param [Relationships] self_ 
-  # @return [nil] 
+  # @param [Relationships] self_
+  # @return [nil]
   # @scope class
   attach_function :relationships_assemble_xml_file, :lxw_relationships_assemble_xml_file, [Relationships], :void
-  
+
   # @method add_document_relationship(self_, type, target)
-  # @param [Relationships] self_ 
-  # @param [String] type 
-  # @param [String] target 
-  # @return [nil] 
+  # @param [Relationships] self_
+  # @param [String] type
+  # @param [String] target
+  # @return [nil]
   # @scope class
   attach_function :add_document_relationship, :lxw_add_document_relationship, [Relationships, :string, :string], :void
-  
+
   # @method add_package_relationship(self_, type, target)
-  # @param [Relationships] self_ 
-  # @param [String] type 
-  # @param [String] target 
-  # @return [nil] 
+  # @param [Relationships] self_
+  # @param [String] type
+  # @param [String] target
+  # @return [nil]
   # @scope class
   attach_function :add_package_relationship, :lxw_add_package_relationship, [Relationships, :string, :string], :void
-  
+
   # @method add_ms_package_relationship(self_, type, target)
-  # @param [Relationships] self_ 
-  # @param [String] type 
-  # @param [String] target 
-  # @return [nil] 
+  # @param [Relationships] self_
+  # @param [String] type
+  # @param [String] target
+  # @return [nil]
   # @scope class
   attach_function :add_ms_package_relationship, :lxw_add_ms_package_relationship, [Relationships, :string, :string], :void
-  
+
   # @method add_worksheet_relationship(self_, type, target, target_mode)
-  # @param [Relationships] self_ 
-  # @param [String] type 
-  # @param [String] target 
-  # @param [String] target_mode 
-  # @return [nil] 
+  # @param [Relationships] self_
+  # @param [String] type
+  # @param [String] target
+  # @param [String] target_mode
+  # @return [nil]
   # @scope class
   attach_function :add_worksheet_relationship, :lxw_add_worksheet_relationship, [Relationships, :string, :string, :string], :void
 
   require_relative 'binding/workbook'
 
-  # 
+  #
   # = Fields:
   # :file ::
-  #   (FFI::Pointer(*FILE)) 
+  #   (FFI::Pointer(*FILE))
   # :workbook ::
-  #   (Workbook) 
+  #   (Workbook)
   # :buffer_size ::
-  #   (Integer) 
+  #   (Integer)
   # :zipfile ::
-  #   (FFI::Pointer(ZipFile)) 
+  #   (FFI::Pointer(ZipFile))
   # :zipfile_info ::
-  #   (ZipFileinfo) 
+  #   (ZipFileinfo)
   # :filename ::
-  #   (String) 
+  #   (String)
   # :buffer ::
-  #   (String) 
+  #   (String)
   # :tmpdir ::
-  #   (String) 
+  #   (String)
   # :chart_count ::
-  #   (Integer) 
+  #   (Integer)
   # :drawing_count ::
-  #   (Integer) 
+  #   (Integer)
   module PackagerWrappers
-    # @return [nil] 
+    # @return [nil]
     def free()
       Libxlsxwriter.packager_free(self)
     end
@@ -2623,206 +2626,206 @@ module Libxlsxwriter
            :buffer, :string,
            :tmpdir, :string
   end
-  
+
   # @method packager_new(filename, tmpdir)
-  # @param [String] filename 
-  # @param [String] tmpdir 
-  # @return [Packager] 
+  # @param [String] filename
+  # @param [String] tmpdir
+  # @return [Packager]
   # @scope class
   attach_function :packager_new, :lxw_packager_new, [:string, :string, :uchar], Packager
-  
+
   # @method packager_free(packager)
-  # @param [Packager] packager 
-  # @return [nil] 
+  # @param [Packager] packager
+  # @return [nil]
   # @scope class
   attach_function :packager_free, :lxw_packager_free, [Packager], :void
-  
+
   # @method create_package(self_)
-  # @param [Packager] self_ 
-  # @return [Symbol from _enum_error_] 
+  # @param [Packager] self_
+  # @return [Symbol from _enum_error_]
   # @scope class
   attach_function :create_package, :lxw_create_package, [Packager], :error
-  
+
   # @method tmpfileplus(dir, prefix, pathname, keep)
-  # @param [String] dir 
-  # @param [String] prefix 
-  # @param [FFI::Pointer(**CharS)] pathname 
-  # @param [Integer] keep 
-  # @return [FFI::Pointer(*FILE)] 
+  # @param [String] dir
+  # @param [String] prefix
+  # @param [FFI::Pointer(**CharS)] pathname
+  # @param [Integer] keep
+  # @return [FFI::Pointer(*FILE)]
   # @scope class
   attach_function :tmpfileplus, :tmpfileplus, [:string, :string, :pointer, :int], :pointer
-  
+
   # @method tmpfileplus_f(dir, prefix, pathnamebuf, pathsize, keep)
-  # @param [String] dir 
-  # @param [String] prefix 
-  # @param [String] pathnamebuf 
-  # @param [Integer] pathsize 
-  # @param [Integer] keep 
-  # @return [FFI::Pointer(*FILE)] 
+  # @param [String] dir
+  # @param [String] prefix
+  # @param [String] pathnamebuf
+  # @param [Integer] pathsize
+  # @param [Integer] keep
+  # @return [FFI::Pointer(*FILE)]
   # @scope class
   attach_function :tmpfileplus_f, :tmpfileplus_f, [:string, :string, :string, :ulong, :int], :pointer
-  
+
   # = Fields:
   # :stqe_next ::
-  #   (FFI::Pointer(*XmlAttribute)) 
+  #   (FFI::Pointer(*XmlAttribute))
   class XmlAttributeListEntries < FFI::Struct
     layout :stqe_next, :pointer
   end
-  
+
   # = Fields:
   # :key ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :value ::
-  #   (Array<Integer>) 
+  #   (Array<Integer>)
   # :list_entries ::
-  #   (XmlAttributeListEntries) 
+  #   (XmlAttributeListEntries)
   class XmlAttribute < FFI::Struct
     layout :key, [:char, 256],
            :value, [:char, 256],
            :list_entries, XmlAttributeListEntries.by_value
   end
-  
+
   # Use queue.h macros to define the xml_attribute_list type.
-  # 
+  #
   # = Fields:
   # :stqh_first ::
-  #   (XmlAttribute) 
+  #   (XmlAttribute)
   # :stqh_last ::
-  #   (FFI::Pointer(**XmlAttribute)) 
+  #   (FFI::Pointer(**XmlAttribute))
   class XmlAttributeList < FFI::Struct
     layout :stqh_first, XmlAttribute,
            :stqh_last, :pointer
   end
-  
+
   # Create a new attribute struct to add to a xml_attribute_list.
-  # 
+  #
   # @method new_attribute_str(key, value)
-  # @param [String] key 
-  # @param [String] value 
-  # @return [XmlAttribute] 
+  # @param [String] key
+  # @param [String] value
+  # @return [XmlAttribute]
   # @scope class
   attach_function :new_attribute_str, :lxw_new_attribute_str, [:string, :string], XmlAttribute
-  
+
   # @method new_attribute_int(key, value)
-  # @param [String] key 
-  # @param [Integer] value 
-  # @return [XmlAttribute] 
+  # @param [String] key
+  # @param [Integer] value
+  # @return [XmlAttribute]
   # @scope class
   attach_function :new_attribute_int, :lxw_new_attribute_int, [:string, :uint], XmlAttribute
-  
+
   # @method new_attribute_dbl(key, value)
-  # @param [String] key 
-  # @param [Float] value 
-  # @return [XmlAttribute] 
+  # @param [String] key
+  # @param [Float] value
+  # @return [XmlAttribute]
   # @scope class
   attach_function :new_attribute_dbl, :lxw_new_attribute_dbl, [:string, :double], XmlAttribute
-  
+
   # Create the XML declaration in an XML file.
-  # 
+  #
   # @param xmlfile A FILE pointer to the output XML file.
-  # 
+  #
   # @method xml_declaration(xmlfile)
-  # @param [FFI::Pointer(*FILE)] xmlfile 
-  # @return [nil] 
+  # @param [FFI::Pointer(*FILE)] xmlfile
+  # @return [nil]
   # @scope class
   attach_function :xml_declaration, :lxw_xml_declaration, [:pointer], :void
-  
+
   # Write an XML start tag with optional attributes.
-  # 
+  #
   # @param xmlfile    A FILE pointer to the output XML file.
   # @param tag        The XML tag to write.
   # @param attributes An optional list of attributes to add to the tag.
-  # 
+  #
   # @method xml_start_tag(xmlfile, tag, attributes)
-  # @param [FFI::Pointer(*FILE)] xmlfile 
-  # @param [String] tag 
-  # @param [XmlAttributeList] attributes 
-  # @return [nil] 
+  # @param [FFI::Pointer(*FILE)] xmlfile
+  # @param [String] tag
+  # @param [XmlAttributeList] attributes
+  # @return [nil]
   # @scope class
   attach_function :xml_start_tag, :lxw_xml_start_tag, [:pointer, :string, XmlAttributeList], :void
-  
+
   # Write an XML start tag with optional un-encoded attributes.
   # This is a minor optimization for attributes that don't need encoding.
-  # 
+  #
   # @param xmlfile    A FILE pointer to the output XML file.
   # @param tag        The XML tag to write.
   # @param attributes An optional list of attributes to add to the tag.
-  # 
+  #
   # @method xml_start_tag_unencoded(xmlfile, tag, attributes)
-  # @param [FFI::Pointer(*FILE)] xmlfile 
-  # @param [String] tag 
-  # @param [XmlAttributeList] attributes 
-  # @return [nil] 
+  # @param [FFI::Pointer(*FILE)] xmlfile
+  # @param [String] tag
+  # @param [XmlAttributeList] attributes
+  # @return [nil]
   # @scope class
   attach_function :xml_start_tag_unencoded, :lxw_xml_start_tag_unencoded, [:pointer, :string, XmlAttributeList], :void
-  
+
   # Write an XML end tag.
-  # 
+  #
   # @param xmlfile    A FILE pointer to the output XML file.
   # @param tag        The XML tag to write.
-  # 
+  #
   # @method xml_end_tag(xmlfile, tag)
-  # @param [FFI::Pointer(*FILE)] xmlfile 
-  # @param [String] tag 
-  # @return [nil] 
+  # @param [FFI::Pointer(*FILE)] xmlfile
+  # @param [String] tag
+  # @return [nil]
   # @scope class
   attach_function :xml_end_tag, :lxw_xml_end_tag, [:pointer, :string], :void
-  
+
   # Write an XML empty tag with optional attributes.
-  # 
+  #
   # @param xmlfile    A FILE pointer to the output XML file.
   # @param tag        The XML tag to write.
   # @param attributes An optional list of attributes to add to the tag.
-  # 
+  #
   # @method xml_empty_tag(xmlfile, tag, attributes)
-  # @param [FFI::Pointer(*FILE)] xmlfile 
-  # @param [String] tag 
-  # @param [XmlAttributeList] attributes 
-  # @return [nil] 
+  # @param [FFI::Pointer(*FILE)] xmlfile
+  # @param [String] tag
+  # @param [XmlAttributeList] attributes
+  # @return [nil]
   # @scope class
   attach_function :xml_empty_tag, :lxw_xml_empty_tag, [:pointer, :string, XmlAttributeList], :void
-  
+
   # Write an XML empty tag with optional un-encoded attributes.
   # This is a minor optimization for attributes that don't need encoding.
-  # 
+  #
   # @param xmlfile    A FILE pointer to the output XML file.
   # @param tag        The XML tag to write.
   # @param attributes An optional list of attributes to add to the tag.
-  # 
+  #
   # @method xml_empty_tag_unencoded(xmlfile, tag, attributes)
-  # @param [FFI::Pointer(*FILE)] xmlfile 
-  # @param [String] tag 
-  # @param [XmlAttributeList] attributes 
-  # @return [nil] 
+  # @param [FFI::Pointer(*FILE)] xmlfile
+  # @param [String] tag
+  # @param [XmlAttributeList] attributes
+  # @return [nil]
   # @scope class
   attach_function :xml_empty_tag_unencoded, :lxw_xml_empty_tag_unencoded, [:pointer, :string, XmlAttributeList], :void
-  
+
   # Write an XML element containing data and optional attributes.
-  # 
+  #
   # @param xmlfile    A FILE pointer to the output XML file.
   # @param tag        The XML tag to write.
   # @param data       The data section of the XML element.
   # @param attributes An optional list of attributes to add to the tag.
-  # 
+  #
   # @method xml_data_element(xmlfile, tag, data, attributes)
-  # @param [FFI::Pointer(*FILE)] xmlfile 
-  # @param [String] tag 
-  # @param [String] data 
-  # @param [XmlAttributeList] attributes 
-  # @return [nil] 
+  # @param [FFI::Pointer(*FILE)] xmlfile
+  # @param [String] tag
+  # @param [String] data
+  # @param [XmlAttributeList] attributes
+  # @return [nil]
   # @scope class
   attach_function :xml_data_element, :lxw_xml_data_element, [:pointer, :string, :string, XmlAttributeList], :void
-  
+
   # @method escape_control_characters(string)
-  # @param [String] string 
-  # @return [String] 
+  # @param [String] string
+  # @return [String]
   # @scope class
   attach_function :escape_control_characters, :lxw_escape_control_characters, [:string], :string
-  
+
   # @method escape_data(data)
-  # @param [String] data 
-  # @return [String] 
+  # @param [String] data
+  # @return [String]
   # @scope class
   attach_function :escape_data, :lxw_escape_data, [:string], :string
-  
+
 end

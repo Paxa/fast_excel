@@ -2,7 +2,8 @@
 #
 # Makefile for libxlsxwriter library.
 #
-# Copyright 2014-2022, John McNamara, jmcnamara@cpan.org
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
 #
 
 # Keep the output quiet by default.
@@ -143,6 +144,7 @@ TOBJS = $(patsubst %.c,%.to,$(SRCS))
 
 # Build the object files and the libraries.
 all : $(LIBXLSXWRITER_A) $(LIBXLSXWRITER_SO)
+	$(Q)mkdir -p ../lib
 	$(Q)cp $(LIBXLSXWRITER_A) $(LIBXLSXWRITER_SO) ../lib
 
 ifeq ($(UNAME), Darwin)

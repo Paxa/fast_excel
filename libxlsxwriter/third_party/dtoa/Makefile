@@ -39,4 +39,4 @@ all: emyg_dtoa.o emyg_dtoa.so
 	$(Q)$(CC) $(FPIC) -c $(CFLAGS) $< -o $@
 
 clean:
-	$(Q)rm -f *.o *.so
+	$(Q)/bin/rm -f *.o *.so

@@ -2,7 +2,8 @@
 #
 # Makefile for libxlsxwriter library.
 #
-# Copyright 2014-2022, John McNamara, jmcnamara@cpan.org
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
 #
 
 # Keep the output quiet by default.
@@ -19,6 +20,14 @@ PYTESTFILES ?= test
 
 VERSION   = $(shell sed -n -e 's/.*LXW_VERSION \"\(.*\)\"/\1/p'   include/xlsxwriter.h)
 SOVERSION = $(shell sed -n -e 's/.*LXW_SOVERSION \"\(.*\)\"/\1/p' include/xlsxwriter.h)
+
+ENABLED_OPTIONS = zlib
+ifdef USE_SYSTEM_MINIZIP
+    ENABLED_OPTIONS += minizip
+endif
+ifdef USE_OPENSSL_MD5
+	ENABLED_OPTIONS += libcrypto
+endif
 
 .PHONY: docs tags examples third_party
 
@@ -117,7 +126,10 @@ test_cpp : all
 test_cmake :
 ifneq ($(findstring m32,$(CFLAGS)),m32)
 	$(Q)$(MAKE) -C src clean
-	$(Q)cd cmake; cmake .. -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON; make clean; make; cp libxlsxwriter.a ../src/
+	$(Q)mkdir -p build
+	$(Q)cd build
+	$(Q)cmake .. -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON
+	$(Q)make clean; make; cp libxlsxwriter.a ../src/
 	$(Q)cmake/xlsxwriter_unit
 	$(Q)$(MAKE) -C test/functional/src
 	$(Q)$(PYTEST) test/functional -v -k $(PYTESTFILES)
@@ -139,6 +151,7 @@ test_compile :
 # Indent the source files with the .indent.pro settings.
 indent:
 	$(Q)gindent src/*.c include/*.h include/xlsxwriter/*.h
+	$(Q)gersemi --no-warn-about-unknown-commands -i CMakeLists.txt
 
 tags:
 	$(Q)rm -f TAGS
@@ -163,7 +176,11 @@ install: all
 	$(Q)mkdir -p        $(DESTDIR)$(PREFIX)/lib
 	$(Q)cp -R lib/*     $(DESTDIR)$(PREFIX)/lib
 	$(Q)mkdir -p        $(DESTDIR)$(PREFIX)/lib/pkgconfig
-	$(Q)sed -e          's|@PREFIX@|$(PREFIX)|g'  -e 's|@VERSION@|$(VERSION)|g' dev/release/pkg-config.txt > $(DESTDIR)$(PREFIX)/lib/pkgconfig/xlsxwriter.pc
+	$(Q)sed             -e 's|@PREFIX@|$(PREFIX)|g'                   \
+	                    -e 's|@VERSION@|$(VERSION)|g'                 \
+	                    -e 's|@ENABLED_OPTIONS@|$(ENABLED_OPTIONS)|g' \
+	                        dev/release/pkg-config.txt                \
+	                        > $(DESTDIR)$(PREFIX)/lib/pkgconfig/xlsxwriter.pc
 
 # Simpler uninstall.
 uninstall:
@@ -183,6 +200,11 @@ coverity: clean_src third_party
 	$(Q)tar -czf libxlsxwriter-coverity.tgz cov-int
 	$(Q)$(MAKE) -C src clean
 	$(Q)rm -f  lib/*
+
+# Run address sanitiser.
+address_sanitiser: third_party
+	$(Q)$(MAKE) -C src libxlsxwriter.a CFLAGS="-fsanitize=address -O1 -fsanitize-coverage=trace-pc-guard -fno-omit-frame-pointer -g"
+	$(Q)$(MAKE) -C examples            CFLAGS="-fsanitize=address -O1 -fsanitize-coverage=trace-pc-guard -fno-omit-frame-pointer -g"
 
 # Run gcov coverage analysis.
 gcov: third_party

@@ -36,19 +36,52 @@ ifndef ($(sitearchdir))
 	sitearchdir = './lib'
 endif
 
-all :
-	# @echo "Compiling ext/text_width ..."
-	# rake compile
+# Custom extensions
+CUSTOM_EXT_DIR = ext/fast_excel_ext
+CUSTOM_OBJS = $(CUSTOM_EXT_DIR)/custom_workbook.o
+CUSTOM_LIB_STATIC = $(CUSTOM_EXT_DIR)/libfast_excel_ext.a
+
+ifeq ($(UNAME), Darwin)
+CUSTOM_LIB = $(CUSTOM_EXT_DIR)/libfast_excel_ext.dylib
+LDFLAGS = -dynamiclib ./libxlsxwriter/lib/libxlsxwriter.a
+else ifdef MING_LIKE
+CUSTOM_LIB = $(CUSTOM_EXT_DIR)/libfast_excel_ext.dll
+LDFLAGS = -shared ./libxlsxwriter/lib/libxlsxwriter.a
+else
+CUSTOM_LIB = $(CUSTOM_EXT_DIR)/libfast_excel_ext.so
+LDFLAGS = -shared ./libxlsxwriter/lib/libxlsxwriter.a
+endif
+
+CFLAGS = -I./libxlsxwriter/include -fPIC -O2
+
+all : libxlsxwriter custom_ext
+
+.PHONY: libxlsxwriter
+
+libxlsxwriter :
 	@echo "Compiling libxlsxwriter ..."
 ifdef USE_CMAKE
 	@echo "run cmake libxlsxwriter ..."
 	cmake libxlsxwriter
 else
-	$(Q)$(MAKE) -C libxlsxwriter
+	$(Q)LDFLAGS= $(MAKE) -C libxlsxwriter
 endif
+
+custom_ext : $(CUSTOM_LIB)
+	@echo "Custom extensions built successfully"
+
+$(CUSTOM_EXT_DIR)/%.o : $(CUSTOM_EXT_DIR)/%.c
+	@echo "Compiling $< ..."
+	$(Q)$(CC) $(CFLAGS) -c $< -o $@
+
+$(CUSTOM_LIB) : $(CUSTOM_OBJS) ./libxlsxwriter/lib/libxlsxwriter.a
+	@echo "Creating custom extensions shared library ..."
+	$(Q)$(CC) $(LDFLAGS) -o $@ $(CUSTOM_OBJS)
 
 clean :
 	$(Q)$(MAKE) clean -C libxlsxwriter
+	$(Q)rm -f $(CUSTOM_OBJS) $(CUSTOM_LIB) $(CUSTOM_LIB_STATIC)
 
 install :
 	$(Q)cp libxlsxwriter/lib/$(LIBXLSXWRITER_SO) $(sitearchdir)
+	$(Q)cp $(CUSTOM_LIB) $(sitearchdir)

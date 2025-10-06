@@ -1,7 +1,8 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
  */
 
 /**
@@ -720,6 +721,7 @@ enum cell_types {
     DYNAMIC_ARRAY_FORMULA_CELL,
     BLANK_CELL,
     BOOLEAN_CELL,
+    ERROR_CELL,
     COMMENT,
     HYPERLINK_URL,
     HYPERLINK_INTERNAL,
@@ -817,6 +819,7 @@ STAILQ_HEAD(lxw_selections, lxw_selection);
 STAILQ_HEAD(lxw_data_validations, lxw_data_val_obj);
 STAILQ_HEAD(lxw_cond_format_list, lxw_cond_format_obj);
 STAILQ_HEAD(lxw_image_props, lxw_object_properties);
+STAILQ_HEAD(lxw_embedded_image_props, lxw_object_properties);
 STAILQ_HEAD(lxw_chart_props, lxw_object_properties);
 STAILQ_HEAD(lxw_comment_objs, lxw_vml_obj);
 STAILQ_HEAD(lxw_table_objs, lxw_table_obj);
@@ -982,7 +985,7 @@ typedef struct lxw_data_validation {
     const char *value_formula;
 
     /**
-     * This parameter is used to set a list of strings for a drop down list.
+     * This parameter is used to set a list of strings for a dropdown list.
      * The list should be a `NULL` terminated array of char* strings:
      *
      * @code
@@ -1695,8 +1698,8 @@ typedef struct lxw_filter_rule_obj {
 /**
  * @brief Options for inserted images.
  *
- * Options for modifying images inserted via `worksheet_insert_image_opt()`.
- *
+ * Options for modifying images inserted via `worksheet_insert_image_opt()` and
+ * `worksheet_embed_image_opt()`.
  */
 typedef struct lxw_image_options {
 
@@ -1734,6 +1737,10 @@ typedef struct lxw_image_options {
 
     /** Add an optional mouseover tip for a hyperlink to the image. */
     const char *tip;
+
+    /** Add an optional format to the cell. Only used with
+     * `worksheet_embed_image_opt()` */
+    lxw_format *cell_format;
 
 } lxw_image_options;
 
@@ -1806,6 +1813,7 @@ typedef struct lxw_object_properties {
     char *md5;
     char *image_position;
     uint8_t decorative;
+    lxw_format *format;
 
     STAILQ_ENTRY (lxw_object_properties) list_pointers;
 } lxw_object_properties;
@@ -2119,6 +2127,7 @@ typedef struct lxw_worksheet {
     struct lxw_data_validations *data_validations;
     struct lxw_cond_format_hash *conditional_formats;
     struct lxw_image_props *image_props;
+    struct lxw_image_props *embedded_image_props;
     struct lxw_chart_props *chart_data;
     struct lxw_drawing_rel_ids *drawing_rel_ids;
     struct lxw_vml_drawing_rel_ids *vml_drawing_rel_ids;
@@ -2192,7 +2201,7 @@ typedef struct lxw_worksheet {
     uint8_t zoom_scale_normal;
     uint8_t black_white;
     uint8_t num_validations;
-    uint8_t has_dynamic_arrays;
+    uint8_t has_dynamic_functions;
     char *vba_codename;
     uint16_t num_buttons;
 
@@ -2251,6 +2260,7 @@ typedef struct lxw_worksheet {
     uint8_t has_header_vml;
     uint8_t has_background_image;
     uint8_t has_buttons;
+    uint8_t storing_embedded_image;
     lxw_rel_tuple *external_vml_comment_link;
     lxw_rel_tuple *external_comment_link;
     lxw_rel_tuple *external_vml_header_link;
@@ -2274,6 +2284,8 @@ typedef struct lxw_worksheet {
     char *ignore_list_data_validation;
     char *ignore_calculated_column;
     char *ignore_two_digit_text_year;
+
+    uint8_t use_1904_epoch;
 
     uint16_t excel_version;
 
@@ -2308,6 +2320,7 @@ typedef struct lxw_worksheet_init_data {
     const char *tmpdir;
     lxw_format *default_url_format;
     uint16_t max_url_length;
+    uint8_t use_1904_epoch;
 
 } lxw_worksheet_init_data;
 
@@ -3621,9 +3634,18 @@ lxw_error worksheet_set_column_pixels_opt(lxw_worksheet *worksheet,
  * **Note**:
  * The scaling of a image may be affected if is crosses a row that has its
  * default height changed due to a font that is larger than the default font
- * size or that has text wrapping turned on. To avoid this you should
- * explicitly set the height of the row using `worksheet_set_row()` if it
- * crosses an inserted image. See @ref working_with_object_positioning.
+ * size or that has text wrapping turned on. To avoid this you should explicitly
+ * set the height of the row using `worksheet_set_row()` if it crosses an
+ * inserted image. See @ref working_with_object_positioning.
+ *
+ * **NOTE on SVG files**:
+ * Excel doesn't directly support SVG files in the same way as other image file
+ * formats. It allows SVG to be inserted into a worksheet but converts them to,
+ * and displays them as, PNG files. It stores the original SVG image in the file
+ * so the original format can be retrieved. This removes the file size and
+ * resolution advantage of using SVG files. As such SVG files are not supported
+ * by `libxlsxwriter` since a conversion to the PNG format would be required
+ * and that format is already supported.
  *
  * BMP images are only supported for backward compatibility. In general it is
  * best to avoid BMP images since they aren't compressed. If used, BMP images
@@ -3746,7 +3768,7 @@ lxw_error worksheet_insert_image_buffer(lxw_worksheet *worksheet,
  *
  * The `%worksheet_insert_image_buffer_opt()` function is like
  * `worksheet_insert_image_buffer()` function except that it takes an optional
- * #lxw_image_options struct  * #lxw_image_options struct with the following members/options:
+ * #lxw_image_options struct with the following members/options:
  *
  * - `x_offset`: Offset from the left of the cell in pixels.
  * - `y_offset`: Offset from the top of the cell in pixels.
@@ -3781,6 +3803,126 @@ lxw_error worksheet_insert_image_buffer_opt(lxw_worksheet *worksheet,
                                             const unsigned char *image_buffer,
                                             size_t image_size,
                                             lxw_image_options *options);
+
+/**
+ * @brief Embed an image in a worksheet cell.
+ *
+ * @param worksheet Pointer to a lxw_worksheet instance to be updated.
+ * @param row       The zero indexed row number.
+ * @param col       The zero indexed column number.
+ * @param filename  The image filename, with path if required.
+ *
+ * @return A #lxw_error code.
+ *
+ * This function can be used to embed a image into a worksheet cell and have the
+ * image automatically scale to the width and height of the cell. The X/Y
+ * scaling of the image is preserved but the size of the image is adjusted to
+ * fit the largest possible width or height depending on the cell dimensions.
+ *
+ * This is the equivalent of Excel's menu option to insert an image using the
+ * option to "Place in Cell" which is only available in Excel 365 versions from
+ * 2023 onwards. For older versions of Excel a `#VALUE!` error is displayed.
+ *
+ * @dontinclude embed_images.c
+ * @skip Change
+ * @until B6
+ *
+ * @image html embed_image.png
+ *
+ * The `worksheet_embed_image_opt()` function takes additional optional
+ * parameters to add urls or format the cell background, see below.
+ *
+ */
+lxw_error worksheet_embed_image(lxw_worksheet *worksheet,
+                                lxw_row_t row, lxw_col_t col,
+                                const char *filename);
+
+/**
+ * @brief Embed an image in a worksheet cell, with options.
+ *
+ * @param worksheet Pointer to a lxw_worksheet instance to be updated.
+ * @param row       The zero indexed row number.
+ * @param col       The zero indexed column number.
+ * @param filename  The image filename, with path if required.
+ * @param options   Optional image parameters.
+ *
+ * @return A #lxw_error code.
+ *
+ * The `%worksheet_embed_image_opt()` function is like
+ * `worksheet_embed_image()` function except that it takes an optional
+ * #lxw_image_options struct with the following members/options:
+ *
+ * - `description`: Optional description or "Alt text" for the image.
+ * - `decorative`: Optional parameter to mark image as decorative.
+ * - `url`: Add an optional hyperlink to the image.
+ * - `cell_format`: Add a format for the cell behind the embedded image.
+ *
+ */
+lxw_error worksheet_embed_image_opt(lxw_worksheet *worksheet,
+                                    lxw_row_t row, lxw_col_t col,
+                                    const char *filename,
+                                    lxw_image_options *options);
+
+/**
+ * @brief Embed an image in a worksheet cell, from a memory buffer.
+ *
+ * @param worksheet    Pointer to a lxw_worksheet instance to be updated.
+ * @param row          The zero indexed row number.
+ * @param col          The zero indexed column number.
+ * @param image_buffer Pointer to an array of bytes that holds the image data.
+ * @param image_size   The size of the array of bytes.
+ *
+ * @return A #lxw_error code.
+ *
+ * This function can be used to embed a image into a worksheet from a memory
+ * buffer:
+ *
+ * @dontinclude embed_image_buffer.c
+ * @skip Embed
+ * @until B3
+ *
+ * @image html embed_image_buffer.png
+ *
+ * The buffer should be a pointer to an array of unsigned char data with a
+ * specified size.
+ *
+ * See `worksheet_embed_image()` for details about the supported image
+ * formats, and other image features.
+ */
+lxw_error worksheet_embed_image_buffer(lxw_worksheet *worksheet,
+                                       lxw_row_t row,
+                                       lxw_col_t col,
+                                       const unsigned char *image_buffer,
+                                       size_t image_size);
+
+/**
+ * @brief Embed an image in a worksheet cell, from a memory buffer.
+ *
+ * @param worksheet    Pointer to a lxw_worksheet instance to be updated.
+ * @param row          The zero indexed row number.
+ * @param col          The zero indexed column number.
+ * @param image_buffer Pointer to an array of bytes that holds the image data.
+ * @param image_size   The size of the array of bytes.
+ * @param options      Optional image parameters.
+ *
+ * @return A #lxw_error code.
+ *
+ * The `%worksheet_embed_image_buffer_opt()` function is like
+ * `worksheet_embed_image_buffer()` function except that it takes an optional
+ * #lxw_image_options struct with the following members/options:
+ *
+ * - `description`: Optional description or "Alt text" for the image.
+ * - `decorative`: Optional parameter to mark image as decorative.
+ * - `url`: Add an optional hyperlink to the image.
+ * - `cell_format`: Add a format for the cell behind the embedded image.
+ *
+ */
+lxw_error worksheet_embed_image_buffer_opt(lxw_worksheet *worksheet,
+                                           lxw_row_t row,
+                                           lxw_col_t col,
+                                           const unsigned char *image_buffer,
+                                           size_t image_size,
+                                           lxw_image_options *options);
 
 /**
  * @brief Set the background image for a worksheet.
@@ -3995,7 +4137,7 @@ lxw_error worksheet_merge_range(lxw_worksheet *worksheet, lxw_row_t first_row,
  * The `%worksheet_autofilter()` function allows an autofilter to be added to
  * a worksheet.
  *
- * An autofilter is a way of adding drop down lists to the headers of a 2D
+ * An autofilter is a way of adding dropdown lists to the headers of a 2D
  * range of worksheet data. This allows users to filter the data based on
  * simple criteria so that some data is shown and some is hidden.
  *
@@ -4578,9 +4720,9 @@ void worksheet_split_panes_opt(lxw_worksheet *worksheet,
  * @endcode
  *
  */
-void worksheet_set_selection(lxw_worksheet *worksheet,
-                             lxw_row_t first_row, lxw_col_t first_col,
-                             lxw_row_t last_row, lxw_col_t last_col);
+lxw_error worksheet_set_selection(lxw_worksheet *worksheet,
+                                  lxw_row_t first_row, lxw_col_t first_col,
+                                  lxw_row_t last_row, lxw_col_t last_col);
 
 /**
  * @brief Set the first visible cell at the top left of a worksheet.
@@ -5810,6 +5952,10 @@ void lxw_worksheet_write_sheet_protection(lxw_worksheet *worksheet,
 void lxw_worksheet_write_sheet_pr(lxw_worksheet *worksheet);
 void lxw_worksheet_write_page_setup(lxw_worksheet *worksheet);
 void lxw_worksheet_write_header_footer(lxw_worksheet *worksheet);
+
+void worksheet_set_error_cell(lxw_worksheet *worksheet,
+                              lxw_object_properties *object_props,
+                              uint32_t ref_id);
 
 /* Declarations required for unit testing. */
 #ifdef TESTING

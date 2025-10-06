@@ -1,7 +1,8 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2025, John McNamara, jmcnamara@cpan.org.
  *
  * content_types - A libxlsxwriter library for creating Excel XLSX
  *                 content_types files.
@@ -63,6 +64,7 @@ void lxw_ct_add_shared_strings(lxw_content_types *content_types);
 void lxw_ct_add_calc_chain(lxw_content_types *content_types);
 void lxw_ct_add_custom_properties(lxw_content_types *content_types);
 void lxw_ct_add_metadata(lxw_content_types *content_types);
+void lxw_ct_add_rich_value(lxw_content_types *content_types);
 
 /* Declarations required for unit testing. */
 #ifdef TESTING
