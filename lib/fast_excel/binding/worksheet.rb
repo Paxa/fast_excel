@@ -210,6 +210,10 @@ module Libxlsxwriter
       Libxlsxwriter.worksheet_write_string(self, row, col, string, format)
     end
 
+    def write_rich_string(row, col, rich_string, format)
+      Libxlsxwriter.worksheet_write_rich_string(self, row, col, rich_string, format)
+    end
+
     def write_comment(row, col, string)
       Libxlsxwriter.worksheet_write_comment(self, row, col, string)
     end
@@ -1010,6 +1014,11 @@ module Libxlsxwriter
            :tree_pointers, CellTreePointers.by_value
   end
 
+  class RichStringTuple < FFI::Struct
+    layout :format, :pointer,
+           :string, :pointer
+  end
+
   # @method worksheet_write_number(worksheet, row, col, number, format)
   # @param [Worksheet] worksheet 
   # @param [Integer] row 
@@ -1029,6 +1038,8 @@ module Libxlsxwriter
   # @return [Symbol from _enum_error_] 
   # @scope class
   attach_function :worksheet_write_string, :worksheet_write_string, [Worksheet, :uint32, :ushort, :string, Format], :error
+
+  attach_function :worksheet_write_rich_string, :worksheet_write_rich_string, [Worksheet, :uint32, :ushort, :pointer, Format], :error
 
   attach_function :worksheet_write_comment, :worksheet_write_comment, [Worksheet, :uint32, :ushort, :string], :error
 

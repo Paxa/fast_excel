@@ -84,6 +84,19 @@ describe "FastExcel::WorksheetExt append_row" do
     assert_equal([[0.1234]], get_arrays(@workbook))
   end
 
+  it "should write rich strings" do
+    bold = @workbook.add_format(bold: true)
+    rich_string = FastExcel::RichString.new([
+      { text: "plain " },
+      { text: "bold", format: bold }
+    ])
+
+    @worksheet.write_value(0, 0, rich_string)
+
+    assert_equal(0, @worksheet.last_row_number)
+    assert_equal([["<html>plain <b>bold</b></html>"]], get_arrays(@workbook))
+  end
+
   it "should set name correctly" do
     workbook = FastExcel.open(constant_memory: true)
     ws1 = workbook.add_worksheet("foo")

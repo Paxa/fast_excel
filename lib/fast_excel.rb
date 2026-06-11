@@ -20,6 +20,19 @@ module FastExcel
     end
   end
 
+  class RichString
+    attr_reader :fragments
+
+    def initialize(fragments)
+      @fragments = fragments.map do |fragment|
+        {
+          text: fragment.fetch(:text).to_s,
+          format: fragment[:format],
+        }
+      end
+    end
+  end
+
   DEF_COL_WIDTH = 8.43
 
   def self.open(filename = nil, constant_memory: false, default_format: nil)
@@ -475,6 +488,11 @@ module FastExcel
       elsif value.is_a?(FastExcel::URL)
         write_url(row_number, cell_number, value.url, format)
         add_text_width(value.url, format, cell_number) if auto_width?
+      elsif value.is_a?(FastExcel::RichString)
+        with_rich_string_pointer(value) do |rich_string|
+          write_rich_string(row_number, cell_number, rich_string, format)
+        end
+        add_text_width(value.fragments.map { |fragment| fragment[:text] }.join, format, cell_number) if auto_width?
       else
         write_string(row_number, cell_number, value.to_s, format)
         add_text_width(value, format, cell_number) if auto_width?
@@ -517,6 +535,22 @@ module FastExcel
 
     def <<(values)
       append_row(values)
+    end
+
+    def with_rich_string_pointer(value)
+      strings = []
+      tuples = value.fragments.map do |fragment|
+        Libxlsxwriter::RichStringTuple.new.tap do |tuple|
+          strings << FFI::MemoryPointer.from_string(fragment[:text])
+          tuple[:format] = fragment[:format]&.to_ptr || FFI::Pointer::NULL
+          tuple[:string] = strings.last
+        end
+      end
+
+      FFI::MemoryPointer.new(:pointer, tuples.length + 1).tap do |pointer|
+        pointer.write_array_of_pointer(tuples.map(&:to_ptr) + [FFI::Pointer::NULL])
+        yield pointer
+      end
     end
 
     def last_row_number
