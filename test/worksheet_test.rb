@@ -97,6 +97,24 @@ describe "FastExcel::WorksheetExt append_row" do
     assert_equal([["<html>plain <b>bold</b></html>"]], get_arrays(@workbook))
   end
 
+  it "should add styled tables" do
+    @worksheet.append_row(["Code", "Status"])
+    @worksheet.append_row(["0101000000", "Active"])
+    @worksheet.add_table(0, 0, 1, 1, style: "TableStyleLight15")
+    @workbook.close
+
+    require "zip"
+
+    Zip::File.open(@workbook.filename) do |zip|
+      table_xml = zip.read("xl/tables/table1.xml")
+      table_xml = table_xml.read if table_xml.respond_to?(:read)
+
+      assert_includes(table_xml, 'ref="A1:B2"')
+      assert_includes(table_xml, 'name="TableStyleLight15"')
+      assert_includes(table_xml, 'showRowStripes="1"')
+    end
+  end
+
   it "should set name correctly" do
     workbook = FastExcel.open(constant_memory: true)
     ws1 = workbook.add_worksheet("foo")

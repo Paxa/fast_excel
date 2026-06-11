@@ -1,4 +1,54 @@
 module Libxlsxwriter
+  class TableOptions < FFI::Struct
+    STYLE_TYPES = {
+      default: 0,
+      light: 1,
+      medium: 2,
+      dark: 3,
+    }.freeze
+
+    layout :name, :string,
+           :no_header_row, :uchar,
+           :no_autofilter, :uchar,
+           :no_banded_rows, :uchar,
+           :banded_columns, :uchar,
+           :first_column, :uchar,
+           :last_column, :uchar,
+           :style_type, :uchar,
+           :style_type_number, :uchar,
+           :total_row, :uchar,
+           :columns, :pointer
+
+    def self.build(options)
+      new.tap do |table_options|
+        table_options[:name] = options[:name] if options[:name]
+        table_options[:no_header_row] = boolean(options[:no_header_row])
+        table_options[:no_autofilter] = boolean(options[:no_autofilter])
+        table_options[:no_banded_rows] = boolean(options[:no_banded_rows])
+        table_options[:banded_columns] = boolean(options[:banded_columns])
+        table_options[:first_column] = boolean(options[:first_column])
+        table_options[:last_column] = boolean(options[:last_column])
+        table_options[:total_row] = boolean(options[:total_row])
+
+        style_type, style_number = style(options[:style])
+        table_options[:style_type] = style_type
+        table_options[:style_type_number] = style_number
+        table_options[:columns] = FFI::Pointer::NULL
+      end
+    end
+
+    def self.boolean(value)
+      value ? 1 : 0
+    end
+
+    def self.style(value)
+      match = value.to_s.match(/\ATableStyle(Light|Medium|Dark)(\d+)\z/)
+      return [STYLE_TYPES.fetch(:default), 0] unless match
+
+      [STYLE_TYPES.fetch(match[1].downcase.to_sym), match[2].to_i]
+    end
+  end
+
   # = Fields:
   # :stqe_next ::
   #   (FFI::Pointer(*Worksheet)) 
@@ -394,6 +444,11 @@ module Libxlsxwriter
     # @return [Symbol from _enum_error_] 
     def autofilter(first_row, first_col, last_row, last_col)
       Libxlsxwriter.worksheet_autofilter(self, first_row, first_col, last_row, last_col)
+    end
+
+    def add_table(first_row, first_col, last_row, last_col, options = {})
+      table_options = TableOptions.build(options)
+      Libxlsxwriter.worksheet_add_table(self, first_row, first_col, last_row, last_col, table_options.to_ptr)
     end
   
     # @return [nil] 
