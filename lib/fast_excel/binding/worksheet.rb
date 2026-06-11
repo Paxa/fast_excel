@@ -17,7 +17,7 @@ module Libxlsxwriter
       dark: 3,
     }.freeze
 
-    layout :name, :string,
+    layout :name, :pointer,
            :no_header_row, :uchar,
            :no_autofilter, :uchar,
            :no_banded_rows, :uchar,
@@ -31,7 +31,10 @@ module Libxlsxwriter
 
     def self.build(options, columns_pointer = FFI::Pointer::NULL)
       new.tap do |table_options|
-        table_options[:name] = options[:name] if options[:name]
+        if options[:name]
+          table_options.instance_variable_set(:@name, FFI::MemoryPointer.from_string(options[:name].to_s))
+          table_options[:name] = table_options.instance_variable_get(:@name)
+        end
         table_options[:no_header_row] = boolean(options[:no_header_row])
         table_options[:no_autofilter] = boolean(options[:no_autofilter])
         table_options[:no_banded_rows] = boolean(options[:no_banded_rows])

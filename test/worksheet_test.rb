@@ -101,7 +101,7 @@ describe "FastExcel::WorksheetExt append_row" do
   it "should add styled tables" do
     @worksheet.append_row(["Code", "Status"])
     @worksheet.append_row(["0101000000", "Active"])
-    @worksheet.add_table(0, 0, 1, 1, style: "TableStyleLight15", columns: ["Code", "Status"])
+    @worksheet.add_table(0, 0, 1, 1, name: "Commodity_watch_list", style: "TableStyleLight15", columns: ["Code", "Status"])
     @workbook.close
 
     Zip::File.open(@workbook.filename) do |zip|
@@ -109,6 +109,8 @@ describe "FastExcel::WorksheetExt append_row" do
       table_xml = table_xml.read if table_xml.respond_to?(:read)
 
       assert_includes(table_xml, 'ref="A1:B2"')
+      assert_includes(table_xml, 'name="Commodity_watch_list"')
+      assert_includes(table_xml, 'displayName="Commodity_watch_list"')
       assert_includes(table_xml, 'name="Code"')
       assert_includes(table_xml, 'name="Status"')
       assert_includes(table_xml, 'name="TableStyleLight15"')
