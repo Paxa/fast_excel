@@ -1,4 +1,14 @@
 module Libxlsxwriter
+  class TableColumn < FFI::Struct
+    layout :header, :pointer,
+           :formula, :pointer,
+           :total_string, :pointer,
+           :total_function, :uchar,
+           :header_format, :pointer,
+           :format, :pointer,
+           :total_value, :double
+  end
+
   class TableOptions < FFI::Struct
     STYLE_TYPES = {
       default: 0,
@@ -19,7 +29,7 @@ module Libxlsxwriter
            :total_row, :uchar,
            :columns, :pointer
 
-    def self.build(options)
+    def self.build(options, columns_pointer = FFI::Pointer::NULL)
       new.tap do |table_options|
         table_options[:name] = options[:name] if options[:name]
         table_options[:no_header_row] = boolean(options[:no_header_row])
@@ -33,7 +43,7 @@ module Libxlsxwriter
         style_type, style_number = style(options[:style])
         table_options[:style_type] = style_type
         table_options[:style_type_number] = style_number
-        table_options[:columns] = FFI::Pointer::NULL
+        table_options[:columns] = columns_pointer
       end
     end
 
@@ -447,7 +457,25 @@ module Libxlsxwriter
     end
 
     def add_table(first_row, first_col, last_row, last_col, options = {})
-      table_options = TableOptions.build(options)
+      strings = []
+      columns = Array(options[:columns]).map do |header|
+        TableColumn.new.tap do |column|
+          strings << FFI::MemoryPointer.from_string(header.to_s)
+          column[:header] = strings.last
+          column[:formula] = FFI::Pointer::NULL
+          column[:total_string] = FFI::Pointer::NULL
+          column[:header_format] = FFI::Pointer::NULL
+          column[:format] = FFI::Pointer::NULL
+        end
+      end
+      columns_pointer = FFI::Pointer::NULL
+
+      unless columns.empty?
+        columns_pointer = FFI::MemoryPointer.new(:pointer, columns.length + 1)
+        columns_pointer.write_array_of_pointer(columns.map(&:to_ptr) + [FFI::Pointer::NULL])
+      end
+
+      table_options = TableOptions.build(options, columns_pointer)
       Libxlsxwriter.worksheet_add_table(self, first_row, first_col, last_row, last_col, table_options.to_ptr)
     end
   
