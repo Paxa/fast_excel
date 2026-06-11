@@ -1,4 +1,5 @@
 require_relative 'test_helper'
+require "zip"
 
 describe "FastExcel::WorksheetExt append_row" do
 
@@ -102,8 +103,6 @@ describe "FastExcel::WorksheetExt append_row" do
     @worksheet.append_row(["0101000000", "Active"])
     @worksheet.add_table(0, 0, 1, 1, style: "TableStyleLight15", columns: ["Code", "Status"])
     @workbook.close
-
-    require "zip"
 
     Zip::File.open(@workbook.filename) do |zip|
       table_xml = zip.read("xl/tables/table1.xml")
