@@ -54,3 +54,17 @@ describe "FastExcel.write_value" do
   end
 
 end
+
+describe "FastExcel.lxw_time" do
+  it "should make Libxlsxwriter::Datetime" do
+    time = Time.at(610421163).utc
+    lxw_time = FastExcel.lxw_time(time)
+
+    assert_equal(lxw_time[:year], 1989)
+    assert_equal(lxw_time[:month], 5)
+    assert_equal(lxw_time[:day], 6)
+    assert_equal(lxw_time[:hour], 1)
+    assert_equal(lxw_time[:min], 26)
+    assert_equal(lxw_time[:sec], 3.0)
+  end
+end

@@ -13,8 +13,12 @@ diff:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
 comment:
-  if: is_pull_request
-  deletePrevious: true
+  if: false
+body:
+  if: true
+#comment:
+#  if: is_pull_request
+#  deletePrevious: true
 report:
   if: is_default_branch
   datastores:
