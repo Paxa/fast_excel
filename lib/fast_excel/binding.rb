@@ -1198,6 +1198,24 @@ module Libxlsxwriter
            :x_offset, :int32,
            :y_offset, :int32
 
+    def initialize(*args)
+      if args.first.is_a?(Hash)
+        super()
+        @pointers = {}
+        set(args.first)
+      else
+        super(*args)
+        @pointers = {}
+      end
+    end
+
+    def set(options)
+      options.each do |k, v|
+        send("#{k}=", v) if respond_to?("#{k}=")
+      end
+      self
+    end
+
     [:visible, :width, :height, :x_scale, :y_scale, :font_size, :font_family, :start_row, :start_col, :x_offset, :y_offset].each do |prop|
       define_method(prop) do
         self[prop]
@@ -1209,11 +1227,20 @@ module Libxlsxwriter
 
     [:author, :font_name].each do |prop|
       define_method(prop) do
-        self[prop].read_string unless self[prop].null?
+        ptr = self[prop]
+        ptr.read_string unless ptr.null?
       end
 
       define_method("#{prop}=") do |value|
-        self[prop] = FFI::MemoryPointer.from_string(value)
+        @pointers ||= {}
+        if value.nil?
+          @pointers.delete(prop)
+          self[prop] = nil
+        else
+          ptr = FFI::MemoryPointer.from_string(value.to_s)
+          @pointers[prop] = ptr
+          self[prop] = ptr
+        end
       end
     end
 

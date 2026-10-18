@@ -210,16 +210,21 @@ module Libxlsxwriter
       Libxlsxwriter.worksheet_write_string(self, row, col, string, format)
     end
 
-    def write_comment(row, col, string)
-      Libxlsxwriter.worksheet_write_comment(self, row, col, string)
+    def write_comment(row, col, string, options = nil)
+      if options
+        write_comment_opt(row, col, string, options)
+      else
+        Libxlsxwriter.worksheet_write_comment(self, row, col, string)
+      end
     end
 
     # @param [Integer] row
     # @param [Integer] col
     # @param [String] string
-    # @param [CommentOptions] options
+    # @param [CommentOptions, Hash] options
     # @return [Symbol from _enum_error_]
     def write_comment_opt(row, col, string, options)
+      options = Libxlsxwriter::CommentOptions.new(options) if options.is_a?(Hash)
       Libxlsxwriter.worksheet_write_comment_opt(self, row, col, string, options)
     end
 
