@@ -1,15 +1,52 @@
 module Libxlsxwriter
+  # Data converters
+  module UTF8StringPointer
+    extend FFI::DataConverter
+    native_type FFI::Type::POINTER
+
+    class << self
+      # Given either a String or nil, make an actual FFI::Pointer
+      # of that value.
+      #
+      # @param [#to_str, nil] value
+      # @param ctx
+      # @return [FFI::Pointer]
+      def to_native(value, ctx)
+        value && FFI::MemoryPointer.from_string(value.to_str.encode(Encoding::UTF_8))
+      end
+
+      # Given a pointer, read out it’s string.
+      #
+      # @param [FFI::Pointer] value
+      # @param ctx
+      # @return [String, nil]
+      def from_native(value, ctx)
+        value.read_string.force_encoding(Encoding::UTF_8) unless value.null?
+      end
+
+      # Used by FFI::StructLayoutField to know if this field
+      # requires the reference to be maintained by FFI. If we
+      # return false here, the MemoryPointer from to_native
+      # will be garbage collected before the struct.
+      def reference_required?
+        true
+      end
+    end
+  end
+
   # = Fields:
   # :constant_memory ::
   #   (Integer) Optimize the workbook to use constant memory for worksheets
   # :tmpdir ::
   #   (String) Directory to use for the temporary files created by libxlsxwriter.
   class WorkbookOptions < FFI::Struct
-    layout :constant_memory, :uchar,
-           :tmpdir, :string,
-           :use_zip64, :uchar,
-           :output_buffer, :pointer,
-           :output_buffer_size, :pointer
+    conf = {}
+    conf[:constant_memory] = :uchar
+    conf[:tmpdir] = UTF8StringPointer
+    conf[:use_zip64] = :uchar
+    conf[:output_buffer] = :pointer
+    conf[:output_buffer_size] = :pointer
+    layout(conf)
   end
 
   # = Fields:

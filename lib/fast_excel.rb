@@ -35,6 +35,7 @@ module FastExcel
 
     opt = Libxlsxwriter::WorkbookOptions.new
     opt[:constant_memory] = constant_memory ? 1 : 0
+    opt[:tmpdir] = Dir.mktmpdir
     workbook = Libxlsxwriter.workbook_new_opt(filename, opt)
 
     result = Libxlsxwriter::Workbook.new(workbook)
