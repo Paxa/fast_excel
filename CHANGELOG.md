@@ -1,3 +1,10 @@
+#### Version 0.6.0 - 19 oct 2026
+
+* Fix segfault in `workbook#get_worksheet_by_name` when sheet does not exist (Thanks to @amberstarlight)
+* Add support for `worksheet_write_comment_opt` with styled comments and hash options (Thanks to @ololoshka12345)
+* Respect current environment's temp directory and add `tmpdir:` option to `FastExcel.open` (Thanks to @spyderdfx)
+* Add tests for `FastExcel.lxw_time`, `color_to_hex`, and pretty print improvements
+
 #### Version 0.5.0 - 02 jan 2024
 
 * Support ruby 3.3
