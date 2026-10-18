@@ -143,7 +143,8 @@ module Libxlsxwriter
     # @param [String] name 
     # @return [Worksheet] 
     def get_worksheet_by_name(name)
-      Worksheet.new Libxlsxwriter.workbook_get_worksheet_by_name(self, name)
+      ptr = Libxlsxwriter.workbook_get_worksheet_by_name(self, name)
+      ptr.null? ? nil : Worksheet.new(ptr)
     end
   
     # @param [String] sheetname 
