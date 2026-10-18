@@ -1153,6 +1153,79 @@ module Libxlsxwriter
            :collapsed, :uchar
   end
 
+  # = Fields:
+  # :visible ::
+  #   (Integer) Make the comment visible.
+  # :author ::
+  #   (String) Author of the comment.
+  # :width ::
+  #   (Integer) Width of the comment box.
+  # :height ::
+  #   (Integer) Height of the comment box.
+  # :x_scale ::
+  #   (Float) X scale of the comment.
+  # :y_scale ::
+  #   (Float) Y scale of the comment.
+  # :color ::
+  #   (Integer) Background color of the comment box.
+  # :font_name ::
+  #   (String) Font name for the comment.
+  # :font_size ::
+  #   (Float) Font size for the comment.
+  # :font_family ::
+  #   (Integer) Font family for the comment.
+  # :start_row ::
+  #   (Integer) Start row for the comment box.
+  # :start_col ::
+  #   (Integer) Start column for the comment box.
+  # :x_offset ::
+  #   (Integer) X offset for the comment box.
+  # :y_offset ::
+  #   (Integer) Y offset for the comment box.
+  class CommentOptions < FFI::Struct
+    layout :visible, :uchar,
+           :author, :pointer,
+           :width, :ushort,
+           :height, :ushort,
+           :x_scale, :double,
+           :y_scale, :double,
+           :color, :uint32,
+           :font_name, :pointer,
+           :font_size, :double,
+           :font_family, :uchar,
+           :start_row, :uint32,
+           :start_col, :ushort,
+           :x_offset, :int32,
+           :y_offset, :int32
+
+    [:visible, :width, :height, :x_scale, :y_scale, :font_size, :font_family, :start_row, :start_col, :x_offset, :y_offset].each do |prop|
+      define_method(prop) do
+        self[prop]
+      end
+      define_method("#{prop}=") do |value|
+        self[prop] = value
+      end
+    end
+
+    [:author, :font_name].each do |prop|
+      define_method(prop) do
+        self[prop].read_string unless self[prop].null?
+      end
+
+      define_method("#{prop}=") do |value|
+        self[prop] = FFI::MemoryPointer.from_string(value)
+      end
+    end
+
+    def color
+      self[:color]
+    end
+
+    def color=(value)
+      self[:color] = FastExcel.color_to_hex(value)
+    end
+  end
+
   require_relative 'binding/format'
 
   # 

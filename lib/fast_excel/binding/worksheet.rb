@@ -214,6 +214,15 @@ module Libxlsxwriter
       Libxlsxwriter.worksheet_write_comment(self, row, col, string)
     end
 
+    # @param [Integer] row
+    # @param [Integer] col
+    # @param [String] string
+    # @param [CommentOptions] options
+    # @return [Symbol from _enum_error_]
+    def write_comment_opt(row, col, string, options)
+      Libxlsxwriter.worksheet_write_comment_opt(self, row, col, string, options)
+    end
+
     # @param [Integer] row 
     # @param [Integer] col 
     # @param [String] formula 
@@ -1031,6 +1040,16 @@ module Libxlsxwriter
   attach_function :worksheet_write_string, :worksheet_write_string, [Worksheet, :uint32, :ushort, :string, Format], :error
 
   attach_function :worksheet_write_comment, :worksheet_write_comment, [Worksheet, :uint32, :ushort, :string], :error
+
+  # @method worksheet_write_comment_opt(worksheet, row, col, string, options)
+  # @param [Worksheet] worksheet
+  # @param [Integer] row
+  # @param [Integer] col
+  # @param [String] string
+  # @param [CommentOptions] options
+  # @return [Symbol from _enum_error_]
+  # @scope class
+  attach_function :worksheet_write_comment_opt, :worksheet_write_comment_opt, [Worksheet, :uint32, :ushort, :string, CommentOptions], :error
 
   # @method worksheet_write_formula(worksheet, row, col, formula, format)
   # @param [Worksheet] worksheet 
