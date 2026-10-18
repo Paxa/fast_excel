@@ -3,7 +3,8 @@
  *
  * Used in conjunction with the libxlsxwriter library.
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2026, John McNamara, jmcnamara@cpan.org.
  *
  */
 
@@ -39,6 +40,8 @@ char *error_strings[LXW_MAX_ERRNO + 1] = {
     "Feature is not currently supported in this configuration.",
     "NULL function parameter ignored.",
     "Function parameter validation error.",
+    "Function string parameter is empty.",
+    "Datetime struct parameter has an invalid field value.",
     "Worksheet name exceeds Excel's limit of 31 characters.",
     "Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'",
     "Worksheet name cannot start or end with an apostrophe.",
@@ -250,18 +253,39 @@ lxw_row_t
 lxw_name_to_row(const char *row_str)
 {
     lxw_row_t row_num = 0;
-    const char *p = row_str;
+
+    if (!row_str)
+        return row_num;
 
     /* Skip the column letters and absolute symbol of the A1 cell. */
-    while (p && !isdigit((unsigned char) *p))
-        p++;
+    while (*row_str && !isdigit((unsigned char) *row_str))
+        row_str++;
 
     /* Convert the row part of the A1 cell to a number. */
-    if (p)
-        row_num = atoi(p);
+    if (*row_str)
+        row_num = atoi(row_str);
 
     if (row_num)
-        return row_num - 1;
+        row_num--;
+
+    return row_num;
+}
+
+/*
+ * Convert the second row of an Excel range ref to a zero indexed number.
+ */
+uint32_t
+lxw_name_to_row_2(const char *row_str)
+{
+    if (!row_str)
+        return 0;
+
+    /* Find the : separator in the range. */
+    while (*row_str && *row_str != ':')
+        row_str++;
+
+    if (*row_str)
+        return lxw_name_to_row(++row_str);
     else
         return 0;
 }
@@ -273,34 +297,21 @@ lxw_col_t
 lxw_name_to_col(const char *col_str)
 {
     lxw_col_t col_num = 0;
-    const char *p = col_str;
+
+    if (!col_str)
+        return col_num;
 
     /* Convert leading column letters of A1 cell. Ignore absolute $ marker. */
-    while (p && (isupper((unsigned char) *p) || *p == '$')) {
-        if (*p != '$')
-            col_num = (col_num * 26) + (*p - 'A' + 1);
-        p++;
+    while (*col_str && (isupper((unsigned char) *col_str) || *col_str == '$')) {
+        if (*col_str != '$')
+            col_num = (col_num * 26) + (*col_str - 'A' + 1);
+        col_str++;
     }
 
-    return col_num - 1;
-}
+    if (col_num)
+        col_num--;
 
-/*
- * Convert the second row of an Excel range ref to a zero indexed number.
- */
-uint32_t
-lxw_name_to_row_2(const char *row_str)
-{
-    const char *p = row_str;
-
-    /* Find the : separator in the range. */
-    while (p && *p != ':')
-        p++;
-
-    if (p)
-        return lxw_name_to_row(++p);
-    else
-        return -1;
+    return col_num;
 }
 
 /*
@@ -309,16 +320,80 @@ lxw_name_to_row_2(const char *row_str)
 uint16_t
 lxw_name_to_col_2(const char *col_str)
 {
-    const char *p = col_str;
+    if (!col_str)
+        return 0;
 
     /* Find the : separator in the range. */
-    while (p && *p != ':')
-        p++;
+    while (*col_str && *col_str != ':')
+        col_str++;
 
-    if (p)
-        return lxw_name_to_col(++p);
+    if (*col_str)
+        return lxw_name_to_col(++col_str);
     else
-        return -1;
+        return 0;
+}
+
+lxw_error
+lxw_datetime_validate(lxw_datetime *datetime)
+{
+    if (!datetime)
+        return LXW_ERROR_DATETIME_VALIDATION;
+
+    /*
+     * Excel uses the year 1900 as the default epoch but it uses 1899-12-31 as
+     * the 0 date and internally we use the 0-0-0 date for time only values.
+     */
+    if (datetime->year < 1900 &&
+        !(datetime->year == 0 &&
+          datetime->month == 0 && datetime->day == 0) &&
+        !(datetime->year == 1899 &&
+          datetime->month == 12 && datetime->day == 31)) {
+
+        LXW_WARN_FORMAT1("lxw_datetime_validate(): invalid year: %d. "
+                         "Valid range is 1900-9999.", datetime->year);
+
+        return LXW_ERROR_DATETIME_VALIDATION;
+    }
+
+    if (datetime->year > 9999) {
+        LXW_WARN_FORMAT1("lxw_datetime_validate(): invalid year: %d. "
+                         "Valid range is 1900-9999.", datetime->year);
+        return LXW_ERROR_DATETIME_VALIDATION;
+    }
+
+    if (datetime->year != 0) {
+        if (datetime->month < 1 || datetime->month > 12) {
+            LXW_WARN_FORMAT1("lxw_datetime_validate(): invalid month: %d. "
+                             "Valid range is 1-12.", datetime->month);
+            return LXW_ERROR_DATETIME_VALIDATION;
+        }
+
+        if (datetime->day < 1 || datetime->day > 31) {
+            LXW_WARN_FORMAT1("lxw_datetime_validate(): invalid day: %d. "
+                             "Valid range is 1-31.", datetime->day);
+            return LXW_ERROR_DATETIME_VALIDATION;
+        }
+    }
+
+    if (datetime->hour < 0 || datetime->hour > 23) {
+        LXW_WARN_FORMAT1("lxw_datetime_validate(): invalid hour: %d. "
+                         "Valid range is 0-23.", datetime->hour);
+        return LXW_ERROR_DATETIME_VALIDATION;
+    }
+
+    if (datetime->min < 0 || datetime->min > 59) {
+        LXW_WARN_FORMAT1("lxw_datetime_validate(): invalid minute: %d. "
+                         "Valid range is 0-59.", datetime->min);
+        return LXW_ERROR_DATETIME_VALIDATION;
+    }
+
+    if (datetime->sec < 0.0 || datetime->sec >= 60.0) {
+        LXW_WARN_FORMAT1("lxw_datetime_validate(): invalid seconds: %.3f. "
+                         "Valid range is 0.0-59.999.", datetime->sec);
+        return LXW_ERROR_DATETIME_VALIDATION;
+    }
+
+    return LXW_NO_ERROR;
 }
 
 /*
@@ -326,7 +401,8 @@ lxw_name_to_col_2(const char *col_str)
  * or 1904 epoch.
  */
 double
-lxw_datetime_to_excel_date_epoch(lxw_datetime *datetime, uint8_t date_1904)
+lxw_datetime_to_excel_date_with_epoch(lxw_datetime *datetime,
+                                      uint8_t use_1904_epoch)
 {
     int year = datetime->year;
     int month = datetime->month;
@@ -335,8 +411,8 @@ lxw_datetime_to_excel_date_epoch(lxw_datetime *datetime, uint8_t date_1904)
     int min = datetime->min;
     double sec = datetime->sec;
     double seconds;
-    int epoch = date_1904 ? 1904 : 1900;
-    int offset = date_1904 ? 4 : 0;
+    int epoch = use_1904_epoch ? 1904 : 1900;
+    int offset = use_1904_epoch ? 4 : 0;
     int norm = 300;
     int range;
     /* Set month days and check for leap year. */
@@ -345,9 +421,12 @@ lxw_datetime_to_excel_date_epoch(lxw_datetime *datetime, uint8_t date_1904)
     int days = 0;
     int i;
 
+    if (lxw_datetime_validate(datetime) != LXW_NO_ERROR)
+        return 0.0;
+
     /* For times without dates set the default date for the epoch. */
     if (!year) {
-        if (!date_1904) {
+        if (!use_1904_epoch) {
             year = 1899;
             month = 12;
             day = 31;
@@ -363,7 +442,7 @@ lxw_datetime_to_excel_date_epoch(lxw_datetime *datetime, uint8_t date_1904)
     seconds = (hour * 60 * 60 + min * 60 + sec) / (24 * 60 * 60.0);
 
     /* Special cases for Excel dates in the 1900 epoch. */
-    if (!date_1904) {
+    if (!use_1904_epoch) {
         /* Excel 1900 epoch. */
         if (year == 1899 && month == 12 && day == 31)
             return seconds;
@@ -412,7 +491,7 @@ lxw_datetime_to_excel_date_epoch(lxw_datetime *datetime, uint8_t date_1904)
     days -= leap;
 
     /* Adjust for Excel erroneously treating 1900 as a leap year. */
-    if (!date_1904 && days > 59)
+    if (!use_1904_epoch && days > 59)
         days++;
 
     return days + seconds;
@@ -424,7 +503,7 @@ lxw_datetime_to_excel_date_epoch(lxw_datetime *datetime, uint8_t date_1904)
 double
 lxw_datetime_to_excel_datetime(lxw_datetime *datetime)
 {
-    return lxw_datetime_to_excel_date_epoch(datetime, LXW_FALSE);
+    return lxw_datetime_to_excel_date_with_epoch(datetime, LXW_FALSE);
 }
 
 /*
@@ -434,7 +513,7 @@ lxw_datetime_to_excel_datetime(lxw_datetime *datetime)
 double
 lxw_unixtime_to_excel_date(int64_t unixtime)
 {
-    return lxw_unixtime_to_excel_date_epoch(unixtime, LXW_FALSE);
+    return lxw_unixtime_to_excel_date_with_epoch(unixtime, LXW_FALSE);
 }
 
 /*
@@ -442,14 +521,15 @@ lxw_unixtime_to_excel_date(int64_t unixtime)
  * 1900 or 1904 epoch.
  */
 double
-lxw_unixtime_to_excel_date_epoch(int64_t unixtime, uint8_t date_1904)
+lxw_unixtime_to_excel_date_with_epoch(int64_t unixtime,
+                                      uint8_t use_1904_epoch)
 {
     double excel_datetime = 0.0;
-    double epoch = date_1904 ? 24107.0 : 25568.0;
+    double epoch = use_1904_epoch ? 24107.0 : 25568.0;
 
     excel_datetime = epoch + (unixtime / (24 * 60 * 60.0));
 
-    if (!date_1904 && excel_datetime >= 60.0)
+    if (!use_1904_epoch && excel_datetime >= 60.0)
         excel_datetime = excel_datetime + 1.0;
 
     return excel_datetime;
@@ -512,6 +592,16 @@ lxw_str_tolower(char *str)
 
     for (i = 0; str[i]; i++)
         str[i] = tolower(str[i]);
+}
+
+/* Simple check for empty strings. */
+uint8_t
+lxw_str_is_empty(const char *str)
+{
+    if (str[0] == '\0')
+        return 1;
+    else
+        return 0;
 }
 
 /* Create a quoted version of the worksheet name, or return an unmodified

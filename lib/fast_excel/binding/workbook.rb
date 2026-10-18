@@ -215,6 +215,7 @@ module Libxlsxwriter
            :worksheet_names, WorksheetNames.ptr,
            :chartsheet_names, :pointer,
            :image_md5s, :pointer,
+           :embedded_image_md5s, :pointer,
            :header_image_md5s, :pointer,
            :background_md5s, :pointer,
            :charts, Charts.ptr,
@@ -237,6 +238,9 @@ module Libxlsxwriter
            :num_format_count, :uint16,
            :drawing_count,    :uint16,
            :comment_count,    :uint16,
+           :num_embedded_images, :uint32,
+           :window_width,     :uint16,
+           :window_height,    :uint16,
 
            :font_count,     :uint16,
            :border_count,   :uint16,
@@ -252,6 +256,9 @@ module Libxlsxwriter
            :has_vml, :uchar,
            :has_comments, :uchar,
            :has_metadata, :uchar,
+           :has_embedded_images, :uchar,
+           :has_dynamic_functions, :uchar,
+           :has_embedded_image_descriptions, :uchar,
 
            :used_xf_formats, HashTable.ptr,
            :used_dxf_formats, HashTable.ptr,
@@ -259,6 +266,8 @@ module Libxlsxwriter
            :vba_project, :string,
            :vba_project_signature, :string,
            :vba_codename, :string,
+
+           :use_1904_epoch, :uchar,
 
            :default_url_format, :pointer
   end

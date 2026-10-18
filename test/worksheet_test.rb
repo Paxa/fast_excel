@@ -87,10 +87,18 @@ describe "FastExcel::WorksheetExt append_row" do
   it "should set name correctly" do
     workbook = FastExcel.open(constant_memory: true)
     ws1 = workbook.add_worksheet("foo")
-    ws2 = workbook.add_worksheet("")
+    ws2 = workbook.add_worksheet
 
     assert_equal("foo", ws1[:name])
-    assert_equal("", ws2[:name])
+    assert_equal("Sheet2", ws2[:name])
+  end
+
+  it "should raise error when sheet name is empty string" do
+    workbook = FastExcel.open(constant_memory: true)
+    error = assert_raises(ArgumentError) do
+      workbook.add_worksheet("")
+    end
+    assert_match(/error_parameter_is_empty/, error.message)
   end
 
   it "should map fields correctly" do

@@ -41,6 +41,7 @@
 -T SLIST_ENTRY
 -T STAILQ_ENTRY
 -T TAILQ_ENTRY
+-T FILE
 
 /* libxlsxwriter typedefs. */
 -T lxw_app
@@ -69,6 +70,7 @@
 -T lxw_chart_gridline
 -T lxw_chart_label_position
 -T lxw_chart_label_separator
+-T lxw_chart_layout
 -T lxw_chart_legend
 -T lxw_chart_legend_position
 -T lxw_chart_line
@@ -132,6 +134,10 @@
 -T lxw_repeat_cols
 -T lxw_repeat_rows
 -T lxw_rich_string_tuple
+-T lxw_rich_value
+-T lxw_rich_value_rel
+-T lxw_rich_value_structure
+-T lxw_rich_value_types
 -T lxw_row
 -T lxw_row_col_options
 -T lxw_row_t

@@ -1,20 +1,16 @@
 const std = @import("std");
-const Path = std.Build.LazyPath;
+const zon_version = @import("build.zig.zon").version;
 
-// Although this function looks imperative, note that its job is to
-// declaratively construct a build graph that will be libcuted by an external
-// runner.
 pub fn build(b: *std.Build) void {
-    // Standard target options allows the person running `zig build` to choose
-    // what target to build for. Here we do not override the defaults, which
-    // means any target is allowed, and the default is native. Other options
-    // for restricting supported target set are available.
     const target = b.standardTargetOptions(.{});
-
-    // Standard optimization options allow the person running `zig build` to select
-    // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here we do not
-    // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
+    const options: BuildConfig = .{
+        .target = target,
+        .optimize = optimize,
+    };
+    const xlsxw_version = std.SemanticVersion.parse(zon_version) catch |err| {
+        std.debug.panic("Error: {s}", .{@errorName(err)});
+    };
 
     const shared = b.option(bool, "SHARED_LIBRARY", "Build the Shared Library [default: false]") orelse false;
     const examples = b.option(bool, "BUILD_EXAMPLES", "Build libxlsxwriter examples [default: false]") orelse false;
@@ -24,93 +20,99 @@ pub fn build(b: *std.Build) void {
     const md5 = b.option(bool, "USE_OPENSSL_MD5", "Build libxlsxwriter with the OpenSSL MD5 lib [default: off]") orelse false;
     const stdtmpfile = b.option(bool, "USE_STANDARD_TMPFILE", "Use the C standard library's tmpfile() [default: off]") orelse false;
 
-    const lib = if (shared) b.addSharedLibrary(.{
+    const lib = b.addLibrary(.{
         .name = "xlsxwriter",
-        .target = target,
-        .optimize = optimize,
-        .version = .{
-            .major = 1,
-            .minor = 1,
-            .patch = 6,
-        },
-    }) else b.addStaticLibrary(.{
-        .name = "xlsxwriter",
-        .target = target,
-        .optimize = optimize,
+        .root_module = createModule(b, options),
+        .linkage = if (shared) .dynamic else .static,
+        .version = xlsxw_version,
     });
     lib.pie = true;
     switch (optimize) {
         .Debug, .ReleaseSafe => lib.bundle_compiler_rt = true,
-        else => lib.strip = true,
+        else => lib.root_module.strip = true,
     }
     if (tests)
-        lib.defineCMacro("TESTING", null);
-    lib.addCSourceFiles(&.{
-        "src/vml.c",
-        "src/chartsheet.c",
-        "src/theme.c",
-        "src/content_types.c",
-        "src/xmlwriter.c",
-        "src/app.c",
-        "src/styles.c",
-        "src/core.c",
-        "src/comment.c",
-        "src/utility.c",
-        "src/metadata.c",
-        "src/custom.c",
-        "src/hash_table.c",
-        "src/relationships.c",
-        "src/drawing.c",
-        "src/chart.c",
-        "src/shared_strings.c",
-        "src/worksheet.c",
-        "src/format.c",
-        "src/table.c",
-        "src/workbook.c",
-        "src/packager.c",
-    }, cflags);
+        lib.root_module.addCMacro("TESTING", "");
+    lib.root_module.addCSourceFiles(.{
+        .files = &.{
+            "src/vml.c",
+            "src/chartsheet.c",
+            "src/theme.c",
+            "src/content_types.c",
+            "src/xmlwriter.c",
+            "src/app.c",
+            "src/styles.c",
+            "src/core.c",
+            "src/comment.c",
+            "src/utility.c",
+            "src/metadata.c",
+            "src/custom.c",
+            "src/hash_table.c",
+            "src/relationships.c",
+            "src/drawing.c",
+            "src/chart.c",
+            "src/shared_strings.c",
+            "src/worksheet.c",
+            "src/format.c",
+            "src/table.c",
+            "src/workbook.c",
+            "src/packager.c",
+            "src/rich_value.c",
+            "src/rich_value_rel.c",
+            "src/rich_value_structure.c",
+            "src/rich_value_types.c",
+        },
+        .flags = cflags,
+    });
 
     // minizip
     if (minizip) {
-        lib.addCSourceFiles(switch (target.getOsTag()) {
-            .windows => minizip_src ++ [_][]const u8{
-                "third_party/minizip/iowin32.c",
+        lib.root_module.addCSourceFiles(.{
+            .files = switch (lib.rootModuleTarget().os.tag) {
+                .windows => minizip_src ++ [_][]const u8{
+                    "third_party/minizip/iowin32.c",
+                },
+                else => minizip_src,
             },
-            else => minizip_src,
-        }, cflags);
+            .flags = cflags,
+        });
     }
 
-    // zig-pkg: download & build zlib (to all targets)
-    const zlib_dep = b.dependency("zlib", .{
-        .optimize = optimize,
-        .target = target,
-    });
-    const zlib = zlib_dep.artifact("z");
-    lib.linkLibrary(zlib);
+    const zlib = buildZlib(b, options);
+    lib.root_module.linkLibrary(zlib);
     lib.installLibraryHeaders(zlib);
 
     // md5
     if (!md5)
-        lib.addCSourceFile(.{ .file = .{ .path = "third_party/md5/md5.c" }, .flags = cflags })
+        lib.root_module.addCSourceFile(.{
+            .file = b.path("third_party/md5/md5.c"),
+            .flags = cflags,
+        })
     else
-        lib.linkSystemLibrary("crypto");
+        lib.root_module.linkSystemLibrary("crypto", .{});
 
     // dtoa
     if (dtoa)
-        lib.addCSourceFile(.{ .file = Path.relative("third_party/dtoa/emyg_dtoa.c"), .flags = cflags });
+        lib.root_module.addCSourceFile(.{
+            .file = b.path("third_party/dtoa/emyg_dtoa.c"),
+            .flags = cflags,
+        });
 
     // tmpfileplus
     if (stdtmpfile)
-        lib.addCSourceFile(.{ .file = .{ .path = "third_party/tmpfileplus/tmpfileplus.c" }, .flags = cflags })
+        lib.root_module.addCSourceFile(.{
+            .file = b.path("third_party/tmpfileplus/tmpfileplus.c"),
+            .flags = cflags,
+        })
     else
-        lib.defineCMacro("USE_STANDARD_TMPFILE", null);
+        lib.root_module.addCMacro("USE_STANDARD_TMPFILE", "");
 
-    lib.addIncludePath(Path.relative("include"));
-    lib.addIncludePath(Path.relative("third_party"));
-    lib.linkLibC();
+    lib.root_module.addIncludePath(b.path("include"));
+    lib.root_module.addIncludePath(b.path("third_party"));
+    lib.root_module.link_libc = true;
 
     // get headers on include to zig-out/include
-    lib.installHeadersDirectory("include", "");
+    lib.installHeadersDirectory(b.path("include"), "", .{});
 
     // get binaries on zig-cache to zig-out
     b.installArtifact(lib);
@@ -118,42 +120,52 @@ pub fn build(b: *std.Build) void {
     // build examples
     if (examples) {
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/anatomy.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/array_formula.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/autofilter.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/background.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/chart_area.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/chart_column.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/data_validate.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/hello.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/watermark.c",
         });
         buildExe(b, .{
+            .options = options,
             .lib = lib,
             .path = "examples/worksheet_protection.c",
         });
@@ -161,100 +173,122 @@ pub fn build(b: *std.Build) void {
     // build tests
     if (tests) {
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/app/test_app.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/chart/test_chart.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/chartsheet/test_chartsheet.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/content_types/test_content_types.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/content_types/test_content_types_write_default.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/content_types/test_content_types_write_override.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/relationships/test_relationships.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/app/test_app_xml_declaration.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/relationships/test_relationships_xml_declaration.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/custom/test_custom_xml_declaration.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/metadata/test_metadata_xml_declaration.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/core/test_core_xml_declaration.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/sst/test_shared_strings.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/workbook/test_workbook.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/xmlwriter/test_xmlwriter.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/table/test_table01.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/table/test_table02.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/table/test_table03.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/table/test_table04.c",
         });
         buildTest(b, .{
+            .options = options,
             .lib = lib,
             .path = "test/unit/styles/test_styles_write_border.c",
         });
     }
 }
 
-fn buildExe(b: *std.Build, info: BuildInfo) void {
+fn buildExe(b: *std.Build, info: BuildExec) void {
     const exe = b.addExecutable(.{
         .name = info.filename(),
-        .optimize = info.lib.optimize,
-        .target = info.lib.target,
+        .root_module = createModule(b, info.options),
     });
-    exe.addCSourceFile(.{ .file = Path.relative(info.path), .flags = cflags });
-    exe.linkLibrary(info.lib);
-    for (info.lib.include_dirs.items) |include| {
-        exe.include_dirs.append(include) catch {};
+    exe.root_module.addCSourceFile(.{
+        .file = b.path(info.path),
+        .flags = cflags,
+    });
+    exe.root_module.linkLibrary(info.lib);
+    for (info.lib.root_module.include_dirs.items) |include| {
+        exe.root_module.include_dirs.append(b.allocator, include) catch @panic("OOM");
     }
-    exe.linkLibC();
+    exe.root_module.link_libc = true;
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
@@ -270,21 +304,26 @@ fn buildExe(b: *std.Build, info: BuildInfo) void {
     run_step.dependOn(&run_cmd.step);
 }
 
-fn buildTest(b: *std.Build, info: BuildInfo) void {
+fn buildTest(b: *std.Build, info: BuildExec) void {
     const exe = b.addExecutable(.{
         .name = info.filename(),
-        .optimize = info.lib.optimize,
-        .target = info.lib.target,
+        .root_module = createModule(b, info.options),
     });
-    exe.defineCMacro("TESTING", null);
-    exe.addCSourceFile(.{ .file = Path.relative(info.path), .flags = cflags });
-    exe.addCSourceFile(.{ .file = Path.relative("test/unit/test_all.c"), .flags = cflags });
-    exe.addIncludePath(Path.relative("test/unit"));
-    for (info.lib.include_dirs.items) |include| {
-        exe.include_dirs.append(include) catch {};
+    exe.root_module.addCMacro("TESTING", "");
+    exe.root_module.addCSourceFile(.{
+        .file = b.path(info.path),
+        .flags = cflags,
+    });
+    exe.root_module.addCSourceFile(.{
+        .file = b.path("test/unit/test_all.c"),
+        .flags = cflags,
+    });
+    exe.root_module.addIncludePath(b.path("test/unit"));
+    exe.root_module.linkLibrary(info.lib);
+    for (info.lib.root_module.include_dirs.items) |include| {
+        exe.root_module.include_dirs.append(b.allocator, include) catch @panic("OOM");
     }
-    exe.linkLibrary(info.lib);
-    exe.linkLibC();
+    exe.root_module.link_libc = true;
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
@@ -298,6 +337,13 @@ fn buildTest(b: *std.Build, info: BuildInfo) void {
         b.fmt("Run the {s} test", .{info.filename()}),
     );
     run_step.dependOn(&run_cmd.step);
+}
+
+fn createModule(b: *std.Build, options: BuildConfig) *std.Build.Module {
+    return b.createModule(.{
+        .target = options.target,
+        .optimize = options.optimize,
+    });
 }
 
 const cflags = &.{
@@ -313,12 +359,55 @@ const minizip_src: []const []const u8 = &.{
     "third_party/minizip/zip.c",
 };
 
-const BuildInfo = struct {
+const BuildExec = struct {
+    options: BuildConfig,
     lib: *std.Build.Step.Compile,
     path: []const u8,
 
-    fn filename(self: BuildInfo) []const u8 {
+    fn filename(self: BuildExec) []const u8 {
         var split = std.mem.splitSequence(u8, std.fs.path.basename(self.path), ".");
         return split.first();
     }
 };
+const BuildConfig = struct {
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+};
+
+fn buildZlib(b: *std.Build, options: BuildConfig) *std.Build.Step.Compile {
+    const libz = b.addLibrary(.{
+        .name = "z",
+        .root_module = createModule(b, options),
+    });
+    if (b.lazyDependency("zlib", .{
+        .target = options.target,
+        .optimize = options.optimize,
+    })) |zlib_path| {
+        libz.root_module.addIncludePath(zlib_path.path(""));
+        libz.root_module.addCSourceFiles(.{
+            .root = zlib_path.path(""),
+            .files = &.{
+                "adler32.c",
+                "crc32.c",
+                "deflate.c",
+                "infback.c",
+                "inffast.c",
+                "inflate.c",
+                "inftrees.c",
+                "trees.c",
+                "zutil.c",
+                "compress.c",
+                "uncompr.c",
+                "gzclose.c",
+                "gzlib.c",
+                "gzread.c",
+                "gzwrite.c",
+            },
+            .flags = cflags,
+        });
+        libz.installHeader(zlib_path.path("zconf.h"), "zconf.h");
+        libz.installHeader(zlib_path.path("zlib.h"), "zlib.h");
+    }
+    libz.root_module.link_libc = true;
+    return libz;
+}

@@ -1,7 +1,8 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2026, John McNamara, jmcnamara@cpan.org.
  */
 
 /**
@@ -9,7 +10,7 @@
  *
  * @brief Utility functions for libxlsxwriter.
  *
- * <!-- Copyright 2014-2022, John McNamara, jmcnamara@cpan.org -->
+ * <!-- Copyright 2014-2026, John McNamara, jmcnamara@cpan.org -->
  *
  */
 
@@ -195,8 +196,45 @@ uint16_t lxw_name_to_col_2(const char *col_str);
  */
 double lxw_datetime_to_excel_datetime(lxw_datetime *datetime);
 
-double lxw_datetime_to_excel_date_epoch(lxw_datetime *datetime,
-                                        uint8_t date_1904);
+/**
+ * @brief Converts a #lxw_datetime to an Excel datetime number with 1900/1904
+ * epoch.
+ *
+ * This function is similar to `lxw_datetime_to_excel_datetime()` but it allows
+ * you to specify whether to use the 1900 or 1904 epoch. See also the
+ * `workbook_use_1904_epoch()` function.
+ *
+ * @param datetime A pointer to a #lxw_datetime struct.
+ * @param use_1904_epoch A flag to indicate whether to use the 1904 epoch (true)
+ *        or the 1900 epoch (false).
+ *
+ */
+double lxw_datetime_to_excel_date_with_epoch(lxw_datetime *datetime,
+                                             uint8_t use_1904_epoch);
+
+/**
+ * @brief Validate a #lxw_datetime struct.
+ *
+ * Validates a #lxw_datetime struct to ensure its fields are within acceptable
+ * ranges for Excel dates and times.
+ *
+ * The members of the #lxw_datetime struct and the range of their values are:
+ *
+ * Member   | Value
+ * -------- | -----------
+ * year     | 1900 - 9999
+ * month    | 1 - 12
+ * day      | 1 - 31
+ * hour     | 0 - 23
+ * min      | 0 - 59
+ * sec      | 0 - 59.999
+ *
+ * @param datetime A pointer to a #lxw_datetime struct.
+ *
+ * @return A #lxw_error code. Either #LXW_NO_ERROR or
+ *         #LXW_ERROR_DATETIME_VALIDATION if a field is out of range.
+ */
+lxw_error lxw_datetime_validate(lxw_datetime *datetime);
 
 /**
  * @brief Converts a unix datetime to an Excel datetime number.
@@ -216,14 +254,27 @@ double lxw_datetime_to_excel_date_epoch(lxw_datetime *datetime,
  */
 double lxw_unixtime_to_excel_date(int64_t unixtime);
 
-double lxw_unixtime_to_excel_date_epoch(int64_t unixtime, uint8_t date_1904);
+/**
+ * @brief Converts a unix datetime to an Excel datetime number with 1900/1904
+ * epoch.
+ *
+ * This function is similar to `lxw_unixtime_to_excel_date()` but it allows
+ * you to specify whether to use the 1900 or 1904 epoch. See also the
+ * `workbook_use_1904_epoch()` function.
+ *
+ * @param unixtime Unix time (seconds since 1970-01-01)
+ * @param use_1904_epoch A flag to indicate whether to use the 1904 epoch (true)
+ *        or the 1900 epoch (false).
+ *
+ */
+double lxw_unixtime_to_excel_date_with_epoch(int64_t unixtime,
+                                             uint8_t use_1904_epoch);
 
 char *lxw_strdup(const char *str);
 char *lxw_strdup_formula(const char *formula);
-
 size_t lxw_utf8_strlen(const char *str);
-
 void lxw_str_tolower(char *str);
+uint8_t lxw_str_is_empty(const char *str);
 
 /* Define a portable version of strcasecmp(). */
 #ifdef _MSC_VER

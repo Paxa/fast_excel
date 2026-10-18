@@ -13,7 +13,7 @@ describe "FastExcel validations" do
     end
 
     assert_equal(ArgumentError, error.class)
-    assert_equal("Invalid worksheet name 'Payments Report': (17 - error_sheetname_already_used) Worksheet name is already in use.", error.message)
+    assert_equal("Invalid worksheet name 'Payments Report': (19 - error_sheetname_already_used) Worksheet name is already in use.", error.message)
   end
 
   it "should not raise error when worksheet name is null" do
@@ -31,7 +31,7 @@ describe "FastExcel validations" do
     end
 
     assert_equal(ArgumentError, error.class)
-    assert_equal("Invalid worksheet name 'ABCDEFGHIJKLMNOPQRSTUVWXYZ012345': (14 - error_sheetname_length_exceeded) Worksheet name exceeds Excel's limit of 31 characters.", error.message)
+    assert_equal("Invalid worksheet name 'ABCDEFGHIJKLMNOPQRSTUVWXYZ012345': (16 - error_sheetname_length_exceeded) Worksheet name exceeds Excel's limit of 31 characters.", error.message)
   end
 
   it "should not raise error when the sheet name is at maximum length" do
@@ -48,7 +48,7 @@ describe "FastExcel validations" do
     end
 
     assert_equal(ArgumentError, error.class)
-    assert_equal("Invalid worksheet name 'a?': (15 - error_invalid_sheetname_character) Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'", error.message)
+    assert_equal("Invalid worksheet name 'a?': (17 - error_invalid_sheetname_character) Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'", error.message)
   end
 
   it "should raise error when reopening workbook" do

@@ -709,11 +709,11 @@ module Libxlsxwriter
            :comments, TableRows.ptr,
            :array, :pointer,
            :merged_ranges, MergedRanges.ptr,
-           #:selections, Selections.ptr,
+           :selections, :pointer,
            :data_validations, :pointer, # TODO add real definition for lxw_data_validations
            :conditional_formats, :pointer,
            :image_props, :pointer,
-           :image_data, ImageData.ptr,
+           :embedded_image_props, :pointer,
            :chart_data, ChartData.ptr,
            :drawing_rel_ids, :pointer,
            :vml_drawing_rel_ids, :pointer,

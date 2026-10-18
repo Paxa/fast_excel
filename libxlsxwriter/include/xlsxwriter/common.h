@@ -1,7 +1,8 @@
 /*
  * libxlsxwriter
  *
- * Copyright 2014-2022, John McNamara, jmcnamara@cpan.org. See LICENSE.txt.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright 2014-2026, John McNamara, jmcnamara@cpan.org.
  */
 
 /**
@@ -9,7 +10,7 @@
  *
  * @brief Common functions and defines for the libxlsxwriter library.
  *
- * <!-- Copyright 2014-2022, John McNamara, jmcnamara@cpan.org -->
+ * <!-- Copyright 2014-2026, John McNamara, jmcnamara@cpan.org -->
  *
  */
 #ifndef __LXW_COMMON_H__
@@ -105,6 +106,12 @@ typedef enum lxw_error {
 
     /** Function parameter validation error. */
     LXW_ERROR_PARAMETER_VALIDATION,
+
+    /** Function string parameter is empty. */
+    LXW_ERROR_PARAMETER_IS_EMPTY,
+
+    /** A #lxw_datetime parameter has a validation error. */
+    LXW_ERROR_DATETIME_VALIDATION,
 
     /** Worksheet name exceeds Excel's limit of 31 characters. */
     LXW_ERROR_SHEETNAME_LENGTH_EXCEEDED,
@@ -207,9 +214,6 @@ enum lxw_custom_property_types {
 
 /* GUID string length. */
 #define LXW_GUID_LENGTH           sizeof("{12345678-1234-1234-1234-1234567890AB}\0")
-
-#define LXW_EPOCH_1900            0
-#define LXW_EPOCH_1904            1
 
 #define LXW_UINT32_T_LENGTH       sizeof("4294967296")
 #define LXW_FILENAME_LENGTH       128
@@ -344,7 +348,7 @@ enum lxw_custom_property_types {
 
 #ifndef LXW_BIG_ENDIAN
 #define LXW_UINT16_HOST(n)    (n)
-#define LXW_UINT32_HOST(n)    (n)
+#define LXW_INT32_HOST(n)     ((int32_t)(n))
 #define LXW_UINT16_NETWORK(n) ((((n) & 0x00FF) << 8) | (((n) & 0xFF00) >> 8))
 #define LXW_UINT32_NETWORK(n) ((((n) & 0xFF)       << 24) | \
                                (((n) & 0xFF00)     <<  8) | \
@@ -354,10 +358,10 @@ enum lxw_custom_property_types {
 #define LXW_UINT16_NETWORK(n) (n)
 #define LXW_UINT32_NETWORK(n) (n)
 #define LXW_UINT16_HOST(n)    ((((n) & 0x00FF) << 8) | (((n) & 0xFF00) >> 8))
-#define LXW_UINT32_HOST(n)    ((((n) & 0xFF)       << 24) | \
+#define LXW_INT32_HOST(n)     ((int32_t)((((n) & 0xFF)       << 24) | \
                                (((n) & 0xFF00)     <<  8) | \
                                (((n) & 0xFF0000)   >>  8) | \
-                               (((n) & 0xFF000000) >> 24))
+                               (((n) & 0xFF000000) >> 24)))
 #endif
 
 /* *INDENT-OFF* */

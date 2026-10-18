@@ -19,9 +19,12 @@ end
 
 desc "Run all examples"
 task :examples do
+  require 'fileutils'
+  FileUtils.rm_f(Dir.glob('*.xlsx'))
   Dir.glob('examples/**/*.rb').each do |file|
-    require './' + file.sub(/\.rb$/, '')
+    load './' + file
   end
+  FileUtils.rm_f(Dir.glob('*.xlsx'))
 end
 
 desc "Compile libxlsxwriter shared library"
