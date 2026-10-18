@@ -1,5 +1,6 @@
 require_relative './fast_excel/binding'
 require 'set'
+require 'tmpdir'
 
 module FastExcel
 
@@ -19,14 +20,13 @@ module FastExcel
 
   DEF_COL_WIDTH = 8.43
 
-  def self.open(filename = nil, constant_memory: false, default_format: nil)
+  def self.open(filename = nil, constant_memory: false, default_format: nil, tmpdir: nil)
     tmp_file = false
     if filename
       if File.exist?(filename) && File.size(filename) > 0
         raise ArgumentError, "File '#{filename}' already exists. FastExcel can not open existing files, only create new files"
       end
     else
-      require 'tmpdir'
       filename = "#{Dir.mktmpdir}/fast_excel.xlsx"
       tmp_file = true
     end
@@ -35,7 +35,7 @@ module FastExcel
 
     opt = Libxlsxwriter::WorkbookOptions.new
     opt[:constant_memory] = constant_memory ? 1 : 0
-    opt[:tmpdir] = Dir.mktmpdir
+    opt[:tmpdir] = tmpdir || Dir.tmpdir
     workbook = Libxlsxwriter.workbook_new_opt(filename, opt)
 
     result = Libxlsxwriter::Workbook.new(workbook)
