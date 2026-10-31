@@ -317,6 +317,16 @@ module Libxlsxwriter
     end
   
     # @param [Integer] row 
+    # @param [Integer] col 
+    # @param [String] formula 
+    # @param [Format] format 
+    # @param [String] result 
+    # @return [Symbol from _enum_error_] 
+    def write_formula_str(row, col, formula, format, result)
+      Libxlsxwriter.worksheet_write_formula_str(self, row, col, formula, format, result)
+    end
+  
+    # @param [Integer] row 
     # @param [Float] height 
     # @param [Format] format 
     # @return [Symbol from _enum_error_] 
@@ -1152,6 +1162,17 @@ module Libxlsxwriter
   # @return [Symbol from _enum_error_] 
   # @scope class
   attach_function :worksheet_write_formula_num, :worksheet_write_formula_num, [Worksheet, :uint32, :ushort, :string, Format, :double], :error
+
+  # @method worksheet_write_formula_str(worksheet, row, col, formula, format, result)
+  # @param [Worksheet] worksheet 
+  # @param [Integer] row 
+  # @param [Integer] col 
+  # @param [String] formula 
+  # @param [Format] format 
+  # @param [String] result 
+  # @return [Symbol from _enum_error_] 
+  # @scope class
+  attach_function :worksheet_write_formula_str, :worksheet_write_formula_str, [Worksheet, :uint32, :ushort, :string, Format, :string], :error
 
   # @method worksheet_set_row(worksheet, row, height, format)
   # @param [Worksheet] worksheet 
