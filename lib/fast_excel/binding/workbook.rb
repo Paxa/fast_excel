@@ -324,7 +324,7 @@ module Libxlsxwriter
   # @param [Workbook] workbook 
   # @return [Symbol from _enum_error_] 
   # @scope class
-  attach_function :workbook_close, :workbook_close, [Workbook], :error
+  attach_function :workbook_close, :workbook_close, [Workbook], :error, blocking: true
 
   # @method workbook_set_properties(workbook, properties)
   # @param [Workbook] workbook 
